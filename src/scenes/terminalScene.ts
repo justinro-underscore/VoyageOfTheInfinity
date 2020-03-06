@@ -23,6 +23,8 @@ export class TerminalScene extends Phaser.Scene {
   commandLine: Phaser.GameObjects.Text;
   currInput = "";
 
+  freezeInput = false;
+
   blinkCursor = false; // If the cursor is visible or not
   lastBlinkTime = 0; // Keeps track of how long its been since we toggled the cursor
 
@@ -44,10 +46,12 @@ export class TerminalScene extends Phaser.Scene {
 
   update(time: number) {
     // Blink the cursor
-    let diff = time - this.lastBlinkTime;
-    if (diff > blinkTimeDelta) {
-      this.blinkCursor = !this.blinkCursor;
-      this.lastBlinkTime = time;
+    if (!this.freezeInput) {
+      let diff = time - this.lastBlinkTime;
+      if (diff > blinkTimeDelta) {
+        this.blinkCursor = !this.blinkCursor;
+        this.lastBlinkTime = time;
+      }
     }
 
     this.commandLine.text = "> " + this.currInput + (this.blinkCursor ? "_" : "");
@@ -57,24 +61,40 @@ export class TerminalScene extends Phaser.Scene {
     PRIVATE METHODS
   */
 
+  private checkForFreezeInput() {
+    const width = this.cameras.main.width;
+    const offset = 40;
+
+    // Need to get rid of cursor in order to check length
+    this.commandLine.text = "> " + this.currInput;
+    this.freezeInput = this.commandLine.width >= (width - offset);
+    if (this.freezeInput) {
+      this.blinkCursor = false;
+    }
+  }
+
   // Defines the functionality of keyboard events
   private onKeyInput(keyEvent: KeyboardEvent) {
-    // Reset cursor to visible
-    this.blinkCursor = false;
-    this.lastBlinkTime = -blinkTimeDelta;
-
     // Get key event category
     const keyCat = this.getKeyCategory(keyEvent.keyCode);
     if (keyCat != KeyCodeCateogry.INVALID) {
       switch (keyCat) {
-        // If letter or space, append to the input string
+        // If letter, digit, or space, append to the input string
         case KeyCodeCateogry.LETTER:
-        case KeyCodeCateogry.SPACE:
-          this.currInput += keyEvent.key.toLocaleLowerCase();
-          break;
-        // If digit, append to the input string the actual number
         case KeyCodeCateogry.DIGIT:
-          this.currInput += keyEvent.keyCode - 48;
+        case KeyCodeCateogry.SPACE:
+          if (!this.freezeInput) {
+            let key = keyEvent.key.toLocaleLowerCase();
+            // Check if user is holding down shift
+            if (keyCat === KeyCodeCateogry.DIGIT && ("" + (keyEvent.keyCode - 48)) != key) {
+              key = "" + (keyEvent.keyCode - 48);
+            }
+            this.currInput += key;
+
+            // Reset cursor to visible
+            this.blinkCursor = false;
+            this.lastBlinkTime = -blinkTimeDelta;
+          }
           break;
         // If backspace, remove last char from keyboard input
         case KeyCodeCateogry.BACKSPACE:
@@ -87,6 +107,7 @@ export class TerminalScene extends Phaser.Scene {
           this.currInput = "";
           break;
       }
+      this.checkForFreezeInput();
     }
   }
 
