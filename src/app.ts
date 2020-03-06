@@ -1,12 +1,13 @@
 import "phaser";
-import { MainMenuScene } from './mainMenuScene';
+import { MainMenuScene } from './scenes/mainMenuScene';
+import { TerminalScene } from './scenes/terminalScene';
 
 const config: Phaser.Types.Core.GameConfig = {
   title: "Voyage of the Infinity",
   width: 800,
   height: 600,
   parent: "game",
-  scene: [MainMenuScene],
+  scene: [TerminalScene, MainMenuScene],
   physics: {
     default: "arcade",
     arcade: {
