@@ -12,8 +12,8 @@ export class MainMenuScene extends Phaser.Scene {
   }
 
   preload() {
-    this.load.image('blackhole', 'res/black-hole-medium.jpg');
-    this.load.image('ship', 'res/train-space-ship.png');
+    this.load.image('blackhole', 'assets/img/black-hole-medium.jpg');
+    this.load.image('ship', 'assets/img/train-space-ship.png');
   }
 
   create() {
