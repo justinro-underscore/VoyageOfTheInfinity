@@ -41,6 +41,7 @@ export class TerminalScene extends Phaser.Scene {
   create() {
     let terminal = this.add.dom(400, 280).createFromCache('terminal');
     this.previousLinesHTML = terminal.getChildByID("lines-display");
+    terminal.getChildByID("first-line").innerHTML = "Terminal 1";
 
     this.currInput = "";
     this.commandLine = this.add.text(10, 570, "> ",
