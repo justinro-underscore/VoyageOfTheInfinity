@@ -19,7 +19,7 @@ enum KeyCodeCateogry {
 const blinkTimeDelta = 800;
 
 export class TerminalScene extends Phaser.Scene {
-  previousInputs: Phaser.GameObjects.Text;
+  previousLinesHTML: Element;
   commandLine: Phaser.GameObjects.Text;
   currInput = "";
 
@@ -34,11 +34,16 @@ export class TerminalScene extends Phaser.Scene {
     });
   }
 
+  preload() {
+    this.load.html('terminal', 'assets/html/terminal.html');
+  }
+
   create() {
+    let terminal = this.add.dom(400, 280).createFromCache('terminal');
+    this.previousLinesHTML = terminal.getChildByID("lines-display");
+
     this.currInput = "";
     this.commandLine = this.add.text(10, 570, "> ",
-      { font: '16px Monospace', fill: '#fbfbac' });
-    this.previousInputs = this.add.text(10, 10, "",
       { font: '16px Monospace', fill: '#fbfbac' });
 
     this.input.keyboard.on('keydown', (event: KeyboardEvent) => this.onKeyInput(event), this);
@@ -67,7 +72,7 @@ export class TerminalScene extends Phaser.Scene {
 
     // Need to get rid of cursor in order to check length
     this.commandLine.text = "> " + this.currInput;
-    this.freezeInput = this.commandLine.width >= (width - offset);
+    // this.freezeInput = this.commandLine.width >= (width - offset);
     if (this.freezeInput) {
       this.blinkCursor = false;
     }
@@ -102,9 +107,15 @@ export class TerminalScene extends Phaser.Scene {
           break;
         // If enter, accept current input
         case KeyCodeCateogry.ENTER:
-          this.previousInputs.text += this.currInput + "\n";
-          // TODO Parse data
-          this.currInput = "";
+          if (this.currInput != "") {
+            let text = document.createElement("p");
+            text.innerText = this.currInput;
+            this.previousLinesHTML.appendChild(text);
+
+            this.previousLinesHTML.scrollTop = this.previousLinesHTML.scrollHeight;
+            // TODO Parse data
+            this.currInput = "";
+          }
           break;
       }
       this.checkForFreezeInput();

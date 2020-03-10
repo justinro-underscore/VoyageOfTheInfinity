@@ -14,7 +14,10 @@ const config: Phaser.Types.Core.GameConfig = {
       debug: false
     }
   },
-  backgroundColor: "#18216D"
+  dom: {
+    createContainer: true
+  },
+  backgroundColor: "#111111"
 };
 
 export class TextAdventureGame extends Phaser.Game {
