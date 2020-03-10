@@ -1,5 +1,6 @@
 import "phaser";
 import { MainMenuScene } from './scenes/mainMenuScene';
+import { PrologueScene } from './scenes/prologueScene';
 import { TerminalScene } from './scenes/terminalScene';
 
 const config: Phaser.Types.Core.GameConfig = {
@@ -7,7 +8,7 @@ const config: Phaser.Types.Core.GameConfig = {
   width: 800,
   height: 600,
   parent: "game",
-  scene: [MainMenuScene, TerminalScene],
+  scene: [MainMenuScene, PrologueScene, TerminalScene],
   physics: {
     default: "arcade",
     arcade: {

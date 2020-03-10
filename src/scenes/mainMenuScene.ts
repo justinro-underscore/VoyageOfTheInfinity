@@ -32,7 +32,7 @@ export class MainMenuScene extends Phaser.Scene {
 
     this.input.keyboard.on('keydown', function (event: KeyboardEvent) {
       if (event.keyCode === 32) {
-        this.scene.start("TerminalScene");
+        this.scene.start("PrologueScene");
       }
     }, this);
   }

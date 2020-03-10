@@ -1,0 +1,148 @@
+{
+  "colors": {
+    "normal": "#fbfbac",
+    "red": "#ff0000",
+    "green": "#00ff00",
+    "white": "#ffffff"
+  },
+  "lines": [
+    {
+      "text": "DANGER",
+      "wait": 0.5,
+      "color": "normal",
+      "newline": false
+    },
+    {
+      "text": " dan",
+      "wait": 1,
+      "color": "normal",
+      "newline": false
+    },
+    {
+      "text": "ang",
+      "wait": 1,
+      "color": "normal",
+      "newline": false
+    },
+    {
+      "text": "nge",
+      "wait": 0.1,
+      "color": "normal",
+      "newline": false
+    },
+    {
+      "text": "ger",
+      "wait": 0.1,
+      "color": "normal",
+      "newline": false
+    },
+    {
+      "text": "erd",
+      "wait": 0.1,
+      "color": "normal",
+      "newline": false
+    },
+    {
+      "text": "rda",
+      "wait": 0.1,
+      "color": "normal",
+      "newline": true
+    },
+    {
+      "text": "SHIP OFF ROUTE",
+      "wait": 0.03,
+      "color": "normal",
+      "newline": false
+    },
+    {
+      "text": " new color",
+      "wait": 0.03,
+      "color": "red",
+      "newline": false
+    },
+    {
+      "text": " other color",
+      "wait": 0.03,
+      "color": "white",
+      "newline": false
+    },
+    {
+      "text": " TEST",
+      "wait": 0.5,
+      "color": "normal",
+      "newline": true
+    },
+    {
+      "text": "RESET",
+      "wait": 0.5,
+      "color": "normal",
+      "newline": true
+    },
+    {
+      "text": "NOW ENTERING IMMINENT DANGER",
+      "wait": 0.5,
+      "color": "red",
+      "newline": true
+    },
+    {
+      "text": "SHIP NOW APPROACHING MONITORED BLACK HOLE AT 2.7884e8 m/s",
+      "wait": 0.5,
+      "color": "normal",
+      "newline": true
+    },
+    {
+      "text": "PASSENGER PODS SEALED SHUT",
+      "wait": 0.5,
+      "color": "normal",
+      "newline": true
+    },
+    {
+      "text": "DANGER",
+      "wait": 0.5,
+      "color": "normal",
+      "newline": true
+    },
+    {
+      "text": "DANGER",
+      "wait": 0.5,
+      "color": "normal",
+      "newline": true
+    },
+    {
+      "text": "DAN.",
+      "wait": 0.5,
+      "color": "red",
+      "newline": false
+    },
+    {
+      "text": " .",
+      "wait": 0.5,
+      "color": "green",
+      "newline": false
+    },
+    {
+      "text": " .",
+      "wait": 1,
+      "color": "white",
+      "newline": true
+    },
+    {
+      "text": "Warning protocols halted.",
+      "wait": 0.5,
+      "color": "white",
+      "newline": true
+    },
+    {
+      "text": "Good morning, Captain.",
+      "wait": 0.5,
+      "color": "white",
+      "newline": true
+    },
+    {
+      "text": "Press space to continue.",
+      "wait": 0,
+      "color": "normal",
+      "newline": false
+    }
+  ]
+}
