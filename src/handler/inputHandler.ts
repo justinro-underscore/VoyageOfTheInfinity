@@ -6,30 +6,67 @@ export class InputHandler {
     return this.handleCommand(command, objs);
   }
 
-  private static handleCommand(command: string, objs: Array<string>): string {
-    switch (command) {
-      case "examine":
+  private static validCommands = {
+    "examine": {
+      "validate": (objs: Array<string>): boolean => {
+        return true;
+      },
+      "execute": (objs: Array<string>): string => {
         if (objs.length === 0) {
           return "Looking around the room";
         }
         let obj = objs.join(" ");
         return `That is a ${ obj }`;
-      case "go":
+      }
+    },
+
+    "go": {
+      "validate": (objs: Array<string>): boolean => {
+        return true;
+      },
+      "execute": (objs: Array<string>): string => {
         let dir = objs[0];
         return `Moving player in the ${ dir } direction`;
-      case "use":
-        obj = objs.join(" ");
-        return `Using the ${ obj }`;
-      case "take":
-        obj = objs.join(" ");
+      }
+    },
+
+    "take": {
+      "validate": (objs: Array<string>): boolean => {
+        return true;
+      },
+      "execute": (objs: Array<string>): string => {
+        let obj = objs.join(" ");
         return `Taking ${ obj }`;
-      case "drop":
-        obj = objs.join(" ");
+      }
+    },
+
+    "drop": {
+      "validate": (objs: Array<string>): boolean => {
+        return true;
+      },
+      "execute": (objs: Array<string>): string => {
+        let obj = objs.join(" ");
         return `Dropping ${ obj }`;
-      case "inventory":
+      }
+    },
+
+    "inventory": {
+      "validate": (objs: Array<string>): boolean => {
+        return true;
+      },
+      "execute": (objs: Array<string>): string => {
         return "Looking at inventory";
-      default:
-        return "Sorry, I didn't get that";
+      }
     }
+  };
+
+  private static handleCommand(command: string, objs: Array<string>): string {
+    if (command in this.validCommands) {
+      const cmdObj = this.validCommands[command];
+      if (cmdObj.validate(objs)) {
+        return cmdObj.execute(objs);
+      }
+    }
+    return "Command not recognized"
   }
 }
