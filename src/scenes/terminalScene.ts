@@ -1,4 +1,5 @@
 import "phaser";
+import { InputHandler } from '../handler/inputHandler';
 
 // Defines what category each key input goes into
 enum KeyCodeCateogry {
@@ -73,7 +74,7 @@ export class TerminalScene extends Phaser.Scene {
 
     // Need to get rid of cursor in order to check length
     this.commandLine.text = "> " + this.currInput;
-    // this.freezeInput = this.commandLine.width >= (width - offset);
+    this.freezeInput = this.commandLine.width >= (width - offset);
     if (this.freezeInput) {
       this.blinkCursor = false;
     }
@@ -109,8 +110,10 @@ export class TerminalScene extends Phaser.Scene {
         // If enter, accept current input
         case KeyCodeCateogry.ENTER:
           if (this.currInput != "") {
+            let response = InputHandler.submitInput(this.currInput);
+
             let text = document.createElement("p");
-            text.innerText = this.currInput;
+            text.innerText = `> ${ this.currInput }\n${ response }`;
             this.previousLinesHTML.appendChild(text);
 
             this.previousLinesHTML.scrollTop = this.previousLinesHTML.scrollHeight;
