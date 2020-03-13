@@ -1,3 +1,5 @@
+import { MapHandler } from './mapHandler';
+
 export class InputHandler {
   static submitInput(inputStr: string): string {
     let inputStrArr = inputStr.split(" ");
@@ -13,7 +15,7 @@ export class InputHandler {
       },
       "execute": (objs: Array<string>): string => {
         if (objs.length === 0) {
-          return "Looking around the room";
+          return MapHandler.getCurrRoomInfo(true);
         }
         let obj = objs.join(" ");
         return `That is a ${ obj }`;
@@ -66,6 +68,7 @@ export class InputHandler {
       if (cmdObj.validate(objs)) {
         return cmdObj.execute(objs);
       }
+      return `Error, invalid use of the command ${ command }`;
     }
     return "Command not recognized"
   }

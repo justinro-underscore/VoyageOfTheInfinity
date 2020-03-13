@@ -1,5 +1,6 @@
 import "phaser";
 import { InputHandler } from '../handler/inputHandler';
+import { MapHandler } from '../handler/mapHandler';
 
 // Defines what category each key input goes into
 enum KeyCodeCateogry {
@@ -42,7 +43,7 @@ export class TerminalScene extends Phaser.Scene {
   create() {
     let terminal = this.add.dom(400, 280).createFromCache('terminal');
     this.previousLinesHTML = terminal.getChildByID("lines-display");
-    terminal.getChildByID("first-line").innerHTML = "Terminal 1";
+    terminal.getChildByID("first-line").innerHTML = MapHandler.getCurrRoomInfo(false);
 
     this.currInput = "";
     this.commandLine = this.add.text(10, 570, "> ",

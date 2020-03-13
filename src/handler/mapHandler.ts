@@ -4,10 +4,14 @@ import testingMap from '../gameinfo/maps/testingmap.json';
 export class MapHandler {
   static instance: MapHandler;
 
-  gameMap: GameMap;
+  private gameMap: GameMap;
 
   static instantiateInstance(mapPath: string) {
     this.instance = new MapHandler(mapPath);
+  }
+
+  static getCurrRoomInfo(fullRoomDesc: boolean): string {
+    return this.instance.gameMap.getRoomInfo(fullRoomDesc);
   }
 
   /*
@@ -16,6 +20,5 @@ export class MapHandler {
 
   private constructor(mapPath: string) {
     this.gameMap = new GameMap(<GameMapJson> testingMap);
-    console.log(this.gameMap);
   }
 }

@@ -16,6 +16,14 @@ export class Room {
     this.exits[2] = roomJson.exits.south;
     this.exits[3] = roomJson.exits.west;
   }
+
+  getRoomInfo(fullRoomDesc=false) {
+    let infoString = this.name;
+    if (fullRoomDesc) {
+      infoString += "\n" + this.desc;
+    }
+    return infoString;
+  }
 }
 
 export interface RoomJson {

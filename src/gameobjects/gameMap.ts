@@ -14,6 +14,13 @@ export class GameMap {
       this.rooms.set(room.id, room);
     });
   }
+
+  getRoomInfo(fullRoomDesc: boolean, roomID=this.playerPos): string {
+    if (this.rooms.has(roomID)) {
+      return this.rooms.get(roomID).getRoomInfo(fullRoomDesc);
+    }
+    return "Room does not exist!";
+  }
 }
 
 export interface GameMapJson {
