@@ -18,6 +18,11 @@ export class MapHandler {
     return this.instance.gameMap.movePlayer(direction);
   }
 
+  // WARNING: DO NOT USE OUTSIDE DEBUGGING PURPOSES
+  static getGameMap(): GameMap {
+    return this.instance.gameMap;
+  }
+
   /*
     Private methods
   */
