@@ -1,4 +1,5 @@
 import "phaser";
+import { MapHandler } from '../handler/mapHandler';
 
 export class MainMenuScene extends Phaser.Scene {
   title: Phaser.GameObjects.Text;
@@ -32,6 +33,7 @@ export class MainMenuScene extends Phaser.Scene {
 
     this.input.keyboard.on('keydown', function (event: KeyboardEvent) {
       if (event.keyCode === 32) {
+        MapHandler.instantiateInstance("");
         this.scene.start("TerminalScene");
       }
     }, this);
