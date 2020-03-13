@@ -27,8 +27,29 @@ export class InputHandler {
         return true;
       },
       "execute": (objs: Array<string>): string => {
-        let dir = objs[0];
-        return `Moving player in the ${ dir } direction`;
+        let dir = -1;
+        switch (objs[0]) {
+          case "north":
+          case "n":
+            dir = 0;
+            break;
+          case "east":
+          case "e":
+            dir = 1;
+            break;
+          case "south":
+          case "s":
+            dir = 2;
+            break;
+          case "west":
+          case "w":
+            dir = 3;
+            break;
+        }
+        if (MapHandler.movePlayer(dir)) {
+          return MapHandler.getCurrRoomInfo(true);
+        }
+        return "Cannot go that direction!";
       }
     },
 

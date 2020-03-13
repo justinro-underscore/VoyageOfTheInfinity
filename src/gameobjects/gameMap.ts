@@ -21,6 +21,15 @@ export class GameMap {
     }
     return "Room does not exist!";
   }
+
+  movePlayer(direction: number): boolean {
+    let newRoomID = this.rooms.get(this.playerPos).exits[direction];
+    if (newRoomID === -1) {
+      return false;
+    }
+    this.playerPos = newRoomID;
+    return true;
+  }
 }
 
 export interface GameMapJson {

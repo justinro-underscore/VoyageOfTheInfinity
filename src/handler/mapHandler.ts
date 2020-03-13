@@ -14,6 +14,10 @@ export class MapHandler {
     return this.instance.gameMap.getRoomInfo(fullRoomDesc);
   }
 
+  static movePlayer(direction: number): boolean {
+    return this.instance.gameMap.movePlayer(direction);
+  }
+
   /*
     Private methods
   */
