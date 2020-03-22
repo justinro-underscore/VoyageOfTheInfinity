@@ -39,13 +39,13 @@ class DebugMapRoom {
     this.gameMap = scene.gameMap;
   }
 
-  setRoom(roomID: number) {
-    if (roomID != -1) {
+  setRoom(roomID: string) {
+    if (roomID != "") {
       let room = this.gameMap.rooms.get(roomID);
       let text = room.id + " - " + room.name + "\n\n" + room.desc;
       this.roomInfo.setText(text);
       room.exits.forEach((id, i) => {
-        if (id != -1) {
+        if (id != "") {
           this.lines[i].setAlpha(1);
           let exitRoom = this.gameMap.rooms.get(id);
           text = exitRoom.id + " - " + exitRoom.name;
@@ -123,7 +123,7 @@ export class DebugMapScene extends Phaser.Scene {
         dir = 3;
         break;
     }
-    if (dir != -1 && !this.panning && this.gameMap.rooms.get(this.gameMap.playerPos).exits[dir] != -1) {
+    if (dir != -1 && !this.panning && this.gameMap.rooms.get(this.gameMap.playerPos).exits[dir] != "") {
       switch(dir) {
         case 0:
           this.cameras.main.pan(400, -300, panTime);

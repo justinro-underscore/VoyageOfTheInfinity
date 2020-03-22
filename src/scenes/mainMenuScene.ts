@@ -36,6 +36,10 @@ export class MainMenuScene extends Phaser.Scene {
         MapHandler.instantiateInstance("");
         this.scene.start("TerminalScene");
       }
+      else if (event.key === "D") {
+        MapHandler.instantiateInstance("");
+        this.scene.start("DebugMapScene");
+      }
     }, this);
   }
 };

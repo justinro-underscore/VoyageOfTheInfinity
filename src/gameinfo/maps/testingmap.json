@@ -1,71 +1,71 @@
 {
   "name": "Testing Map",
-  "starting_room": 3,
+  "starting_room": "rm_start",
   "rooms": [
     {
-      "id": 0,
+      "id": "rm_nw",
       "name": "Room NW",
       "desc": "This room is northwest of everything else",
       "exits": {
-        "north": -1,
-        "east": 1,
-        "south": -1,
-        "west": -1
+        "north": "",
+        "east": "rm_n",
+        "south": "",
+        "west": ""
       }
     },
     {
-      "id": 1,
+      "id": "rm_n",
       "name": "Room N",
       "desc": "This room is at the top",
       "exits": {
-        "north": -1,
-        "east": 2,
-        "south": 3,
-        "west": 0
+        "north": "",
+        "east": "rm_ne",
+        "south": "rm_start",
+        "west": "rm_nw"
       }
     },
     {
-      "id": 2,
+      "id": "rm_ne",
       "name": "Room NE",
       "desc": "This room is in the top right corner\nNext line!",
       "exits": {
-        "north": -1,
-        "east": -1,
-        "south": 4,
-        "west": 1
+        "north": "",
+        "east": "",
+        "south": "rm_e",
+        "west": "rm_n"
       }
     },
     {
-      "id": 3,
+      "id": "rm_start",
       "name": "Starting Room",
       "desc": "This room is in the middle and is the starting place!",
       "exits": {
-        "north": 1,
-        "east": 4,
-        "south": -1,
-        "west": 5
+        "north": "rm_n",
+        "east": "rm_e",
+        "south": "",
+        "west": "rm_bottom_left"
       }
     },
     {
-      "id": 4,
+      "id": "rm_e",
       "name": "Room E",
       "desc": "This room is to the east",
       "exits": {
-        "north": 2,
-        "east": -1,
-        "south": 5,
-        "west": 3
+        "north": "rm_ne",
+        "east": "",
+        "south": "rm_bottom_left",
+        "west": "rm_start"
       }
     },
     {
-      "id": 5,
+      "id": "rm_bottom_left",
       "name": "Bottom left corner",
       "desc": "This room is in the corner and not directly connected to anything else",
       "exits": {
-        "north": 3,
-        "east": 4,
-        "south": -1,
-        "west": -1
+        "north": "rm_start",
+        "east": "rm_e",
+        "south": "",
+        "west": ""
       }
     }
   ]
