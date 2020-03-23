@@ -1,13 +1,18 @@
 import { GameMap, GameMapJson } from '../gameobjects/gameMap';
 import testingMap from '../gameinfo/maps/testingmap.json';
+import voyageMap from '../gameinfo/maps/voyagemap.json';
 
 export class MapHandler {
   static instance: MapHandler;
+  static availableGameMaps: Map<string, GameMap> = new Map([
+    ["testing", new GameMap(<GameMapJson> testingMap)],
+    ["voyage", new GameMap(<GameMapJson> voyageMap)]
+  ]);
 
   private gameMap: GameMap;
 
-  static instantiateInstance(mapPath: string) {
-    this.instance = new MapHandler(mapPath);
+  static instantiateInstance(mapKey: string) {
+    this.instance = new MapHandler(mapKey);
   }
 
   static getCurrRoomInfo(fullRoomDesc: boolean): string {
@@ -31,7 +36,12 @@ export class MapHandler {
     Private methods
   */
 
-  private constructor(mapPath: string) {
-    this.gameMap = new GameMap(<GameMapJson> testingMap);
+  private constructor(mapKey: string) {
+    if (!MapHandler.availableGameMaps.has(mapKey)) {
+      console.error(`Map {${ mapKey }} does not exist!`)
+    }
+    else {
+      this.gameMap = MapHandler.availableGameMaps.get(mapKey);
+    }
   }
 }

@@ -33,11 +33,11 @@ export class MainMenuScene extends Phaser.Scene {
 
     this.input.keyboard.on('keydown', function (event: KeyboardEvent) {
       if (event.keyCode === 32) {
-        MapHandler.instantiateInstance("");
+        MapHandler.instantiateInstance("testing");
         this.scene.start("TerminalScene");
       }
       else if (event.key === "D") {
-        MapHandler.instantiateInstance("");
+        MapHandler.instantiateInstance("testing");
         this.scene.start("DebugMapScene");
       }
     }, this);
