@@ -33,7 +33,7 @@ class DebugMapRoom {
       fontFamily: 'Arial',
       align: "left",
       color: "#000000",
-      wordWrap: { width: 580, useAdvancedWrap: true }
+      wordWrap: { width: 580, useAdvancedWrap: false }
     });
 
     this.gameMap = scene.gameMap;
@@ -42,7 +42,10 @@ class DebugMapRoom {
   setRoom(roomID: string) {
     if (roomID != "") {
       let room = this.gameMap.rooms.get(roomID);
-      let text = room.id + " - " + room.name + "\n\n" + room.desc;
+      let text = room.id + " - " + room.name + "\n\n" + room.desc + "\n\n" + "Objects: ";
+      room.objects.forEach(obj => {
+        text += "\n" + (obj.pickupable ? "+" : "-") + " {" + obj.id + "} " + obj.name + " => " + obj.desc;
+      })
       this.roomInfo.setText(text);
       room.exits.forEach((id, i) => {
         if (id != "") {

@@ -11,7 +11,8 @@
         "east": "rm_n",
         "south": "",
         "west": ""
-      }
+      },
+      "objects": []
     },
     {
       "id": "rm_n",
@@ -22,7 +23,21 @@
         "east": "rm_ne",
         "south": "rm_start",
         "west": "rm_nw"
-      }
+      },
+      "objects": [
+        {
+          "id": "obj_bookshelf",
+          "name": "Bookshelf",
+          "desc": "It's got a lot of nice books in it. This guy must be a reader",
+          "pickupable": true
+        },
+        {
+          "id": "obj_desk",
+          "name": "Desk",
+          "desc": "A simple metal desk",
+          "pickupable": false
+        }
+      ]
     },
     {
       "id": "rm_ne",
@@ -33,7 +48,8 @@
         "east": "",
         "south": "rm_e",
         "west": "rm_n"
-      }
+      },
+      "objects": []
     },
     {
       "id": "rm_start",
@@ -44,7 +60,27 @@
         "east": "rm_e",
         "south": "",
         "west": "rm_bottom_left"
-      }
+      },
+      "objects": [
+        {
+          "id": "obj_tool",
+          "name": "Tool",
+          "desc": "This is a tool",
+          "pickupable": true
+        },
+        {
+          "id": "obj_weapon",
+          "name": "Sword",
+          "desc": "Oh look out, it's sharp",
+          "pickupable": true
+        },
+        {
+          "id": "obj_chair",
+          "name": "Chair",
+          "desc": "4 legs, definitely a chair",
+          "pickupable": false
+        }
+      ]
     },
     {
       "id": "rm_e",
@@ -55,7 +91,21 @@
         "east": "",
         "south": "rm_bottom_left",
         "west": "rm_start"
-      }
+      },
+      "objects": [
+        {
+          "id": "obj_bench",
+          "name": "Bench",
+          "desc": "It is a nice wooden bench, intricately carved",
+          "pickupable": true
+        },
+        {
+          "id": "obj_bench2",
+          "name": "Bench",
+          "desc": "It is a nice wooden bench, intricately carved",
+          "pickupable": false
+        }
+      ]
     },
     {
       "id": "rm_bottom_left",
@@ -66,7 +116,8 @@
         "east": "rm_e",
         "south": "",
         "west": ""
-      }
+      },
+      "objects": []
     }
   ]
 }
