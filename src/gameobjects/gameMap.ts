@@ -19,10 +19,7 @@ export class GameMap {
         this.rooms.set(room.id, room);
       }
     });
-    let roomExitError = this.verifyExits();
-    if (roomExitError != null) {
-      console.error("Room " + roomExitError[0].id + " has invalid exit: {" + roomExitError[1] + "} - " + roomExitError[0].exits[roomExitError[1]]);
-    }
+    this.verifyExits();
   }
 
   getRoomInfo(fullRoomDesc: boolean, roomID=this.playerPos): string {
@@ -52,17 +49,14 @@ export class GameMap {
     return true;
   }
 
-  // Returns true if exits are valid, false otherwise
-  private verifyExits(): [Room, number] {
-    let res = null;
+  private verifyExits() {
     this.rooms.forEach(room => {
       room.exits.forEach((exit, i) => {
         if (exit != "" && !this.rooms.has(exit)) {
-          res = [room, i];
+          console.error(`Room ${ room.id } has invalid exit: {${ i }} - ${ exit }`);
         }
       })
     })
-    return res;
   }
 }
 
