@@ -28,12 +28,14 @@
         {
           "id": "obj_bookshelf",
           "name": "Bookshelf",
+          "altNames": ["Wood Bookshelf"],
           "desc": "It's got a lot of nice books in it. This guy must be a reader",
           "pickupable": true
         },
         {
           "id": "obj_desk",
           "name": "Desk",
+          "altNames": [],
           "desc": "A simple metal desk",
           "pickupable": false
         }
@@ -65,18 +67,21 @@
         {
           "id": "obj_tool",
           "name": "Tool",
+          "altNames": [],
           "desc": "This is a tool",
           "pickupable": true
         },
         {
           "id": "obj_weapon",
           "name": "Sword",
+          "altNames": ["Tool"],
           "desc": "Oh look out, it's sharp",
           "pickupable": true
         },
         {
           "id": "obj_chair",
           "name": "Chair",
+          "altNames": [],
           "desc": "4 legs, definitely a chair",
           "pickupable": false
         }
@@ -96,13 +101,15 @@
         {
           "id": "obj_bench",
           "name": "Bench",
+          "altNames": [],
           "desc": "It is a nice wooden bench, intricately carved",
           "pickupable": true
         },
         {
           "id": "obj_bench2",
           "name": "Bench",
-          "desc": "It is a nice wooden bench, intricately carved",
+          "altNames": ["Copy of Bench"],
+          "desc": "It is an exact copy of the other bench",
           "pickupable": false
         }
       ]

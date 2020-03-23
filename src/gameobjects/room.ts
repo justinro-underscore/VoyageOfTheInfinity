@@ -21,12 +21,13 @@ export class Room {
     this.exits[3] = roomJson.exits.west;
     this.objects = new Map<string, GameObject>();
     roomJson.objects.forEach(obj => {
-      if (Room.objectIds.includes(obj.id)) {
-        console.error("Object id repeated in room " + this.id + ": " + obj.id);
+      let object = new GameObject(<GameObjectJson>obj);
+      if (Room.objectIds.includes(object.id)) {
+        console.error("Object id repeated in room " + this.id + ": " + object.id);
       }
       else {
-        Room.objectIds.push(obj.id);
-        this.objects.set(obj.id, obj);
+        Room.objectIds.push(object.id);
+        this.objects.set(object.id, object);
       }
     })
   }
@@ -37,6 +38,16 @@ export class Room {
       infoString += "\n" + this.desc;
     }
     return infoString;
+  }
+
+  getObjects(objName: string): Array<GameObject> {
+    let objs = new Array<GameObject>();
+    this.objects.forEach(obj => {
+      if (obj.name.toLocaleLowerCase() === objName || obj.altNames.includes(objName)) {
+        objs.push(obj);
+      }
+    })
+    return objs;
   }
 }
 
