@@ -7,7 +7,7 @@
       "name": "The Drone Cockpit Room",
       "desc": "This room is where all the repair drones are stationed.",
       "exits": {
-        "north": "room_quarters",
+        "north": "room_chambers",
         "east": "",
         "south": "",
         "west": ""
@@ -22,7 +22,7 @@
         "north": "room_fitness",
         "east": "room_lodging",
         "south": "room_drone",
-        "west": "room_A"
+        "west": "room_a"
       },
       "objects": []
     },
@@ -51,7 +51,7 @@
       "objects": []
     },
     {
-      "id": "room_cafte",
+      "id": "room_cafe",
       "name": "The Cafeteria",
       "desc": "The Cafeteria holds a large array of state of the art cutlery and exquisite ingredients for gourmet meals.",
       "exits": {
@@ -305,7 +305,7 @@
     {
       "id": "room_cool",
       "name": "The Cooling Chamber",
-      "desc": "This frigid room has a large vessel containing multiple cooling cells, attributing to The Infinity’s AC system. There are Icicles dangling from the grafters above.",
+      "desc": "This frigid room has a large vessel containing multiple cooling cells, attributing to The Infinity’s AC system. There are icicles dangling from the grafters above.",
       "exits": {
         "north": "room_b",
         "east": "room_boiler",
@@ -343,10 +343,10 @@
       "name": "The Observatory",
       "desc": "This beautiful room is surrounded with glass where hallways deviate in all directions. Here passengers can get an almost 360 degree view of space around them.",
       "exits": {
-        "north": "room_captian",
-        "east": "room_escape",
+        "north": "room_captain",
+        "east": "room_short",
         "south": "room_b",
-        "west": "room_short"
+        "west": "room_escape"
       },
       "objects": []
     },
@@ -363,7 +363,7 @@
       "objects": []
     },
     {
-      "id": "room_captian",
+      "id": "room_captain",
       "name": "The Captain's Quarters",
       "desc": "This classic Captain’s Quarters room is decorated with a large library, a modest wooden desk and a large glass wall facing the west. Next to the wall is a small little hatch that one could fit through.",
       "exits": {
@@ -375,12 +375,12 @@
       "objects": []
     },
     {
-      "id": "cescape",
+      "id": "room_cescape",
       "name": "The Captain's Escape Pod",
       "desc": "This hidden escape pod is like that of the other pods on the ship, however it is speculated that this one is unregulated and a secret to other passengers of The Infinity.",
       "exits": {
         "north": "",
-        "east": "room_captian",
+        "east": "room_captain",
         "south": "",
         "west": ""
       },
@@ -425,7 +425,7 @@
     {
       "id": "room_confrence",
       "name": "The Conference Room",
-      "desc": "This organized conference room, stationed with laptops, desks and filing cabinets is used to debrief any information gathered from the Communications Array. There is a large holographic image on the south wall illustration the ship’s trajectory and anything that might show up on exterior proximity radars.",
+      "desc": "This organized conference room, stationed with laptops, desks and filing cabinets is used to debrief any information gathered from the Communications Array. There is a large holographic image on the south wall illustrating the ship’s trajectory and anything that might show up on exterior proximity radars.",
       "exits": {
         "north": "room_gravity",
         "east": "room_control",
