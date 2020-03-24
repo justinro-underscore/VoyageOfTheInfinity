@@ -20,6 +20,9 @@ enum KeyCodeCateogry {
 // The amount of ticks between when the cursor blinks
 const blinkTimeDelta = 800;
 
+// How long to wait between key inputs
+const keyDebounceVal = 1;
+
 // Coefficient that determines how fast a scroll moves
 const scrollCoef = 10;
 
@@ -36,6 +39,8 @@ export class TerminalScene extends Phaser.Scene {
 
   blinkCursor = false; // If the cursor is visible or not
   lastBlinkTime = 0; // Keeps track of how long its been since we toggled the cursor
+
+  keyDebounceTime = 0;
 
   constructor() {
     super({
@@ -96,6 +101,9 @@ export class TerminalScene extends Phaser.Scene {
         this.blinkCursor = !this.blinkCursor;
         this.lastBlinkTime = time;
       }
+    }
+    if (this.keyDebounceTime > 0) {
+      this.keyDebounceTime -= 1;
     }
 
     this.commandLine.text = "> " + this.currInput + (this.blinkCursor ? "_" : "");
@@ -162,6 +170,12 @@ export class TerminalScene extends Phaser.Scene {
 
   // Defines the functionality of keyboard events
   private onKeyInput(keyEvent: KeyboardEvent) {
+    if (this.keyDebounceTime > 0) {
+      return;
+    }
+    else {
+      this.keyDebounceTime = keyDebounceVal;
+    }
     // Get key event category
     const keyCat = this.getKeyCategory(keyEvent.keyCode);
     if (keyCat != KeyCodeCateogry.INVALID) {
