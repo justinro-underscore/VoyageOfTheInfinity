@@ -84,6 +84,13 @@
           "altNames": [],
           "desc": "4 legs, definitely a chair",
           "pickupable": false
+        },
+        {
+          "id": "obj_big_desc",
+          "name": "Big Desc",
+          "altNames": ["Desc"],
+          "desc": "This\nIs\nA\nPurposely\nLarge\nDescription\nIn\nOrder\nTo\nTest\nHow\nWell\nThe\nScroll\nFunctions\nIn\nThe\nNew\nType\nOf\nTerminal\nScreen\nThat\nIs\nNot\nOn\nThe\nDOM",
+          "pickupable": false
         }
       ]
     },
@@ -111,6 +118,13 @@
           "altNames": ["Copy of Bench"],
           "desc": "It is an exact copy of the other bench",
           "pickupable": false
+        },
+        {
+          "id": "obj_emoji",
+          "name": "Emoji",
+          "altNames": [],
+          "desc": "😜",
+          "pickupable": true
         }
       ]
     },

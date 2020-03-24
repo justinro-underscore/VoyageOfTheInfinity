@@ -20,10 +20,17 @@ enum KeyCodeCateogry {
 // The amount of ticks between when the cursor blinks
 const blinkTimeDelta = 800;
 
+// Coefficient that determines how fast a scroll moves
+const scrollCoef = 10;
+
+// How many pixels wide the scroll bar is
+const scrollBarWidth = 5;
+
 export class TerminalScene extends Phaser.Scene {
-  previousLinesHTML: Element;
+  terminalScreen: Phaser.GameObjects.Text;
   commandLine: Phaser.GameObjects.Text;
   currInput = "";
+  scrollBar: Phaser.GameObjects.Image;
 
   freezeInput = false;
 
@@ -37,19 +44,48 @@ export class TerminalScene extends Phaser.Scene {
   }
 
   preload() {
-    this.load.html('terminal', 'assets/html/terminal.html');
+    this.load.image("scrollBar", 'assets/img/white-pixel.png');
+    this.load.image("terminalScreen", 'assets/img/terminal-screen.png');
   }
 
   create() {
-    let terminal = this.add.dom(400, 280).createFromCache('terminal');
-    this.previousLinesHTML = terminal.getChildByID("lines-display");
-    terminal.getChildByID("first-line").innerHTML = MapHandler.getCurrRoomInfo(true).replace("\n", "<br>");
+    let background = this.add.image(0, 0, "terminalScreen");
+    background.setOrigin(0, 0);
+    background.setDisplaySize(this.cameras.main.width, this.cameras.main.height);
+
+    let graphics = this.make.graphics({});
+    graphics.fillRect(0, 0, this.cameras.main.width, this.cameras.main.height - 40);
+    let mask = new Phaser.Display.Masks.GeometryMask(this, graphics);
+    this.terminalScreen = this.add.text(10, 10, MapHandler.getCurrRoomInfo(true), {
+      font: "16px Monospace",
+      align: "left",
+      fill: "#77ff55",
+      wordWrap: { width: this.cameras.main.width - 20, useAdvancedWrap: false }
+    });
+    this.terminalScreen.setMask(mask);
 
     this.currInput = "";
-    this.commandLine = this.add.text(10, 570, "> ",
-      { font: '16px Monospace', fill: '#fbfbac' });
+    this.commandLine = this.add.text(10, this.cameras.main.height - 30, "> ",
+      { font: '16px Monospace', fill: '#77ff55' });
+
+    this.scrollBar = this.add.image(this.cameras.main.width - scrollBarWidth, 0, "scrollBar").setInteractive();
+    this.scrollBar.setOrigin(0, 0);
+    this.scrollBar.setDisplaySize(scrollBarWidth, this.cameras.main.height - 40);
+    this.scrollBar.setTint(0x77ff55);
+    this.scrollBar.on('pointerover', () => this.scrollBar.setTint(0xfdfdcd));
+    this.scrollBar.on('pointerout', () => this.scrollBar.setTint(0x77ff55));
+    this.input.setDraggable(this.scrollBar);
+    this.input.on('drag', (_pointer: Phaser.Input.Mouse.MouseManager, _gameObjects: Array<Phaser.GameObjects.GameObject>, _x: number, y: number) => {
+      this.moveScrollBar(y);
+    });
+    this.scrollBar.setVisible(false);
 
     this.input.keyboard.on('keydown', (event: KeyboardEvent) => this.onKeyInput(event), this);
+    this.input.on('wheel', (_pointer: Phaser.Input.Mouse.MouseManager, _gameObjects: Array<Phaser.GameObjects.GameObject>, _deltaX: number, deltaY: number) => {
+      const scrollDelta = deltaY * scrollCoef;
+      this.scrollTerminalScreenTo(this.terminalScreen.y - scrollDelta);
+      this.updateScrollBarPosition();
+    });
   }
 
   update(time: number) {
@@ -79,6 +115,49 @@ export class TerminalScene extends Phaser.Scene {
     if (this.freezeInput) {
       this.blinkCursor = false;
     }
+  }
+
+  private scrollTerminalScreenTo(newY: number) {
+    if (this.terminalScreen.height > this.cameras.main.height - 40) {
+      this.terminalScreen.y = newY;
+      this.terminalScreen.y = Phaser.Math.Clamp(this.terminalScreen.y, this.cameras.main.height - 40 - this.terminalScreen.height, 10);
+    }
+  }
+
+  private moveScrollBar(newY: number) {
+    this.scrollBar.y = newY;
+    this.scrollBar.y = Phaser.Math.Clamp(this.scrollBar.y, 0, this.cameras.main.height - 40 - this.scrollBar.displayHeight);
+
+    const [m, b] = this.getMB();
+    const newTerminalScreenY = (this.scrollBar.y - b) / m;
+    this.scrollTerminalScreenTo(newTerminalScreenY);
+  }
+
+  private updateScrollBarSize() {
+    const screenHeight = this.cameras.main.height - 40;
+    if (this.terminalScreen.height > this.cameras.main.height - 40) {
+      this.scrollBar.setVisible(true);
+      let scrollBarHeight = (screenHeight * screenHeight) / this.terminalScreen.height;
+      scrollBarHeight = Phaser.Math.Clamp(scrollBarHeight, 3, screenHeight);
+      this.scrollBar.setDisplaySize(scrollBarWidth, scrollBarHeight);
+      this.scrollBar.y = screenHeight - scrollBarHeight;
+    }
+    else {
+      this.scrollBar.setVisible(false);
+    }
+  }
+
+  private updateScrollBarPosition() {
+    const [m, b] = this.getMB();
+    const scrollBarPos = m * (this.terminalScreen.y) + b;
+    this.scrollBar.y = scrollBarPos;
+  }
+
+  private getMB(): [number, number] {
+    const screenHeight = this.cameras.main.height - 40;
+    const m = (screenHeight - this.scrollBar.displayHeight) / (screenHeight - this.terminalScreen.height - 10);
+    const b = -10 * m;
+    return [m, b];
   }
 
   // Defines the functionality of keyboard events
@@ -112,13 +191,9 @@ export class TerminalScene extends Phaser.Scene {
         case KeyCodeCateogry.ENTER:
           if (this.currInput != "") {
             let response = InputHandler.submitInput(this.currInput);
-
-            let text = document.createElement("p");
-            text.innerText = `> ${ this.currInput }\n${ response }`;
-            this.previousLinesHTML.appendChild(text);
-
-            this.previousLinesHTML.scrollTop = this.previousLinesHTML.scrollHeight;
-            // TODO Parse data
+            this.terminalScreen.text += `\n\n> ${ this.currInput }\n${ response }`;
+            this.scrollTerminalScreenTo(this.cameras.main.height - 40 - this.terminalScreen.height);
+            this.updateScrollBarSize();
             this.currInput = "";
           }
           break;
