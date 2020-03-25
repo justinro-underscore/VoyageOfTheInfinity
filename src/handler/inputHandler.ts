@@ -114,8 +114,10 @@ export class InputHandler {
           let obj = InputHandler.getObject(objName, [ObjectLocation.INVENTORY]);
           if (obj != null) {
             if (obj.pickupable) {
-              InventoryHandler.getInstance().addObj(obj);
-              MapHandler.removeObject(obj);
+              InventoryHandler.getInstance().addObject(obj);
+              if (!MapHandler.removeObject(obj)) {
+                console.error(`Removed an object from the map that did not exist on the map: {${ obj.id }}`);
+              }
               return "Taken";
             }
             else {
@@ -143,8 +145,29 @@ export class InputHandler {
         return true;
       },
       "execute": (objs: Array<string>): string => {
-        let obj = objs.join(" ");
-        return `Dropping ${ obj }`;
+        let objName = objs.join(" ");
+        try {
+          let obj = InputHandler.getObject(objName, [ObjectLocation.MAP]);
+          if (obj != null) {
+            if (!InventoryHandler.getInstance().removeObject(obj)) {
+              console.error(`Dropped an object that was not in the inventory: {${ obj.id }}`);
+            }
+            MapHandler.addObject(obj);
+            return "Dropped";
+          }
+          else {
+            return `${ objName } is not in your inventory`;
+          }
+        }
+        catch (multObj) {
+          InputHandler.overrideInputFunc = InputHandler.chooseObject;
+          InputHandler.overrideInputContext = new OverrideInputContext("take", (<MultipleObjects>multObj).objectsFound);
+          let prompt = "Which one? (Choose number)";
+          (<MultipleObjects>multObj).objectsFound.forEach((obj, i) => {
+            prompt += `\n${ i + 1 }. ${ obj.name }`;
+          });
+          return prompt;
+        }
       }
     },
 
@@ -204,18 +227,28 @@ export class InputHandler {
     let result = `${ inputStr } was not a possible choice`
     if (num != NaN && num >= 1 && num <= objects.length) {
       switch (InputHandler.overrideInputContext.command) {
+        // TODO Put these in seperate functions so that code does not have to be copied
         case "examine":
           result = objects[num - 1].desc;
           break;
         case "take":
           if (objects[num - 1].pickupable) {
-            InventoryHandler.getInstance().addObj(objects[num - 1]);
-            MapHandler.removeObject(objects[num - 1]);
+            InventoryHandler.getInstance().addObject(objects[num - 1]);
+            if (!MapHandler.removeObject(objects[num - 1])) {
+              console.error(`Removed an object from the map that did not exist on the map: {${ objects[num - 1].id }}`);
+            }
             result = "Taken";
           }
           else {
             result = `${ objects[num - 1].name } cannot be moved!`;
           }
+          break;
+        case "drop":
+          if (!InventoryHandler.getInstance().removeObject(objects[num - 1])) {
+            console.error(`Dropped an object that was not in the inventory: {${ objects[num - 1].id }}`);
+          }
+          MapHandler.addObject(objects[num - 1]);
+          result = "Dropped";
           break;
       }
     }

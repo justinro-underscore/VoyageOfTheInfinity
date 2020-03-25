@@ -24,6 +24,10 @@ export class MapHandler {
     return this.instance.gameMap.getObjects(objName);
   }
 
+  static addObject(obj: GameObject) {
+    this.instance.gameMap.addObject(obj);
+  }
+
   static removeObject(obj: GameObject): boolean {
     return this.instance.gameMap.removeObject(obj);
   }

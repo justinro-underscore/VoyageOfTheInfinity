@@ -1,5 +1,4 @@
 import { GameObject } from "../gameobjects/gameObject";
-import { MultipleObjects } from "../util/multipleObjects";
 
 export class InventoryHandler {
   private static instance: InventoryHandler;
@@ -26,15 +25,15 @@ export class InventoryHandler {
     return objs;
   }
 
-  addObj(obj: GameObject) {
+  addObject(obj: GameObject) {
     this.objectsInInventory.push(obj);
     this.size += 1;
   }
 
-  removeObj(obj: GameObject): boolean {
+  removeObject(obj: GameObject): boolean {
     const index = this.objectsInInventory.indexOf(obj);
     if (index != -1) {
-      this.objectsInInventory = this.objectsInInventory.splice(index, 1);
+      this.objectsInInventory.splice(index, 1);
       this.size -= 1;
       return true;
     }

@@ -33,6 +33,10 @@ export class GameMap {
     return this.rooms.get(this.playerPos).getObjects(objName);
   }
 
+  addObject(obj: GameObject) {
+    this.rooms.get(this.playerPos).addObject(obj);
+  }
+
   removeObject(obj: GameObject): boolean {
     return this.rooms.get(this.playerPos).removeObject(obj);
   }

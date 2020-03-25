@@ -50,6 +50,12 @@ export class Room {
     return objs;
   }
 
+  addObject(obj: GameObject) {
+    if (!this.objects.has(obj.id)) {
+      this.objects.set(obj.id, obj);
+    }
+  }
+
   removeObject(obj: GameObject): boolean {
     if (this.objects.has(obj.id)) {
       this.objects.delete(obj.id);
