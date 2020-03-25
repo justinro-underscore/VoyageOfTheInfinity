@@ -15,6 +15,10 @@ export class GameObject {
     this.desc = objJson.desc;
     this.pickupable = objJson.pickupable;
   }
+
+  equals(objName: string): boolean {
+    return this.name.toLocaleLowerCase() === objName || this.altNames.includes(objName);
+  }
 }
 
 export interface GameObjectJson {

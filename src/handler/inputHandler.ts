@@ -1,10 +1,34 @@
 import { MapHandler } from './mapHandler';
-import { MultipleObjects } from '../gameobjects/gameMap';
+import { InventoryHandler } from './inventoryHandler';
 import { GameObject } from '../gameobjects/gameObject';
+
+class MultipleObjects extends Error {
+  objectsFound: Array<GameObject>;
+
+  constructor(objects: Array<GameObject>) {
+    super();
+    this.objectsFound = objects;
+  }
+}
+
+class OverrideInputContext {
+  command: string;
+  data: any;
+
+  constructor(command: string, data: any) {
+    this.command = command;
+    this.data = data;
+  }
+}
+
+enum ObjectLocation {
+  MAP,
+  INVENTORY
+}
 
 export class InputHandler {
   static overrideInputFunc: (inputStr: string) => string = null;
-  static overrideInputContext: any;
+  static overrideInputContext: OverrideInputContext;
 
   static submitInput(inputStr: string): string {
     if (this.overrideInputFunc === null) {
@@ -27,15 +51,21 @@ export class InputHandler {
         if (objs.length === 0) {
           return MapHandler.getCurrRoomInfo(true);
         }
-        let obj = objs.join(" ");
+        let objName = objs.join(" ");
         try {
-          return MapHandler.examineObj(obj);
+          let obj = InputHandler.getObject(objName);
+          if (obj != null) {
+            return obj.desc;
+          }
+          else {
+            return `${ objName } cannot be found`;
+          }
         }
-        catch (objs) {
+        catch (multObj) {
           InputHandler.overrideInputFunc = InputHandler.chooseObject;
-          InputHandler.overrideInputContext = (<MultipleObjects>objs).objectsFound;
+          InputHandler.overrideInputContext = new OverrideInputContext("examine", (<MultipleObjects>multObj).objectsFound);
           let prompt = "Which one? (Choose number)";
-          (<MultipleObjects>objs).objectsFound.forEach((obj, i) => {
+          (<MultipleObjects>multObj).objectsFound.forEach((obj, i) => {
             prompt += `\n${ i + 1 }. ${ obj.name }`;
           });
           return prompt;
@@ -79,8 +109,32 @@ export class InputHandler {
         return true;
       },
       "execute": (objs: Array<string>): string => {
-        let obj = objs.join(" ");
-        return `Taking ${ obj }`;
+        let objName = objs.join(" ");
+        try {
+          let obj = InputHandler.getObject(objName, [ObjectLocation.INVENTORY]);
+          if (obj != null) {
+            if (obj.pickupable) {
+              InventoryHandler.getInstance().addObj(obj);
+              MapHandler.removeObject(obj);
+              return "Taken";
+            }
+            else {
+              return `${ obj.name } cannot be moved!`;
+            }
+          }
+          else {
+            return `${ objName } cannot be found`;
+          }
+        }
+        catch (multObj) {
+          InputHandler.overrideInputFunc = InputHandler.chooseObject;
+          InputHandler.overrideInputContext = new OverrideInputContext("take", (<MultipleObjects>multObj).objectsFound);
+          let prompt = "Which one? (Choose number)";
+          (<MultipleObjects>multObj).objectsFound.forEach((obj, i) => {
+            prompt += `\n${ i + 1 }. ${ obj.name }`;
+          });
+          return prompt;
+        }
       }
     },
 
@@ -99,7 +153,16 @@ export class InputHandler {
         return true;
       },
       "execute": (objs: Array<string>): string => {
-        return "Looking at inventory";
+        if (InventoryHandler.getInstance().size === 0) {
+          return "Inventory is empty!";
+        }
+        else {
+          let result = "In your inventory you have:";
+          InventoryHandler.getInstance().objectsInInventory.forEach(obj => {
+            result += `\n- ${ obj.name }`;
+          });
+          return result;
+        }
       }
     }
   };
@@ -115,12 +178,46 @@ export class InputHandler {
     return "Command not recognized"
   }
 
+  private static getObject(objName: string, ignoreObjFrom: Array<ObjectLocation>=[]): GameObject {
+    let objs = new Array<GameObject>();
+    if (!ignoreObjFrom.includes(ObjectLocation.INVENTORY)) {
+      objs = objs.concat(InventoryHandler.getInstance().getObjects(objName));
+    }
+    if (!ignoreObjFrom.includes(ObjectLocation.MAP)) {
+      objs = objs.concat(MapHandler.getObjects(objName));
+    }
+
+    if (objs.length === 0) {
+      return null;
+    }
+    else if (objs.length === 1) {
+      return objs[0];
+    }
+    else {
+      throw new MultipleObjects(objs);
+    }
+  }
+
   private static chooseObject(inputStr: string): string {
-    let objects = (<Array<GameObject>>InputHandler.overrideInputContext)
+    let objects = (<Array<GameObject>>InputHandler.overrideInputContext.data);
     let num = Number(inputStr);
     let result = `${ inputStr } was not a possible choice`
     if (num != NaN && num >= 1 && num <= objects.length) {
-      result = objects[num - 1].desc;
+      switch (InputHandler.overrideInputContext.command) {
+        case "examine":
+          result = objects[num - 1].desc;
+          break;
+        case "take":
+          if (objects[num - 1].pickupable) {
+            InventoryHandler.getInstance().addObj(objects[num - 1]);
+            MapHandler.removeObject(objects[num - 1]);
+            result = "Taken";
+          }
+          else {
+            result = `${ objects[num - 1].name } cannot be moved!`;
+          }
+          break;
+      }
     }
     InputHandler.overrideInputFunc = null;
     InputHandler.overrideInputContext = null;

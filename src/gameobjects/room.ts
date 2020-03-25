@@ -43,11 +43,19 @@ export class Room {
   getObjects(objName: string): Array<GameObject> {
     let objs = new Array<GameObject>();
     this.objects.forEach(obj => {
-      if (obj.name.toLocaleLowerCase() === objName || obj.altNames.includes(objName)) {
+      if (obj.equals(objName)) {
         objs.push(obj);
       }
     })
     return objs;
+  }
+
+  removeObject(obj: GameObject): boolean {
+    if (this.objects.has(obj.id)) {
+      this.objects.delete(obj.id);
+      return true;
+    }
+    return false;
   }
 }
 
@@ -61,5 +69,5 @@ export interface RoomJson {
     south: string,
     west: string
   };
-  objects: [GameObject];
+  objects: [GameObjectJson];
 }

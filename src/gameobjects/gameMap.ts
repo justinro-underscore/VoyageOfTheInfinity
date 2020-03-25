@@ -1,5 +1,5 @@
 import { Room, RoomJson } from './room';
-import { GameObject, GameObjectJson } from './gameObject';
+import { GameObject } from './gameObject';
 
 export class GameMap {
   mapName: string;
@@ -29,15 +29,12 @@ export class GameMap {
     return "Room does not exist!";
   }
 
-  examineObj(objName: string): string {
-    let objects = this.rooms.get(this.playerPos).getObjects(objName);
-    if (objects.length > 0) {
-      if (objects.length === 1) {
-        return objects[0].desc;
-      }
-      throw new MultipleObjects(objects);
-    }
-    return `${ objName } cannot be found`;
+  getObjects(objName: string): Array<GameObject> {
+    return this.rooms.get(this.playerPos).getObjects(objName);
+  }
+
+  removeObject(obj: GameObject): boolean {
+    return this.rooms.get(this.playerPos).removeObject(obj);
   }
 
   movePlayer(direction: number): boolean {
@@ -64,13 +61,4 @@ export interface GameMapJson {
   name: string;
   starting_room: string;
   rooms: [RoomJson];
-}
-
-export class MultipleObjects extends Error {
-  objectsFound: Array<GameObject>;
-
-  constructor(objects: Array<GameObject>) {
-    super();
-    this.objectsFound = objects;
-  }
 }

@@ -1,6 +1,7 @@
 import { GameMap, GameMapJson } from '../gameobjects/gameMap';
 import testingMap from '../gameinfo/maps/testingmap.json';
 import voyageMap from '../gameinfo/maps/voyagemap.json';
+import { GameObject } from '../gameobjects/gameObject';
 
 export class MapHandler {
   static instance: MapHandler;
@@ -19,8 +20,12 @@ export class MapHandler {
     return this.instance.gameMap.getRoomInfo(fullRoomDesc);
   }
 
-  static examineObj(objName: string): string {
-    return this.instance.gameMap.examineObj(objName);
+  static getObjects(objName: string): Array<GameObject> {
+    return this.instance.gameMap.getObjects(objName);
+  }
+
+  static removeObject(obj: GameObject): boolean {
+    return this.instance.gameMap.removeObject(obj);
   }
 
   static movePlayer(direction: number): boolean {
