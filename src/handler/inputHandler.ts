@@ -204,6 +204,17 @@ export class InputHandler {
             return "With what?";
           }
           else {
+            // Try splitting it
+            if (objName.includes(" with ")) {
+              let objNames = objName.split(" with ");
+              console.log(objNames);
+              let useObj = InputHandler.getObject(objNames[0]);
+              if (useObj === null) {
+                return `${ useObj } cannot be found`;
+              }
+              InputHandler.overrideInputContext = new OverrideInputContext("", useObj);
+              return InputHandler.useObject(objNames[1]);
+            }
             return `${ objName } cannot be found`;
           }
         }
