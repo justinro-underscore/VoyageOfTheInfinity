@@ -43,199 +43,209 @@ export class InputHandler {
     }
   }
 
-  private static validCommands = {
-    "examine": {
-      "validate": (objs: Array<string>): boolean => {
-        return true;
-      },
-      "execute": (objs: Array<string>): string => {
-        if (objs.length === 0) {
-          return MapHandler.getCurrRoomInfo(true);
-        }
-        let objName = objs.join(" ");
-        try {
-          let obj = InputHandler.getObject(objName);
-          if (obj != null) {
-            return obj.desc;
-          }
-          else {
-            return `${ objName } cannot be found`;
-          }
-        }
-        catch (multObj) {
-          InputHandler.overrideInputFunc = InputHandler.chooseObject;
-          InputHandler.overrideInputContext = new OverrideInputContext("examine", (<MultipleObjects>multObj).objectsFound);
-          let prompt = "Which one? (Choose number)";
-          (<MultipleObjects>multObj).objectsFound.forEach((obj, i) => {
-            prompt += `\n${ i + 1 }. ${ obj.name }`;
-          });
-          return prompt;
-        }
-      }
-    },
-
-    "go": {
-      "validate": (objs: Array<string>): boolean => {
-        return true;
-      },
-      "execute": (objs: Array<string>): string => {
-        let dir = -1;
-        switch (objs[0]) {
-          case "north":
-          case "n":
-            dir = 0;
-            break;
-          case "east":
-          case "e":
-            dir = 1;
-            break;
-          case "south":
-          case "s":
-            dir = 2;
-            break;
-          case "west":
-          case "w":
-            dir = 3;
-            break;
-        }
-        if (MapHandler.movePlayer(dir)) {
-          return MapHandler.getCurrRoomInfo(true);
-        }
-        return "Cannot go that direction!";
-      }
-    },
-
-    "take": {
-      "validate": (objs: Array<string>): boolean => {
-        return true;
-      },
-      "execute": (objs: Array<string>): string => {
-        let objName = objs.join(" ");
-        try {
-          let obj = InputHandler.getObject(objName, [ObjectLocation.INVENTORY]);
-          if (obj != null) {
-            if (obj.pickupable) {
-              InventoryHandler.getInstance().addObject(obj);
-              if (!MapHandler.removeObject(obj)) {
-                console.error(`Removed an object from the map that did not exist on the map: {${ obj.id }}`);
+  private static getCommandObj(command: string): {validate: (objs: Array<string>) => boolean, execute: (objs: Array<string>) => string} {
+    switch (command) {
+      case "examine":
+        return {
+          validate: (objs: Array<string>): boolean => {
+            return true;
+          },
+          execute: (objs: Array<string>): string => {
+            if (objs.length === 0) {
+              return MapHandler.getCurrRoomInfo(true);
+            }
+            let objName = objs.join(" ");
+            try {
+              let obj = InputHandler.getObject(objName);
+              if (obj != null) {
+                return obj.desc;
               }
-              return "Taken";
+              else {
+                return `${ objName } cannot be found`;
+              }
+            }
+            catch (multObj) {
+              InputHandler.overrideInputFunc = InputHandler.chooseObject;
+              InputHandler.overrideInputContext = new OverrideInputContext("examine", (<MultipleObjects>multObj).objectsFound);
+              let prompt = "Which one? (Choose number)";
+              (<MultipleObjects>multObj).objectsFound.forEach((obj, i) => {
+                prompt += `\n${ i + 1 }. ${ obj.name }`;
+              });
+              return prompt;
+            }
+          }
+        }
+
+      case "go":
+      case "walk":
+        return {
+          validate: (objs: Array<string>): boolean => {
+            return true;
+          },
+          execute: (objs: Array<string>): string => {
+            let dir = -1;
+            switch (objs[0]) {
+              case "north":
+              case "n":
+                dir = 0;
+                break;
+              case "east":
+              case "e":
+                dir = 1;
+                break;
+              case "south":
+              case "s":
+                dir = 2;
+                break;
+              case "west":
+              case "w":
+                dir = 3;
+                break;
+            }
+            if (MapHandler.movePlayer(dir)) {
+              return MapHandler.getCurrRoomInfo(true);
+            }
+            return "Cannot go that direction!";
+          }
+        }
+
+      case "take":
+        return {
+          validate: (objs: Array<string>): boolean => {
+            return true;
+          },
+          execute: (objs: Array<string>): string => {
+            let objName = objs.join(" ");
+            try {
+              let obj = InputHandler.getObject(objName, [ObjectLocation.INVENTORY]);
+              if (obj != null) {
+                if (obj.pickupable) {
+                  InventoryHandler.getInstance().addObject(obj);
+                  if (!MapHandler.removeObject(obj)) {
+                    console.error(`Removed an object from the map that did not exist on the map: {${ obj.id }}`);
+                  }
+                  return "Taken";
+                }
+                else {
+                  return `${ obj.name } cannot be moved!`;
+                }
+              }
+              else {
+                return `${ objName } cannot be found`;
+              }
+            }
+            catch (multObj) {
+              InputHandler.overrideInputFunc = InputHandler.chooseObject;
+              InputHandler.overrideInputContext = new OverrideInputContext("take", (<MultipleObjects>multObj).objectsFound);
+              let prompt = "Which one? (Choose number)";
+              (<MultipleObjects>multObj).objectsFound.forEach((obj, i) => {
+                prompt += `\n${ i + 1 }. ${ obj.name }`;
+              });
+              return prompt;
+            }
+          }
+        }
+
+      case "drop":
+        return {
+          validate: (objs: Array<string>): boolean => {
+            return true;
+          },
+          execute: (objs: Array<string>): string => {
+            let objName = objs.join(" ");
+            try {
+              let obj = InputHandler.getObject(objName, [ObjectLocation.MAP]);
+              if (obj != null) {
+                if (!InventoryHandler.getInstance().removeObject(obj)) {
+                  console.error(`Dropped an object that was not in the inventory: {${ obj.id }}`);
+                }
+                MapHandler.addObject(obj);
+                return "Dropped";
+              }
+              else {
+                return `${ objName } is not in your inventory`;
+              }
+            }
+            catch (multObj) {
+              InputHandler.overrideInputFunc = InputHandler.chooseObject;
+              InputHandler.overrideInputContext = new OverrideInputContext("take", (<MultipleObjects>multObj).objectsFound);
+              let prompt = "Which one? (Choose number)";
+              (<MultipleObjects>multObj).objectsFound.forEach((obj, i) => {
+                prompt += `\n${ i + 1 }. ${ obj.name }`;
+              });
+              return prompt;
+            }
+          }
+        }
+
+      case "inventory":
+      case "inv":
+        return {
+          validate: (objs: Array<string>): boolean => {
+            return true;
+          },
+          execute: (objs: Array<string>): string => {
+            if (InventoryHandler.getInstance().size === 0) {
+              return "Inventory is empty!";
             }
             else {
-              return `${ obj.name } cannot be moved!`;
+              let result = "In your inventory you have:";
+              InventoryHandler.getInstance().objectsInInventory.forEach(obj => {
+                result += `\n- ${ obj.name }`;
+              });
+              return result;
             }
           }
-          else {
-            return `${ objName } cannot be found`;
-          }
         }
-        catch (multObj) {
-          InputHandler.overrideInputFunc = InputHandler.chooseObject;
-          InputHandler.overrideInputContext = new OverrideInputContext("take", (<MultipleObjects>multObj).objectsFound);
-          let prompt = "Which one? (Choose number)";
-          (<MultipleObjects>multObj).objectsFound.forEach((obj, i) => {
-            prompt += `\n${ i + 1 }. ${ obj.name }`;
-          });
-          return prompt;
-        }
-      }
-    },
 
-    "drop": {
-      "validate": (objs: Array<string>): boolean => {
-        return true;
-      },
-      "execute": (objs: Array<string>): string => {
-        let objName = objs.join(" ");
-        try {
-          let obj = InputHandler.getObject(objName, [ObjectLocation.MAP]);
-          if (obj != null) {
-            if (!InventoryHandler.getInstance().removeObject(obj)) {
-              console.error(`Dropped an object that was not in the inventory: {${ obj.id }}`);
-            }
-            MapHandler.addObject(obj);
-            return "Dropped";
-          }
-          else {
-            return `${ objName } is not in your inventory`;
-          }
-        }
-        catch (multObj) {
-          InputHandler.overrideInputFunc = InputHandler.chooseObject;
-          InputHandler.overrideInputContext = new OverrideInputContext("take", (<MultipleObjects>multObj).objectsFound);
-          let prompt = "Which one? (Choose number)";
-          (<MultipleObjects>multObj).objectsFound.forEach((obj, i) => {
-            prompt += `\n${ i + 1 }. ${ obj.name }`;
-          });
-          return prompt;
-        }
-      }
-    },
-
-    "inventory": {
-      "validate": (objs: Array<string>): boolean => {
-        return true;
-      },
-      "execute": (objs: Array<string>): string => {
-        if (InventoryHandler.getInstance().size === 0) {
-          return "Inventory is empty!";
-        }
-        else {
-          let result = "In your inventory you have:";
-          InventoryHandler.getInstance().objectsInInventory.forEach(obj => {
-            result += `\n- ${ obj.name }`;
-          });
-          return result;
-        }
-      }
-    },
-
-    "use": {
-      "validate": (objs: Array<string>): boolean => {
-        return true;
-      },
-      "execute": (objs: Array<string>): string => {
-        let objName = objs.join(" ");
-        try {
-          let obj = InputHandler.getObject(objName);
-          if (obj != null) {
-            InputHandler.overrideInputFunc = InputHandler.useObject;
-            InputHandler.overrideInputContext = new OverrideInputContext("", obj);
-            return "With what?";
-          }
-          else {
-            // Try splitting it
-            if (objName.includes(" with ")) {
-              let objNames = objName.split(" with ");
-              console.log(objNames);
-              let useObj = InputHandler.getObject(objNames[0]);
-              if (useObj === null) {
-                return `${ useObj } cannot be found`;
+      case "use":
+        return {
+          validate: (objs: Array<string>): boolean => {
+            return true;
+          },
+          execute: (objs: Array<string>): string => {
+            let objName = objs.join(" ");
+            try {
+              let obj = InputHandler.getObject(objName);
+              if (obj != null) {
+                InputHandler.overrideInputFunc = InputHandler.useObject;
+                InputHandler.overrideInputContext = new OverrideInputContext("", obj);
+                return "With what?";
               }
-              InputHandler.overrideInputContext = new OverrideInputContext("", useObj);
-              return InputHandler.useObject(objNames[1]);
+              else {
+                // Try splitting it
+                if (objName.includes(" with ")) {
+                  let objNames = objName.split(" with ");
+                  let useObj = InputHandler.getObject(objNames[0]);
+                  if (useObj === null) {
+                    return `${ useObj } cannot be found`;
+                  }
+                  InputHandler.overrideInputContext = new OverrideInputContext("", useObj);
+                  return InputHandler.useObject(objNames[1]);
+                }
+                return `${ objName } cannot be found`;
+              }
             }
-            return `${ objName } cannot be found`;
+            catch (multObj) {
+              InputHandler.overrideInputFunc = InputHandler.chooseObject;
+              InputHandler.overrideInputContext = new OverrideInputContext("examine", (<MultipleObjects>multObj).objectsFound);
+              let prompt = "Which one? (Choose number)";
+              (<MultipleObjects>multObj).objectsFound.forEach((obj, i) => {
+                prompt += `\n${ i + 1 }. ${ obj.name }`;
+              });
+              return prompt;
+            }
           }
         }
-        catch (multObj) {
-          InputHandler.overrideInputFunc = InputHandler.chooseObject;
-          InputHandler.overrideInputContext = new OverrideInputContext("examine", (<MultipleObjects>multObj).objectsFound);
-          let prompt = "Which one? (Choose number)";
-          (<MultipleObjects>multObj).objectsFound.forEach((obj, i) => {
-            prompt += `\n${ i + 1 }. ${ obj.name }`;
-          });
-          return prompt;
-        }
-      }
     }
-  };
+    return null;
+  }
 
   private static handleCommand(command: string, objs: Array<string>): string {
-    if (command in this.validCommands) {
-      const cmdObj = this.validCommands[command];
-      if (cmdObj.validate(objs)) {
-        return cmdObj.execute(objs);
+    const commandObj = this.getCommandObj(command);
+    if (commandObj != null) {
+      if (commandObj.validate(objs)) {
+        return commandObj.execute(objs);
       }
       return `Error, invalid use of the command ${ command }`;
     }
