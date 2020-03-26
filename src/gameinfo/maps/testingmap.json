@@ -131,10 +131,37 @@
     {
       "id": "rm_bottom_left",
       "name": "Bottom left corner",
-      "desc": "This room is in the corner and not directly connected to anything else",
+      "desc": "This room is in the corner and not directly connected to anything else\nThere are exits to the east and north\nThere is a locked door to the south",
       "exits": {
         "north": "rm_start",
         "east": "rm_e",
+        "south": "",
+        "west": ""
+      },
+      "objects": [
+        {
+          "id": "obj_key1",
+          "name": "Key",
+          "altNames": [],
+          "desc": "This is the key to the door",
+          "pickupable": true
+        },
+        {
+          "id": "obj_door1",
+          "name": "Door",
+          "altNames": ["South Door"],
+          "desc": "It appears to be locked",
+          "pickupable": false
+        }
+      ]
+    },
+    {
+      "id": "rm_unlocked_room",
+      "name": "Unlocked Room",
+      "desc": "Ay, you got in!\nThere is an exit to the north",
+      "exits": {
+        "north": "rm_bottom_left",
+        "east": "",
         "south": "",
         "west": ""
       },

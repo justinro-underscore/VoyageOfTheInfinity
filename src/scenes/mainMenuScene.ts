@@ -1,5 +1,6 @@
 import "phaser";
 import { MapHandler } from '../handler/mapHandler';
+import { EventHandler } from '../handler/eventHandler';
 
 export class MainMenuScene extends Phaser.Scene {
   title: Phaser.GameObjects.Text;
@@ -34,10 +35,12 @@ export class MainMenuScene extends Phaser.Scene {
     this.input.keyboard.on('keydown', function (event: KeyboardEvent) {
       if (event.keyCode === 32) {
         MapHandler.instantiateInstance("testing");
+        EventHandler.instantiateEventMap("testing");
         this.scene.start("TerminalScene");
       }
       else if (event.key === "D") {
         MapHandler.instantiateInstance("testing");
+        EventHandler.instantiateEventMap("testing");
         this.scene.start("DebugMapScene");
       }
     }, this);

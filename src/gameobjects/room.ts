@@ -63,6 +63,26 @@ export class Room {
     }
     return false;
   }
+
+  setExit(direction: string, newRoomId: string): boolean {
+    switch (direction) {
+      case "north":
+        this.exits[0] = newRoomId;
+        break;
+      case "east":
+        this.exits[1] = newRoomId;
+        break;
+      case "south":
+        this.exits[2] = newRoomId;
+        break;
+      case "west":
+        this.exits[3] = newRoomId;
+        break;
+      default:
+        return false;
+    }
+    return true;
+  }
 }
 
 export interface RoomJson {

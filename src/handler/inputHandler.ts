@@ -1,5 +1,6 @@
 import { MapHandler } from './mapHandler';
 import { InventoryHandler } from './inventoryHandler';
+import { EventHandler } from './eventHandler';
 import { GameObject } from '../gameobjects/gameObject';
 
 class MultipleObjects extends Error {
@@ -187,6 +188,35 @@ export class InputHandler {
           return result;
         }
       }
+    },
+
+    "use": {
+      "validate": (objs: Array<string>): boolean => {
+        return true;
+      },
+      "execute": (objs: Array<string>): string => {
+        let objName = objs.join(" ");
+        try {
+          let obj = InputHandler.getObject(objName);
+          if (obj != null) {
+            InputHandler.overrideInputFunc = InputHandler.useObject;
+            InputHandler.overrideInputContext = new OverrideInputContext("", obj);
+            return "With what?";
+          }
+          else {
+            return `${ objName } cannot be found`;
+          }
+        }
+        catch (multObj) {
+          InputHandler.overrideInputFunc = InputHandler.chooseObject;
+          InputHandler.overrideInputContext = new OverrideInputContext("examine", (<MultipleObjects>multObj).objectsFound);
+          let prompt = "Which one? (Choose number)";
+          (<MultipleObjects>multObj).objectsFound.forEach((obj, i) => {
+            prompt += `\n${ i + 1 }. ${ obj.name }`;
+          });
+          return prompt;
+        }
+      }
     }
   };
 
@@ -254,6 +284,19 @@ export class InputHandler {
     }
     InputHandler.overrideInputFunc = null;
     InputHandler.overrideInputContext = null;
-    return result
+    return result;
+  }
+
+  private static useObject(inputStr: string): string {
+    let useObject = (<GameObject>InputHandler.overrideInputContext.data);
+    let withObject = InputHandler.getObject(inputStr); // TODO Handle multiple objects
+
+    let result = `${ inputStr } cannot be found`;
+    if (withObject != null) {
+      result = EventHandler.runEvent(useObject, withObject);
+    }
+    InputHandler.overrideInputFunc = null;
+    InputHandler.overrideInputContext = null;
+    return result;
   }
 }
