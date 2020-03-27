@@ -1,5 +1,5 @@
 {
-  "name": "WebTextAdventure",
+  "name": "voyage-of-the-infinity",
   "version": "0.1.0",
   "description": "A brwoser-based text adventure game created with Phaser 3",
   "main": "index.js",
@@ -10,12 +10,23 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/justinro-underscore/WebTextAdventure.git"
+    "url": "git+https://github.com/justinro-underscore/VoyageOfTheInfinity.git"
   },
   "author": "Justin Roderman",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/justinro-underscore/WebTextAdventure/issues"
+    "url": "https://github.com/justinro-underscore/VoyageOfTheInfinity/issues"
   },
-  "homepage": "https://github.com/justinro-underscore/WebTextAdventure#readme"
+  "homepage": "https://github.com/justinro-underscore/VoyageOfTheInfinity#readme",
+  "devDependencies": {
+    "live-server": "^1.2.1",
+    "phaser": "^3.20.1",
+    "ts-loader": "^6.2.2",
+    "typescript": "^3.8.3",
+    "webpack": "^4.41.2",
+    "webpack-cli": "^3.3.10"
+  },
+  "dependencies": {
+    "phaser": "^3.20.1"
+  }
 }
