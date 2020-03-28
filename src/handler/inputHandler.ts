@@ -29,9 +29,13 @@ enum ObjectLocation {
 
 export class InputHandler {
   static overrideInput: OverrideInput = null;
+  static previousInputs = new Array<string>();
+  static currPrevInputPointer = -1;
 
   static submitInput(inputStr: string): string {
+    InputHandler.currPrevInputPointer = -1;
     if (this.overrideInput === null) {
+      InputHandler.previousInputs.unshift(inputStr);
       let inputStrArr = inputStr.split(" ");
       let command = inputStrArr[0];
       let objs = inputStrArr.splice(1);
@@ -40,6 +44,38 @@ export class InputHandler {
     else {
       return this.overrideInput.func(inputStr);
     }
+  }
+
+  static resetPrevInputCounter() {
+    InputHandler.currPrevInputPointer = -1;
+  }
+
+  static getNextPrevInput(): string {
+    return InputHandler.getPrevInput(true);
+  }
+
+  static getPreviousPrevInput(): {bottom: boolean, prevInput: string} {
+    if (InputHandler.currPrevInputPointer < 0) {
+      return {bottom: true, prevInput: ""};
+    }
+    return {bottom: false, prevInput: InputHandler.getPrevInput(false)};
+  }
+
+  private static getPrevInput(next: boolean) {
+    if (InputHandler.previousInputs.length === 0) {
+      return "";
+    }
+    if (next && (InputHandler.currPrevInputPointer < (InputHandler.previousInputs.length - 1))) {
+      InputHandler.currPrevInputPointer++;
+    }
+    if (!next && InputHandler.currPrevInputPointer >= 0) {
+      InputHandler.currPrevInputPointer--;
+    }
+
+    if (InputHandler.currPrevInputPointer < 0) {
+      return "";
+    }
+    return InputHandler.previousInputs[InputHandler.currPrevInputPointer];
   }
 
   private static examineObject(obj: GameObject): string {

@@ -42,6 +42,8 @@ export class TerminalScene extends Phaser.Scene {
 
   keyDebounceTime = 0;
 
+  lastInput: string = ""; // Keeps track of the last input before a call to get the previous input was made
+
   constructor() {
     super({
       key: "TerminalScene"
@@ -192,14 +194,37 @@ export class TerminalScene extends Phaser.Scene {
             }
             this.currInput += key;
 
+            // Save last input
+            InputHandler.resetPrevInputCounter();
+            this.lastInput = this.currInput;
+
             // Reset cursor to visible
             this.blinkCursor = false;
             this.lastBlinkTime = -blinkTimeDelta;
           }
           break;
+        case KeyCodeCateogry.KEY_UP:
+          let newNextInput = InputHandler.getNextPrevInput();
+          if (newNextInput != "") {
+            this.currInput = newNextInput;
+          }
+          break;
+        case KeyCodeCateogry.KEY_DOWN:
+          let newPrevInput = InputHandler.getPreviousPrevInput();
+          if (!newPrevInput.bottom && newPrevInput.prevInput != "") {
+            this.currInput = newPrevInput.prevInput;
+          }
+          else {
+            this.currInput = this.lastInput;
+          }
+          break;
         // If backspace, remove last char from keyboard input
         case KeyCodeCateogry.BACKSPACE:
           this.currInput = this.currInput.substring(0, this.currInput.length - 1);
+
+          // Save this change
+          InputHandler.resetPrevInputCounter();
+          this.lastInput = this.currInput;
           break;
         // If enter, accept current input
         case KeyCodeCateogry.ENTER:
@@ -209,6 +234,7 @@ export class TerminalScene extends Phaser.Scene {
             this.scrollTerminalScreenTo(this.cameras.main.height - 40 - this.terminalScreen.height);
             this.updateScrollBarSize();
             this.currInput = "";
+            this.lastInput = "";
           }
           break;
       }
