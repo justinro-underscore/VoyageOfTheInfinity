@@ -56,11 +56,11 @@
     {
       "id": "rm_start",
       "name": "Starting Room",
-      "desc": "This room is in the middle and is the starting place!",
+      "desc": "This room is in the middle and is the starting place! Go south for use testing",
       "exits": {
         "north": "rm_n",
         "east": "rm_e",
-        "south": "",
+        "south": "rm_use_test_1",
         "west": "rm_bottom_left"
       },
       "objects": [
@@ -166,6 +166,142 @@
         "west": ""
       },
       "objects": []
+    },
+    {
+      "id": "rm_use_test_1",
+      "name": "Use Test 1",
+      "desc": "Test single object for use and with",
+      "exits": {
+        "north": "rm_start",
+        "east": "rm_use_test_2",
+        "south": "",
+        "west": ""
+      },
+      "objects": [
+        {
+          "id": "obj_use_test_1_use",
+          "name": "Use",
+          "altNames": [],
+          "desc": "Use",
+          "pickupable": true
+        },
+        {
+          "id": "obj_use_test_1_with",
+          "name": "With",
+          "altNames": [],
+          "desc": "With",
+          "pickupable": false
+        }
+      ]
+    },
+    {
+      "id": "rm_use_test_2",
+      "name": "Use Test 2",
+      "desc": "Test multiple objects for use, one for with",
+      "exits": {
+        "north": "rm_start",
+        "east": "rm_use_test_3",
+        "south": "",
+        "west": "rm_use_test_1"
+      },
+      "objects": [
+        {
+          "id": "obj_use_test_2_use_1",
+          "name": "Use 1",
+          "altNames": ["Use"],
+          "desc": "Use 1",
+          "pickupable": true
+        },
+        {
+          "id": "obj_use_test_2_use_2",
+          "name": "Use 2",
+          "altNames": ["Use"],
+          "desc": "Use 2",
+          "pickupable": true
+        },
+        {
+          "id": "obj_use_test_2_with",
+          "name": "With",
+          "altNames": [],
+          "desc": "With",
+          "pickupable": false
+        }
+      ]
+    },
+    {
+      "id": "rm_use_test_3",
+      "name": "Use Test 3",
+      "desc": "Test one object for use, multiple for with",
+      "exits": {
+        "north": "rm_start",
+        "east": "rm_use_test_4",
+        "south": "",
+        "west": "rm_use_test_2"
+      },
+      "objects": [
+        {
+          "id": "obj_use_test_3_use",
+          "name": "Use",
+          "altNames": [],
+          "desc": "Use",
+          "pickupable": true
+        },
+        {
+          "id": "obj_use_test_3_with_1",
+          "name": "With 1",
+          "altNames": ["With"],
+          "desc": "With 1",
+          "pickupable": false
+        },
+        {
+          "id": "obj_use_test_3_with_2",
+          "name": "With 2",
+          "altNames": ["With"],
+          "desc": "With 2",
+          "pickupable": false
+        }
+      ]
+    },
+    {
+      "id": "rm_use_test_4",
+      "name": "Use Test 4",
+      "desc": "Test multiple objects for both use and with",
+      "exits": {
+        "north": "rm_start",
+        "east": "",
+        "south": "",
+        "west": "rm_use_test_3"
+      },
+      "objects": [
+        {
+          "id": "obj_use_test_4_use_1",
+          "name": "Use 1",
+          "altNames": ["Use"],
+          "desc": "Use 1",
+          "pickupable": true
+        },
+        {
+          "id": "obj_use_test_4_use_2",
+          "name": "Use 2",
+          "altNames": ["Use"],
+          "desc": "Use 2",
+          "pickupable": true
+        },
+        {
+          "id": "obj_use_test_4_with_1",
+          "name": "With 1",
+          "altNames": ["With"],
+          "desc": "With 1",
+          "pickupable": false
+        },
+        {
+          "id": "obj_use_test_4_with_2",
+          "name": "With 2",
+          "altNames": ["With"],
+          "desc": "With 2",
+          "pickupable": false
+        }
+      ]
     }
   ]
 }
