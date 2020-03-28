@@ -3,7 +3,7 @@ import { TestingEventMap } from "../gameinfo/events/testingEvents";
 
 export class EventHandler {
   private static eventMap: Map<string, () => string>;
-  private static availableEventMaps: Map<string, {events: [{useObj: string, withObj: string, event: () => string}]}> = new Map([
+  private static availableEventMaps: Map<string, {events: {useObj: string, withObj: string, event: () => string}[]}> = new Map([
     ["testing", TestingEventMap]
   ]);
 

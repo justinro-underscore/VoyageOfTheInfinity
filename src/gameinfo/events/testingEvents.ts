@@ -1,6 +1,6 @@
 import { MapHandler } from "../../handler/mapHandler";
 
-export const TestingEventMap: {events: [{useObj: string, withObj: string, event: () => string}]} = {
+export const TestingEventMap: {events: {useObj: string, withObj: string, event: () => string}[]} = {
   events: [
     {
       useObj: "obj_key1",
