@@ -30,22 +30,25 @@ const scrollCoef = 10;
 // How many pixels wide the scroll bar is
 const scrollBarWidth = 5;
 
+/**
+ * Defines the scene where user can input commands through a terminal interface
+ */
 export class TerminalScene extends Phaser.Scene {
-  terminalScreen: Phaser.GameObjects.Text;
-  commandLine: Phaser.GameObjects.Text;
-  currInput = "";
-  scrollBar: Phaser.GameObjects.Image;
+  terminalScreen: Phaser.GameObjects.Text; // Text that is shown to the user, holds all previous inputs and their responses
+  commandLine: Phaser.GameObjects.Text; // Text that keeps track of what is currently input
+  currInput = ""; // The current input
+  scrollBar: Phaser.GameObjects.Image; // Scroll bar on the right side of the scene that keeps track of where the user has scrolled to
 
-  freezeInput = false;
+  freezeInput = false; // If true, user cannot enter in any more characters
 
-  cursor: Phaser.GameObjects.Text;
+  cursor: Phaser.GameObjects.Text; // Text that shows where the cursor is currently positioned
   cursorPos = 0; // Current cursor position
   blinkCursor = false; // If the cursor is visible or not
   lastBlinkTime = 0; // Keeps track of how long its been since we toggled the cursor
 
-  keyDebounceTime = 0;
+  keyDebounceTime = 0; // Keeps track of how long its been since the user typed a character (to avoid double inputs)
 
-  lastInput: string = ""; // Keeps track of the last input before a call to get the previous input was made
+  lastInput = ""; // Keeps track of the last input before a call to get the previous input was made
 
   constructor() {
     super({
@@ -53,19 +56,33 @@ export class TerminalScene extends Phaser.Scene {
     });
   }
 
+  /**
+   * Load images
+   */
   preload() {
     this.load.image("scrollBar", 'assets/img/white-pixel.png');
     this.load.image("terminalScreen", 'assets/img/terminal-screen.png');
   }
 
+  /**
+   * Set up all game elements that are shown to the user
+   */
   create() {
+    /*************************
+     * Set up the background *
+     *************************/
     let background = this.add.image(0, 0, "terminalScreen");
     background.setOrigin(0, 0);
     background.setDisplaySize(this.cameras.main.width, this.cameras.main.height);
 
+    /******************************
+     * Set up the terminal screen *
+     ******************************/
+    // Create a mask (so that the terminal screen does not reach the bottom of the screen which is reserved for user input)
     let graphics = this.make.graphics({});
     graphics.fillRect(0, 0, this.cameras.main.width, this.cameras.main.height - 40);
     let mask = new Phaser.Display.Masks.GeometryMask(this, graphics);
+
     this.terminalScreen = this.add.text(10, 10, MapHandler.getCurrRoomInfo(true), {
       font: "16px Monospace",
       align: "left",
@@ -74,32 +91,44 @@ export class TerminalScene extends Phaser.Scene {
     });
     this.terminalScreen.setMask(mask);
 
-    this.currInput = "";
-    this.commandLine = this.add.text(10, this.cameras.main.height - 30, "> ",
-      { font: '16px Monospace', fill: '#77ff55' });
-    this.cursor = this.add.text(10, this.cameras.main.height - 30, "  _",
-    { font: '16px Monospace', fill: '#77ff55' });
-
+    /***********************************************
+     * Set up the scroll bar and its functionality *
+     ***********************************************/
     this.scrollBar = this.add.image(this.cameras.main.width - scrollBarWidth, 0, "scrollBar").setInteractive();
     this.scrollBar.setOrigin(0, 0);
-    this.scrollBar.setDisplaySize(scrollBarWidth, this.cameras.main.height - 40);
-    this.scrollBar.setTint(0x77ff55);
+    this.scrollBar.setDisplaySize(scrollBarWidth, this.cameras.main.height - 40); // Start out the full size of the terminal screen
+    this.scrollBar.setTint(0x77ff55); // Should be the color of the text
+
+    // Set up draggable functionality
     this.scrollBar.on('pointerover', () => this.scrollBar.setTint(0xfdfdcd));
     this.scrollBar.on('pointerout', () => this.scrollBar.setTint(0x77ff55));
     this.input.setDraggable(this.scrollBar);
     this.input.on('drag', (_pointer: Phaser.Input.Mouse.MouseManager, _gameObjects: Array<Phaser.GameObjects.GameObject>, _x: number, y: number) => {
       this.moveScrollBar(y);
     });
-    this.scrollBar.setVisible(false);
-
-    this.input.keyboard.on('keydown', (event: KeyboardEvent) => this.onKeyInput(event), this);
+    // When the user scrolls their scrollwheel, move the screen & scroll bar
     this.input.on('wheel', (_pointer: Phaser.Input.Mouse.MouseManager, _gameObjects: Array<Phaser.GameObjects.GameObject>, _deltaX: number, deltaY: number) => {
       const scrollDelta = deltaY * scrollCoef;
       this.scrollTerminalScreenTo(this.terminalScreen.y - scrollDelta);
       this.updateScrollBarPosition();
     });
+    this.scrollBar.setVisible(false); // Start out invisible
+
+    /*********************************
+     * Set up the command line input *
+     *********************************/
+    this.currInput = "";
+    this.commandLine = this.add.text(10, this.cameras.main.height - 30, "> ",
+      { font: '16px Monospace', fill: '#77ff55' });
+    this.cursor = this.add.text(10, this.cameras.main.height - 30, "  _",
+      { font: '16px Monospace', fill: '#77ff55' });
+    this.input.keyboard.on('keydown', (event: KeyboardEvent) => this.onKeyInput(event), this);
   }
 
+  /**
+   * Updates the command line
+   * @param time How long has passed since creation of the scene
+   */
   update(time: number) {
     // Blink the cursor
     if (!this.freezeInput) {
@@ -109,33 +138,46 @@ export class TerminalScene extends Phaser.Scene {
         this.lastBlinkTime = time;
       }
     }
+    // If we currently frozen, always keep cursor on (unless it is at the end of the input)
     else {
       this.blinkCursor = (this.cursorPos != this.currInput.length);
     }
+
+    // Count down from key debounce if it has been activated
     if (this.keyDebounceTime > 0) {
       this.keyDebounceTime -= 1;
     }
 
+    // Update command line
     this.commandLine.text = "> " + this.currInput;
+
+    // Update cursor on command line
     let cursorPadding = "  ";
     for (let i = 0; i < this.cursorPos; i++) { cursorPadding += " "; }
-    this.cursor.x = (this.cursorPos === this.currInput.length ? 10 : 5);
+    this.cursor.x = (this.cursorPos === this.currInput.length ? 10 : 5); // If cursor is in the middle of the word, move it slightly so that the pipe isn't on top of a character
     this.cursor.text = cursorPadding + (this.blinkCursor ? (this.cursorPos === this.currInput.length ? "_" : "|") : "");
   }
 
-  /*
-    PRIVATE METHODS
-  */
+  /***********************
+   *   PRIVATE METHODS   *
+   ***********************/
 
+  /**
+   * Checks if we should freeze user input
+   * This should happen if the user's input has reached the end of the screen
+   */
   private checkForFreezeInput() {
     const width = this.cameras.main.width;
-    const offset = 40;
+    const offset = 40; // Determines how far from the side of the screen should be counted until the user input has reached the end of the screen
 
-    // Need to get rid of cursor in order to check length
-    this.commandLine.text = "> " + this.currInput;
+    this.commandLine.text = "> " + this.currInput; // Need to get rid of cursor in order to check length
     this.freezeInput = this.commandLine.width >= (width - offset);
   }
 
+  /**
+   * Moves the terminal screen to a specified location (used for scrolling)
+   * @param newY The new Y-value the terminal screen should move to
+   */
   private scrollTerminalScreenTo(newY: number) {
     if (this.terminalScreen.height > this.cameras.main.height - 40) {
       this.terminalScreen.y = newY;
@@ -143,51 +185,76 @@ export class TerminalScene extends Phaser.Scene {
     }
   }
 
+  /**
+   * Moves the scroll bar to a new position
+   * NOTE: will also scroll the terminal screen to a new location
+   * @param newY The new Y-value the scroll bar should move to
+   */
   private moveScrollBar(newY: number) {
     this.scrollBar.y = newY;
     this.scrollBar.y = Phaser.Math.Clamp(this.scrollBar.y, 0, this.cameras.main.height - 40 - this.scrollBar.displayHeight);
 
+    // Calculate where the terminal screen should move to
     const [m, b] = this.getMB();
     const newTerminalScreenY = (this.scrollBar.y - b) / m;
     this.scrollTerminalScreenTo(newTerminalScreenY);
   }
 
+  /**
+   * Updates the scroll bar size depending on the size of the terminal screen
+   * Will always be called when a new input is registered
+   */
   private updateScrollBarSize() {
-    const screenHeight = this.cameras.main.height - 40;
-    if (this.terminalScreen.height > this.cameras.main.height - 40) {
+    const screenHeight = this.cameras.main.height - 40; // TODO Abstract this out so it doesn't need to be recalculated every time
+    // Only change the size if the terminal screen height has surpassed its masking
+    if (this.terminalScreen.height > screenHeight) {
       this.scrollBar.setVisible(true);
+      // Set the height with HELLA maths (see notebook for description of how I got this)
       let scrollBarHeight = (screenHeight * screenHeight) / this.terminalScreen.height;
-      scrollBarHeight = Phaser.Math.Clamp(scrollBarHeight, 3, screenHeight);
+      scrollBarHeight = Phaser.Math.Clamp(scrollBarHeight, 3, screenHeight); // Height should never be less than 3 pixels (but we shouldn't really ever get there)
       this.scrollBar.setDisplaySize(scrollBarWidth, scrollBarHeight);
-      this.scrollBar.y = screenHeight - scrollBarHeight;
+      this.scrollBar.y = screenHeight - scrollBarHeight; // Set scroll bar location to bottom of screen
     }
     else {
-      this.scrollBar.setVisible(false);
+      this.scrollBar.setVisible(false); // Hide the scroll bar if we don't need it
     }
   }
 
+  /**
+   * Sets the scroll bar's position using the height of the terminal screen
+   * TODO Replace this with @see moveScrollBar
+   */
   private updateScrollBarPosition() {
     const [m, b] = this.getMB();
     const scrollBarPos = m * (this.terminalScreen.y) + b;
     this.scrollBar.y = scrollBarPos;
   }
 
+  /**
+   * Calculates the m & b values for the linear equation relating scroll bar location to terminal screen location
+   * m & b refer to the variables in the equation `y = mx + b`
+   * @returns [m value, b value]
+   */
   private getMB(): [number, number] {
+    // Calculate m & b with HELLA maths (see notebook for description of how I got this)
     const screenHeight = this.cameras.main.height - 40;
     const m = (screenHeight - this.scrollBar.displayHeight) / (screenHeight - this.terminalScreen.height - 10);
     const b = -10 * m;
     return [m, b];
   }
 
-  // Defines the functionality of keyboard events
+  /**
+   * Defines what happens when a key is input
+   * @param keyEvent The keyboard event that calls this function
+   */
   private onKeyInput(keyEvent: KeyboardEvent) {
     if (this.keyDebounceTime > 0) {
-      return;
+      return; // Reject any input that while we are in debounce cooldown
     }
     else {
-      this.keyDebounceTime = keyDebounceVal;
+      this.keyDebounceTime = keyDebounceVal; // Reset the debounce timer
     }
-    // Get key event category
+
     const keyCat = this.getKeyCategory(keyEvent.keyCode);
     if (keyCat != KeyCodeCateogry.INVALID) {
       switch (keyCat) {
@@ -197,13 +264,13 @@ export class TerminalScene extends Phaser.Scene {
         case KeyCodeCateogry.SPACE:
           if (!this.freezeInput) {
             let key = keyEvent.key.toLocaleLowerCase();
-            // Check if user is holding down shift
+            // Check if user is typing in digit while holding down shift
             if (keyCat === KeyCodeCateogry.DIGIT && ("" + (keyEvent.keyCode - 48)) != key) {
               key = "" + (keyEvent.keyCode - 48);
             }
             this.currInput = this.currInput.substring(0, this.cursorPos) + key + this.currInput.substring(this.cursorPos);
 
-            // Save last input
+            // Save this change
             InputHandler.resetPrevInputCounter();
             this.lastInput = this.currInput;
 
@@ -217,7 +284,7 @@ export class TerminalScene extends Phaser.Scene {
           if (newNextInput != "") {
             this.currInput = newNextInput;
           }
-          this.cursorPos = this.currInput.length;
+          this.cursorPos = this.currInput.length; // Move cursor to the end
           break;
         // Replace input with previous previous input (or last edited command)
         case KeyCodeCateogry.KEY_DOWN:
@@ -225,10 +292,10 @@ export class TerminalScene extends Phaser.Scene {
           if (!newPrevInput.bottom && newPrevInput.prevInput != "") {
             this.currInput = newPrevInput.prevInput;
           }
-          else {
+          else { // If we reach the bottom, set the input as the last edited input
             this.currInput = this.lastInput;
           }
-          this.cursorPos = this.currInput.length;
+          this.cursorPos = this.currInput.length; // Move cursor to the end
           break;
         // Move cursor to the left
         case KeyCodeCateogry.KEY_LEFT:
@@ -257,7 +324,7 @@ export class TerminalScene extends Phaser.Scene {
           break;
         // If delete, remove char in front of cursor
         case KeyCodeCateogry.DELETE:
-          if (this.cursorPos != this.currInput.length) {
+          if (this.cursorPos < this.currInput.length) {
             this.currInput = this.currInput.substring(0, this.cursorPos) + this.currInput.substring(this.cursorPos + 1);
 
             // Save this change
@@ -269,26 +336,38 @@ export class TerminalScene extends Phaser.Scene {
         case KeyCodeCateogry.ENTER:
           if (this.currInput != "") {
             let response = InputHandler.submitInput(this.currInput);
+
+            // Update the terminal screen
             this.terminalScreen.text += `\n\n> ${ this.currInput }\n${ response }`;
-            this.scrollTerminalScreenTo(this.cameras.main.height - 40 - this.terminalScreen.height);
-            this.updateScrollBarSize();
+            this.scrollTerminalScreenTo(this.cameras.main.height - 40 - this.terminalScreen.height); // Move the terminal screen to the bottom
+            this.updateScrollBarSize(); // Update the scroll bar
+
+            // Reset all variables
             this.currInput = "";
             this.lastInput = "";
             this.cursorPos = 0;
           }
           break;
       }
-      this.setCursorVisible();
-      this.checkForFreezeInput();
+      this.setCursorVisible(); // After every key input, set the cursor to visible
+      this.checkForFreezeInput(); // After every key input, check if we should freeze user input (or release user input freeze)
     }
   }
 
+  /**
+   * Sets the cursor status to visible
+   * Also sets the last blink time back so cursor continues to blink normally
+   */
   private setCursorVisible() {
     this.blinkCursor = false;
     this.lastBlinkTime = -blinkTimeDelta;
   }
 
-  // Returns the key code category of the input character
+  /**
+   * Gets the category of the keyboard input (@see KeyCodeCateogry)
+   * @param key The keycode of the keyboard input
+   * @returns The category of the keyboard input
+   */
   private getKeyCategory(key: number): KeyCodeCateogry {
     if (key >= 65 && key <= 90) {
       return KeyCodeCateogry.LETTER
