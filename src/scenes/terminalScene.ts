@@ -13,6 +13,7 @@ enum KeyCodeCateogry {
   KEY_LEFT,
   KEY_RIGHT,
   KEY_DOWN,
+  DELETE,
   TAB,
   INVALID
 };
@@ -37,6 +38,8 @@ export class TerminalScene extends Phaser.Scene {
 
   freezeInput = false;
 
+  cursor: Phaser.GameObjects.Text;
+  cursorPos = 0; // Current cursor position
   blinkCursor = false; // If the cursor is visible or not
   lastBlinkTime = 0; // Keeps track of how long its been since we toggled the cursor
 
@@ -74,6 +77,8 @@ export class TerminalScene extends Phaser.Scene {
     this.currInput = "";
     this.commandLine = this.add.text(10, this.cameras.main.height - 30, "> ",
       { font: '16px Monospace', fill: '#77ff55' });
+    this.cursor = this.add.text(10, this.cameras.main.height - 30, "  _",
+    { font: '16px Monospace', fill: '#77ff55' });
 
     this.scrollBar = this.add.image(this.cameras.main.width - scrollBarWidth, 0, "scrollBar").setInteractive();
     this.scrollBar.setOrigin(0, 0);
@@ -104,11 +109,18 @@ export class TerminalScene extends Phaser.Scene {
         this.lastBlinkTime = time;
       }
     }
+    else {
+      this.blinkCursor = (this.cursorPos != this.currInput.length);
+    }
     if (this.keyDebounceTime > 0) {
       this.keyDebounceTime -= 1;
     }
 
-    this.commandLine.text = "> " + this.currInput + (this.blinkCursor ? "_" : "");
+    this.commandLine.text = "> " + this.currInput;
+    let cursorPadding = "  ";
+    for (let i = 0; i < this.cursorPos; i++) { cursorPadding += " "; }
+    this.cursor.x = (this.cursorPos === this.currInput.length ? 10 : 5);
+    this.cursor.text = cursorPadding + (this.blinkCursor ? (this.cursorPos === this.currInput.length ? "_" : "|") : "");
   }
 
   /*
@@ -122,9 +134,6 @@ export class TerminalScene extends Phaser.Scene {
     // Need to get rid of cursor in order to check length
     this.commandLine.text = "> " + this.currInput;
     this.freezeInput = this.commandLine.width >= (width - offset);
-    if (this.freezeInput) {
-      this.blinkCursor = false;
-    }
   }
 
   private scrollTerminalScreenTo(newY: number) {
@@ -192,23 +201,25 @@ export class TerminalScene extends Phaser.Scene {
             if (keyCat === KeyCodeCateogry.DIGIT && ("" + (keyEvent.keyCode - 48)) != key) {
               key = "" + (keyEvent.keyCode - 48);
             }
-            this.currInput += key;
+            this.currInput = this.currInput.substring(0, this.cursorPos) + key + this.currInput.substring(this.cursorPos);
 
             // Save last input
             InputHandler.resetPrevInputCounter();
             this.lastInput = this.currInput;
 
-            // Reset cursor to visible
-            this.blinkCursor = false;
-            this.lastBlinkTime = -blinkTimeDelta;
+            // Manipulate cursor
+            this.cursorPos++;
           }
           break;
+        // Replace input with next previous input
         case KeyCodeCateogry.KEY_UP:
           let newNextInput = InputHandler.getNextPrevInput();
           if (newNextInput != "") {
             this.currInput = newNextInput;
           }
+          this.cursorPos = this.currInput.length;
           break;
+        // Replace input with previous previous input (or last edited command)
         case KeyCodeCateogry.KEY_DOWN:
           let newPrevInput = InputHandler.getPreviousPrevInput();
           if (!newPrevInput.bottom && newPrevInput.prevInput != "") {
@@ -217,14 +228,42 @@ export class TerminalScene extends Phaser.Scene {
           else {
             this.currInput = this.lastInput;
           }
+          this.cursorPos = this.currInput.length;
           break;
-        // If backspace, remove last char from keyboard input
+        // Move cursor to the left
+        case KeyCodeCateogry.KEY_LEFT:
+          if (this.cursorPos > 0) {
+            this.cursorPos--;
+          }
+          break;
+        // Move cursor to the right
+        case KeyCodeCateogry.KEY_RIGHT:
+          if (this.cursorPos < this.currInput.length) {
+            this.cursorPos++;
+          }
+          break;
+        // If backspace, remove char behind cursor
         case KeyCodeCateogry.BACKSPACE:
-          this.currInput = this.currInput.substring(0, this.currInput.length - 1);
+          this.currInput = this.currInput.substring(0, this.cursorPos - 1) + this.currInput.substring(this.cursorPos);
+
+          // Move the cursor
+          if (this.cursorPos > 0) {
+            this.cursorPos--;
+          }
 
           // Save this change
           InputHandler.resetPrevInputCounter();
           this.lastInput = this.currInput;
+          break;
+        // If delete, remove char in front of cursor
+        case KeyCodeCateogry.DELETE:
+          if (this.cursorPos != this.currInput.length) {
+            this.currInput = this.currInput.substring(0, this.cursorPos) + this.currInput.substring(this.cursorPos + 1);
+
+            // Save this change
+            InputHandler.resetPrevInputCounter();
+            this.lastInput = this.currInput;
+          }
           break;
         // If enter, accept current input
         case KeyCodeCateogry.ENTER:
@@ -235,11 +274,18 @@ export class TerminalScene extends Phaser.Scene {
             this.updateScrollBarSize();
             this.currInput = "";
             this.lastInput = "";
+            this.cursorPos = 0;
           }
           break;
       }
+      this.setCursorVisible();
       this.checkForFreezeInput();
     }
+  }
+
+  private setCursorVisible() {
+    this.blinkCursor = false;
+    this.lastBlinkTime = -blinkTimeDelta;
   }
 
   // Returns the key code category of the input character
@@ -268,6 +314,8 @@ export class TerminalScene extends Phaser.Scene {
         return KeyCodeCateogry.KEY_RIGHT;
       case 40:
         return KeyCodeCateogry.KEY_DOWN;
+      case 46:
+        return KeyCodeCateogry.DELETE;
       default:
         return KeyCodeCateogry.INVALID;
     }
