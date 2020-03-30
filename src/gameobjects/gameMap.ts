@@ -76,7 +76,10 @@ export class GameMap {
    * @returns True if the user moved, false otherwise
    */
   movePlayer(direction: number): boolean {
-    // TODO validate that direction is valid
+    // Validate that direction is valid
+    if (direction < 0 || direction > 3) {
+      return false;
+    }
     let newRoomID = this.rooms.get(this.playerPos).exits[direction];
     if (newRoomID === "") { // If room doesn't exist, don't move the player
       return false;
