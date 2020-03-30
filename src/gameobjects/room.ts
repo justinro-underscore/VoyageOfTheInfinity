@@ -8,7 +8,7 @@ const NUM_EXITS = 4;
  * A room contains information pertaining to how to navigate the room and objects that the player can interact with
  */
 export class Room {
-  id: string; // Unique ID of the room
+  id: string; // Unique ID of the room (uniqueness is verified in Room object)
   name: string; // Name of the room (does not have to be unique)
   desc: string; // Description of the room
   exits: Array<string>; // Array of room IDs defining the exits to this room [North, East, South, West]. An empty string represents no exit in that direction
@@ -99,7 +99,6 @@ export class Room {
 
   /**
    * Sets the given exit for this room
-   * TODO add check if newRoomId exists
    * @param direction A string describing which direction to overwrite. Must be one of the following: ["north", "east", "south", "west"]
    * @param newRoomId The new room ID to set
    * @returns True if direction is valid
