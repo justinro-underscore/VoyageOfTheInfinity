@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "build": "webpack",
-    "start": "webpack --watch & live-server --port=2569",
+    "start": "webpack & http-server --port=2569",
+    "start-dev": "webpack --watch & live-server --port=2569",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -27,6 +28,9 @@
     "webpack-cli": "^3.3.10"
   },
   "dependencies": {
-    "phaser": "^3.20.1"
+    "phaser": "^3.20.1",
+    "http-server": "^0.12.1",
+    "webpack": "^4.41.2",
+    "webpack-cli": "^3.3.10"
   }
 }
