@@ -25,7 +25,7 @@ export class EventHandler {
     else {
       EventHandler.eventMap = new Map<string, () => string>();
       EventHandler.availableEventMaps.get(eventMapKey).events.forEach(eventData => {
-        EventHandler.eventMap.set(`${ eventData.useObj } ${ eventData.withObj }`, eventData.event); // Where the key format is defined TODO change to a more robust key system
+        EventHandler.eventMap.set(`{${ eventData.useObj }} {${ eventData.withObj }}`, eventData.event); // Where the key format is defined
       });
     }
   }
@@ -37,11 +37,11 @@ export class EventHandler {
    * @returns The outcome of the event
    */
   static runEvent(useObject: GameObject, withObject: GameObject): string {
-    let key = `${ useObject.id } ${ withObject.id }`;
+    let key = `{${ useObject.id }} {${ withObject.id }}`;
     if (EventHandler.eventMap.has(key)) {
       return EventHandler.eventMap.get(key)();
     }
-    else if (EventHandler.eventMap.has(`${ withObject.id } ${ useObject.id }`)) {
+    else if (EventHandler.eventMap.has(`{${ withObject.id }} {${ useObject.id }}`)) {
       return `Cannot use ${ useObject.name } with ${ withObject.name } (Hint: try reversing them)`;
     }
     else {
