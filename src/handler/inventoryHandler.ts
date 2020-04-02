@@ -5,21 +5,8 @@ import { GameObject } from "../gameobjects/gameObject";
  * Inventory handler acts as a singleton
  */
 export class InventoryHandler {
-  private static instance: InventoryHandler; // The singleton instance of the handler
-
-  objectsInInventory: Array<GameObject>; // Describes what objects are kept in the inventory
-  size: number; // Describes how many objects are in the inventory
-
-  /**
-   * Returns the instance of InventoryHandler
-   * This class's instance must be procured before running commands because we don't know if / when the class instance will be instantiated
-   */
-  static getInstance(): InventoryHandler {
-    if (InventoryHandler.instance === undefined) {
-      InventoryHandler.instance = new InventoryHandler();
-    }
-    return InventoryHandler.instance;
-  }
+  static objectsInInventory = new Array<GameObject>(); // Describes what objects are kept in the inventory
+  static size = 0; // Describes how many objects are in the inventory
 
   /**
    * Get all objects that respond to the name given
@@ -27,9 +14,9 @@ export class InventoryHandler {
    * @param objName A string representing the object's name
    * @returns An array containing the game objects with the name (or alternate name) given
    */
-  getObjects(objName: string): Array<GameObject> {
+  static getObjects(objName: string): Array<GameObject> {
     let objs = new Array<GameObject>();
-    this.objectsInInventory.forEach(obj => {
+    InventoryHandler.objectsInInventory.forEach(obj => {
       if (obj.equals(objName)) {
         objs.push(obj);
       }
@@ -41,9 +28,9 @@ export class InventoryHandler {
    * Adds an object to the inventory
    * @param obj The game object to add to the inventory
    */
-  addObject(obj: GameObject) {
-    this.objectsInInventory.push(obj);
-    this.size += 1;
+  static addObject(obj: GameObject) {
+    InventoryHandler.objectsInInventory.push(obj);
+    InventoryHandler.size += 1;
   }
 
   /**
@@ -51,7 +38,7 @@ export class InventoryHandler {
    * @param obj The object to remove from the inventory
    * @returns True if the object was successfully removed, false otherwise
    */
-  removeObject(obj: GameObject): boolean {
+  static removeObject(obj: GameObject): boolean {
     const index = this.objectsInInventory.indexOf(obj);
     if (index != -1) {
       this.objectsInInventory.splice(index, 1);
@@ -62,10 +49,10 @@ export class InventoryHandler {
   }
 
   /**
-   * Creates a new instance of the InventoryHandler by instantiating the 
+   * Resets the inventory handler by removing all objects and resetting size
    */
-  private constructor() {
-    this.objectsInInventory = new Array<GameObject>();
-    this.size = 0;
+  static resetInventory() {
+    InventoryHandler.objectsInInventory = new Array<GameObject>();
+    InventoryHandler.size = 0;
   }
 }

@@ -87,7 +87,7 @@ export class InputHandler {
   private static takeObject(obj: GameObject): string {
     InputHandler.overrideInput = null;
     if (obj.pickupable) {
-      InventoryHandler.getInstance().addObject(obj);
+      InventoryHandler.addObject(obj);
       if (!MapHandler.removeObject(obj)) {
         console.error(`Removed an object from the map that did not exist on the map: {${ obj.id }}`);
       }
@@ -100,7 +100,7 @@ export class InputHandler {
 
   private static dropObject(obj: GameObject): string {
     InputHandler.overrideInput = null;
-    if (!InventoryHandler.getInstance().removeObject(obj)) {
+    if (!InventoryHandler.removeObject(obj)) {
       console.error(`Dropped an object that was not in the inventory: {${ obj.id }}`);
     }
     MapHandler.addObject(obj);
@@ -258,12 +258,12 @@ export class InputHandler {
             return true;
           },
           execute: (objs: Array<string>): string => {
-            if (InventoryHandler.getInstance().size === 0) {
+            if (InventoryHandler.size === 0) {
               return "Inventory is empty!";
             }
             else {
               let result = "In your inventory you have:";
-              InventoryHandler.getInstance().objectsInInventory.forEach(obj => {
+              InventoryHandler.objectsInInventory.forEach(obj => {
                 result += `\n- ${ obj.name }`;
               });
               return result;
@@ -338,7 +338,7 @@ export class InputHandler {
   private static getObject(objName: string, ignoreObjFrom: Array<ObjectLocation>=[]): GameObject {
     let objs = new Array<GameObject>();
     if (!ignoreObjFrom.includes(ObjectLocation.INVENTORY)) {
-      objs = objs.concat(InventoryHandler.getInstance().getObjects(objName));
+      objs = objs.concat(InventoryHandler.getObjects(objName));
     }
     if (!ignoreObjFrom.includes(ObjectLocation.MAP)) {
       objs = objs.concat(MapHandler.getObjects(objName));
