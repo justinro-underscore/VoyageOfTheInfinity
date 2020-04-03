@@ -11,7 +11,7 @@ export class LinesPipeline extends Phaser.Renderer.WebGL.Pipelines.TextureTintPi
         uniform vec2      resolution;
         uniform sampler2D uMainSampler;
         varying vec2 outTexCoord;
-        
+
         void main( void ) {
           vec2 uv = outTexCoord;
           // uv.y += (sin((uv.x + (time * 0.5)) * 10.0) * 0.1) + (sin((uv.x + (time * 0.2)) * 32.0) * 0.01);
