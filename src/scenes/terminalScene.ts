@@ -1,6 +1,11 @@
 import "phaser";
 import { InputHandler } from '../handler/inputHandler';
 import { MapHandler } from '../handler/mapHandler';
+import { BlurPipeline } from '../shaders/blurPipeline';
+import { GrayscalePipeline } from '../shaders/grayscalePipeline';
+import { LinesPipeline } from '../shaders/linesPipeline';
+import { BulgePipeline } from '../shaders/bulgePipeline';
+import { TransparentPipeline } from '../shaders/transparentPipeline';
 
 // Defines what category each key input goes into
 enum KeyCodeCateogry {
@@ -49,6 +54,8 @@ export class TerminalScene extends Phaser.Scene {
   keyDebounceReject = false; // Keeps track of if we should accept or reject user input (to avoid double inputs)
 
   lastInput = ""; // Keeps track of the last input before a call to get the previous input was made
+
+  shaders: Map<string, Phaser.Renderer.WebGL.WebGLPipeline>;
 
   constructor() {
     super({
@@ -132,7 +139,24 @@ export class TerminalScene extends Phaser.Scene {
       callbackScope: this,
       loop: true
     });
+
+    // this.shaders = new Map<string, Phaser.Renderer.WebGL.WebGLPipeline>();
+    // this.shaders.set("Blur", (<Phaser.Renderer.WebGL.WebGLRenderer>this.game.renderer).addPipeline("Blur", new BlurPipeline(this.game)));
+    // this.shaders.set("Grayscale", (<Phaser.Renderer.WebGL.WebGLRenderer>this.game.renderer).addPipeline("Grayscale", new GrayscalePipeline(this.game)));
+    // this.shaders.set("Transparent", (<Phaser.Renderer.WebGL.WebGLRenderer>this.game.renderer).addPipeline("Transparent", new TransparentPipeline(this.game)));
+    // this.shaders.set("Lines", (<Phaser.Renderer.WebGL.WebGLRenderer>this.game.renderer).addPipeline("Lines", new LinesPipeline(this.game)));
+    // this.shaders.set("Bulge", (<Phaser.Renderer.WebGL.WebGLRenderer>this.game.renderer).addPipeline("Bulge", new BulgePipeline(this.game)));
+
+    // this.shaders.forEach(shader => {
+    //   shader.setFloat2('resolution', <number>this.game.config.width, <number>this.game.config.height);
+    //   this.cameras.main.setRenderToTexture(shader);
+    //   this.cameras.main.glTexture
+    // });
   }
+
+  // update(time: number) {
+  //   this.shaders.get("Lines").setFloat1("time", time);
+  // }
 
   /***********************
    *   PRIVATE METHODS   *
