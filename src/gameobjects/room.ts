@@ -14,6 +14,7 @@ export class Room {
   exits: Array<string>; // Array of room IDs defining the exits to this room [North, East, South, West]. An empty string represents no exit in that direction
   objects: Map<string, GameObject>; // Defines a mapping of game object IDs to game object references
   static objectIds: Array<string> = new Array<string>(); // A static array of object IDs (to ensure uniqueness)
+  visited: boolean; // If true, the player has already visited this room
 
   /**
    * Generates a new room object from a given JSON object
@@ -41,7 +42,9 @@ export class Room {
         Room.objectIds.push(object.id);
         this.objects.set(object.id, object);
       }
-    })
+    });
+
+    this.visited = false; // Player could not have visited this yet
   }
 
   /**
@@ -95,6 +98,14 @@ export class Room {
       return true;
     }
     return false;
+  }
+
+  /**
+   * Sets the visited variable, which tells if a user has visited this room yet
+   * @param visited The boolean to set visited to
+   */
+  setVisited(visited: boolean) {
+    this.visited = visited;
   }
 
   /**

@@ -20,6 +20,14 @@ export class MapHandler {
     return this.instance.gameMap.getRoomInfo(fullRoomDesc);
   }
 
+  static getCurrRoomVisited(): boolean {
+    return this.instance.gameMap.getRoomVisitedStatus();
+  }
+
+  static setCurrRoomVisitedStatus(visited: boolean): boolean {
+    return this.instance.gameMap.setRoomVisitedStatus(visited);
+  }
+
   static getObjects(objName: string): Array<GameObject> {
     return this.instance.gameMap.getObjects(objName);
   }
@@ -51,6 +59,7 @@ export class MapHandler {
     }
     else {
       this.gameMap = MapHandler.availableGameMaps.get(mapKey);
+      this.gameMap.setRoomVisitedStatus(true);
     }
   }
 }

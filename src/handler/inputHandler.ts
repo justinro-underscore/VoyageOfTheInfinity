@@ -199,7 +199,11 @@ export class InputHandler {
                 break;
             }
             if (MapHandler.movePlayer(dir)) {
-              return MapHandler.getCurrRoomInfo(true);
+              let visited = MapHandler.getCurrRoomVisited()
+              if (!visited) {
+                MapHandler.setCurrRoomVisitedStatus(true);
+              }
+              return MapHandler.getCurrRoomInfo(!visited);
             }
             return "Cannot go that direction!";
           }

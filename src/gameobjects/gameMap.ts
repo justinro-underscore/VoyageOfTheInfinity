@@ -45,6 +45,32 @@ export class GameMap {
   }
 
   /**
+   * @see Room.visited
+   * @throws Error if room does not exist
+   * @param roomID The ID of the room requested, defaults to current room
+   */
+  getRoomVisitedStatus(roomID=this.playerPos): boolean {
+    if (this.rooms.has(roomID)) {
+      return this.rooms.get(roomID).visited;
+    }
+    throw Error("Room does not exist!");
+  }
+
+  /**
+   * @see Room.setVisited
+   * @param visited If true, set the room visited variable to true
+   * @param roomID The ID of the room requested, defaults to current room
+   * @returns If true, successful. Otherwise, room does not exist
+   */
+  setRoomVisitedStatus(visited: boolean, roomID=this.playerPos): boolean {
+    if (this.rooms.has(roomID)) {
+      this.rooms.get(roomID).setVisited(visited);
+      return true;
+    }
+    return false;
+  }
+
+  /**
    * @see Room.getObjects
    * @param objName @see Room.getObjects
    * @returns @see Room.getObjects
