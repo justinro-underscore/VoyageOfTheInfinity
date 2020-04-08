@@ -4,9 +4,9 @@
   "description": "A brwoser-based text adventure game created with Phaser 3",
   "main": "index.js",
   "scripts": {
-    "dev": "rollup --config rollup.config.dev.js",
     "build": "rollup --config rollup.config.dist.js",
-    "watch": "rollup --watch --config rollup.config.dev.js"
+    "start": "rollup --watch --config rollup.config.dev.js",
+    "dev": "rollup --config rollup.config.dev.js"
   },
   "repository": {
     "type": "git",
