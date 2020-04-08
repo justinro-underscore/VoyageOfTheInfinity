@@ -108,11 +108,6 @@ export class InputHandler {
   }
 
   private static getObjectToUseWith(useObj: GameObject): string {
-    InputHandler.overrideInput = new OverrideInput(InputHandler.getObjectToUseWithCallback, {useObj: useObj, setNull: false});
-    return "With what?";
-  }
-
-  private static getObjectToUseWithHasWith(useObj: GameObject): string {
     let withObjStr = <string>InputHandler.overrideInput.data.withObjStr;
     InputHandler.overrideInput = new OverrideInput(null, {useObj: useObj, setNull: false});
     return InputHandler.getObjectToUseWithCallback(withObjStr);
@@ -123,14 +118,14 @@ export class InputHandler {
       let withObj = InputHandler.getObject(inputStr);
       let result = `${ inputStr } cannot be found`;
       if (withObj != null) {
-        result = InputHandler.useObjects(withObj);
+        result = InputHandler.useMultipleObjects(withObj);
       }
       InputHandler.overrideInput = null;
       return result;
     }
     catch (multObj) {
       InputHandler.overrideInput = new OverrideInput(InputHandler.chooseObject, {
-        callback: InputHandler.useObjects,
+        callback: InputHandler.useMultipleObjects,
         objs: (<MultipleObjects>multObj).objectsFound,
         useObj: InputHandler.overrideInput.data.useObj
       });
@@ -138,10 +133,20 @@ export class InputHandler {
     }
   }
 
-  private static useObjects(withObj: GameObject): string {
+  private static useMultipleObjects(withObj: GameObject): string {
     let useObj = <GameObject>InputHandler.overrideInput.data.useObj;
     InputHandler.overrideInput = null;
-    return EventHandler.runEvent(useObj, withObj);
+    if (useObj.id != withObj.id) {
+      return EventHandler.runEvent(useObj, withObj);
+    }
+    else {
+      return "Cannot use an object with itself!";
+    }
+  }
+
+  private static useSingleObject(useObj: GameObject): string {
+    InputHandler.overrideInput = null;
+    return EventHandler.runEvent(useObj);
   }
 
   private static getCommandObj(command: string): {validate: (objs: Array<string>) => boolean, execute: (objs: Array<string>) => string} {
@@ -282,35 +287,35 @@ export class InputHandler {
           },
           execute: (objs: Array<string>): string => {
             let objName = objs.join(" ");
-            if (objName.includes(" with ")) {
+            if (objName.includes(" with ")) { // Use multiple objects
               let objNames = objName.split(" with ");
               try {
                 let useObj = InputHandler.getObject(objNames[0]);
                 if (useObj != null) {
                   InputHandler.overrideInput = new OverrideInput(null, {withObjStr: objNames[1]});
-                  return InputHandler.getObjectToUseWithHasWith(useObj);
+                  return InputHandler.getObjectToUseWith(useObj);
                 }
                 else {
                   return `${ objNames[0] } cannot be found`;
                 }
               }
               catch (multObj) {
-                InputHandler.overrideInput = new OverrideInput(InputHandler.chooseObject, {callback: InputHandler.getObjectToUseWithHasWith, objs: (<MultipleObjects>multObj).objectsFound, withObjStr: objNames[1], setNull: false});
+                InputHandler.overrideInput = new OverrideInput(InputHandler.chooseObject, {callback: InputHandler.getObjectToUseWith, objs: (<MultipleObjects>multObj).objectsFound, withObjStr: objNames[1], setNull: false});
                 return InputHandler.multipleObjectsDetectedPrompt(multObj);
               }
             }
-            else {
+            else { // Using single objects
               try {
                 let obj = InputHandler.getObject(objName);
                 if (obj != null) {
-                  return InputHandler.getObjectToUseWith(obj);
+                  return InputHandler.useSingleObject(obj);
                 }
                 else {
                   return `${ objName } cannot be found`;
                 }
               }
               catch (multObj) {
-                InputHandler.overrideInput = new OverrideInput(InputHandler.chooseObject, {callback: InputHandler.getObjectToUseWith, objs: (<MultipleObjects>multObj).objectsFound, setNull: false});
+                InputHandler.overrideInput = new OverrideInput(InputHandler.chooseObject, {callback: InputHandler.useSingleObject, objs: (<MultipleObjects>multObj).objectsFound, setNull: false});
                 return InputHandler.multipleObjectsDetectedPrompt(multObj);
               }
             }

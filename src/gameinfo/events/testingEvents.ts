@@ -1,6 +1,6 @@
 import { MapHandler } from "../../handler/mapHandler";
 
-export const TestingEventMap: {events: {useObj: string, withObj: string, event: () => string}[]} = {
+export const TestingEventMap: {events: {useObj: string, withObj?: string, event: () => string}[]} = {
   events: [
     {
       useObj: "obj_key1",
@@ -10,6 +10,12 @@ export const TestingEventMap: {events: {useObj: string, withObj: string, event: 
         room.desc = "This room is in the corner and not directly connected to anything else\nThere are exits to the east, north, and south";
         room.setExit("south", "rm_unlocked_room");
         return `You unlocked the door!\n\n${ MapHandler.getCurrRoomInfo(true) }`;
+      }
+    },
+    {
+      useObj: "obj_weapon",
+      event: () => {
+        return `You swing the sword wildly`;
       }
     },
     {
