@@ -50,14 +50,14 @@ export class MainMenuScene extends Phaser.Scene {
     this.input.keyboard.on('keydown', function (event: KeyboardEvent) {
       if (event.keyCode === 32) { // Space starts the game
         // Set up the game
-        MapHandler.instantiateInstance("testing");
-        EventHandler.instantiateEventMap("testing");
+        MapHandler.instantiateInstance("voyage");
+        EventHandler.instantiateEventMap("voyage");
         // Start the game
         this.scene.start("TerminalScene");
       }
       else if (event.key === "D") { // D goes to debug scene
-        MapHandler.instantiateInstance("testing");
-        EventHandler.instantiateEventMap("testing");
+        MapHandler.instantiateInstance("voyage");
+        EventHandler.instantiateEventMap("voyage");
         this.scene.start("DebugMapScene");
       }
     }, this);
