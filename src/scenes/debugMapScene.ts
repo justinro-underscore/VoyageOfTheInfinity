@@ -70,10 +70,10 @@ class DebugMapRoom {
 
       // Populates the room exits
       room.exits.forEach((id, i) => {
-        if (id != "") { // If the exit exists...
+        if (id[0] != "") { // If the exit exists...
           this.lines[i].setAlpha(1); // Make sure the exit line is visible
-          let exitRoom = this.gameMap.rooms.get(id);
-          text = exitRoom.id + " - " + exitRoom.name;
+          let exitRoom = this.gameMap.rooms.get(id[0]);
+          text = exitRoom.id[0] + " - " + exitRoom.name;
           this.roomExits[i].setText(text);
         }
         else { // If the exit doesn't exist, hide the room exit line
@@ -173,7 +173,7 @@ export class DebugMapScene extends Phaser.Scene {
     }
 
     // If we can move in this direction... (If direction is valid, we are not panning, and there is an exit in the desired direction)
-    if (dir != -1 && !this.panning && this.gameMap.rooms.get(this.gameMap.playerPos).exits[dir] != "") {
+    if (dir != -1 && !this.panning && this.gameMap.rooms.get(this.gameMap.playerPos).exits[dir][0] != "") {
       // Pan the camera to the direction
       switch(dir) {
         case 0:
@@ -204,6 +204,6 @@ export class DebugMapScene extends Phaser.Scene {
    */
   private setRooms() {
     this.rooms[0].setRoom(this.gameMap.playerPos);
-    this.gameMap.rooms.get(this.gameMap.playerPos).exits.forEach((id, i) => this.rooms[i + 1].setRoom(id));
+    this.gameMap.rooms.get(this.gameMap.playerPos).exits.forEach((id, i) => this.rooms[i + 1].setRoom(id[0]));
   }
 };

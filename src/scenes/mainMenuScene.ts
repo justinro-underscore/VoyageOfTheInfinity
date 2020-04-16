@@ -53,7 +53,7 @@ export class MainMenuScene extends Phaser.Scene {
         MapHandler.instantiateInstance("testing");
         EventHandler.instantiateEventMap("testing");
         // Start the game
-        this.scene.start("TerminalScene");
+        this.scene.start("MapTerminalScene");
       }
       else if (event.key === "D") { // D goes to debug scene
         MapHandler.instantiateInstance("testing");

@@ -1,7 +1,18 @@
 import { GameObject, GameObjectJson } from './gameObject';
 
 // Defines how many exits a room has
-const NUM_EXITS = 4;
+const EXIT_CODES = {
+  "north": 0,
+  "east": 1,
+  "south": 2,
+  "west": 3
+};
+
+export enum RoomExitStatus {
+  UNLOCKED,
+  LOCKED,
+  JAMMED
+}
 
 /**
  * Defines a room object
@@ -12,7 +23,7 @@ export class Room {
   name: string; // Name of the room (does not have to be unique)
   desc: string; // Description of the room
   mapCoords: [number, number]; // Arbitrary coordinates on a plane that describes where this room should lie on the map [x, y]
-  exits: Array<string>; // Array of room IDs defining the exits to this room [North, East, South, West]. An empty string represents no exit in that direction
+  exits: Array<[string, RoomExitStatus]>; // Array of room IDs defining the exits to this room [North, East, South, West]. An empty string represents no exit in that direction
   objects: Map<string, GameObject>; // Defines a mapping of game object IDs to game object references
   static objectIds: Array<string> = new Array<string>(); // A static array of object IDs (to ensure uniqueness)
   visited: boolean; // If true, the player has already visited this room
@@ -27,11 +38,38 @@ export class Room {
     this.name = roomJson.name;
     this.desc = roomJson.desc;
     this.mapCoords = [roomJson.mapCoords.x, roomJson.mapCoords.y];
-    this.exits = new Array<string>(NUM_EXITS);
-    this.exits[0] = roomJson.exits.north;
-    this.exits[1] = roomJson.exits.east;
-    this.exits[2] = roomJson.exits.south;
-    this.exits[3] = roomJson.exits.west;
+
+    // Set exits
+    this.exits = new Array<[string, RoomExitStatus]>(Object.keys(EXIT_CODES).length);
+    this.exits[0] = [roomJson.exits.north, RoomExitStatus.UNLOCKED];
+    this.exits[1] = [roomJson.exits.east, RoomExitStatus.UNLOCKED];
+    this.exits[2] = [roomJson.exits.south, RoomExitStatus.UNLOCKED];
+    this.exits[3] = [roomJson.exits.west, RoomExitStatus.UNLOCKED];
+    if (roomJson.exits.locked != null) {
+      roomJson.exits.locked.forEach(exit => {
+        let index = EXIT_CODES[exit];
+        if (index === undefined) {
+          console.error(`Room {${ this.id }} has locked room that is not valid ${ exit }`);
+        }
+        else {
+          this.exits[index][1] = RoomExitStatus.LOCKED;
+        }
+      });
+    }
+    if (roomJson.exits.jammed != null) {
+      roomJson.exits.jammed.forEach(exit => {
+        let index = EXIT_CODES[exit];
+        if (index === undefined) {
+          console.error(`Room {${ this.id }} has locked room that is not valid ${ exit }`);
+        }
+        else if (this.exits[index][1] != RoomExitStatus.UNLOCKED) {
+          console.error(`Room {${ this.id }} has exit {${ exit }} that is locked and jammed`);
+        }
+        else {
+          this.exits[index][1] = RoomExitStatus.JAMMED;
+        }
+      });
+    }
 
     // Create and set the objects
     this.objects = new Map<string, GameObject>();
@@ -114,25 +152,30 @@ export class Room {
    * Sets the given exit for this room
    * @param direction A string describing which direction to overwrite. Must be one of the following: ["north", "east", "south", "west"]
    * @param newRoomId The new room ID to set
+   * @param exitStatus The status of the exit (locked, jammed, etc.). Defaults to unlocked
    * @returns True if direction is valid
    */
-  setExit(direction: string, newRoomId: string): boolean {
-    switch (direction) {
-      case "north":
-        this.exits[0] = newRoomId;
-        break;
-      case "east":
-        this.exits[1] = newRoomId;
-        break;
-      case "south":
-        this.exits[2] = newRoomId;
-        break;
-      case "west":
-        this.exits[3] = newRoomId;
-        break;
-      default:
-        return false;
+  setExitID(direction: string, newRoomId: string, exitStatus: RoomExitStatus=RoomExitStatus.UNLOCKED): boolean {
+    let index = EXIT_CODES[direction];
+    if (index === undefined) {
+      return false;
     }
+    this.exits[index] = [newRoomId, exitStatus];
+    return true;
+  }
+
+  /**
+   * Sets the given exit status for this room
+   * @param direction A string describing which direction to overwrite. Must be one of the following: ["north", "east", "south", "west"]
+   * @param exitStatus The status of the exit (locked, jammed, etc.)
+   * @returns True if direction is valid
+   */
+  setExitStatus(direction: string, exitStatus: RoomExitStatus): boolean {
+    let index = EXIT_CODES[direction];
+    if (index === undefined) {
+      return false;
+    }
+    this.exits[index][1] = exitStatus;
     return true;
   }
 
@@ -143,7 +186,7 @@ export class Room {
    */
   getExitFromId(id: string): number {
     for (let i = 0; i < this.exits.length; i++) {
-      if (this.exits[i] === id) {
+      if (this.exits[i][0] === id) {
         return i;
       }
     }
@@ -166,7 +209,9 @@ export interface RoomJson {
     north: string, // This is the id of the room to the north, "" if cannot go this direction
     east: string,
     south: string,
-    west: string
+    west: string,
+    locked?: [string],
+    jammed?: [string]
   };
   objects: [GameObjectJson];
 }

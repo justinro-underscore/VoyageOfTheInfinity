@@ -159,8 +159,9 @@
       "exits": {
         "north": "rm_start",
         "east": "rm_e",
-        "south": "",
-        "west": ""
+        "south": "rm_unlocked_room",
+        "west": "",
+        "locked": ["south"]
       },
       "objects": [
         {
@@ -191,7 +192,8 @@
         "north": "rm_bottom_left",
         "east": "",
         "south": "",
-        "west": ""
+        "west": "",
+        "jammed": ["west"]
       },
       "objects": []
     },

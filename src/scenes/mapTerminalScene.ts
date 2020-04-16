@@ -302,8 +302,8 @@ export class MapTerminalScene extends Phaser.Scene {
   }
 
   private moveCurrRoom(dir: number) {
-    if (this.currRoom.room.exits[dir] != "") {
-      this.currRoom = this.roomMap.get(this.currRoom.room.exits[dir]);
+    if (this.currRoom.room.exits[dir][0] != "") {
+      this.currRoom = this.roomMap.get(this.currRoom.room.exits[dir][0]);
       let newCoords = this.currRoom.getCenterCoords();
       this.cameras.main.pan(newCoords[0], newCoords[1] - (this.mapUI.getActivated() ? MapUI.CAMERA_OFFSET : 0), 200, "Quad.easeInOut", true);
       this.tweens.add({
@@ -330,8 +330,8 @@ export class MapTerminalScene extends Phaser.Scene {
       this.roomMap.set(id, room);
 
       room.room.exits.forEach((exit, i) => {
-        if (exit != "") {
-          let nextRoom = this.createRoom(exit);
+        if (exit[0] != "") {
+          let nextRoom = this.createRoom(exit[0]);
           if (nextRoom != null) {
             room.linkRooms(nextRoom, this);
           }

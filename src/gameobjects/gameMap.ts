@@ -1,4 +1,4 @@
-import { Room, RoomJson } from './room';
+import { Room, RoomJson, RoomExitStatus } from './room';
 import { GameObject } from './gameObject';
 
 /**
@@ -107,10 +107,13 @@ export class GameMap {
       return false;
     }
     let newRoomID = this.rooms.get(this.playerPos).exits[direction];
-    if (newRoomID === "") { // If room doesn't exist, don't move the player
+    if (newRoomID[0] === "") { // If room doesn't exist, don't move the player
       return false;
     }
-    this.playerPos = newRoomID;
+    if (newRoomID[1] != RoomExitStatus.UNLOCKED) { // If room is not unlocked, don't move the player
+      return false;
+    }
+    this.playerPos = newRoomID[0];
     return true;
   }
 
@@ -138,8 +141,8 @@ export class GameMap {
   private verifyExits() {
     this.rooms.forEach(room => {
       room.exits.forEach((exit, i) => {
-        if (exit != "" && !this.rooms.has(exit)) {
-          console.error(`Room ${ room.id } has invalid exit: {${ i }} - ${ exit }`);
+        if (exit[0] != "" && !this.rooms.has(exit[0])) {
+          console.error(`Room ${ room.id } has invalid exit: {${ i }} - ${ exit[0] }`);
         }
       })
     })
