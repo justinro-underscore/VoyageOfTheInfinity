@@ -11,6 +11,7 @@ export class Room {
   id: string; // Unique ID of the room (uniqueness is verified in Room object)
   name: string; // Name of the room (does not have to be unique)
   desc: string; // Description of the room
+  mapCoords: [number, number]; // Arbitrary coordinates on a plane that describes where this room should lie on the map [x, y]
   exits: Array<string>; // Array of room IDs defining the exits to this room [North, East, South, West]. An empty string represents no exit in that direction
   objects: Map<string, GameObject>; // Defines a mapping of game object IDs to game object references
   static objectIds: Array<string> = new Array<string>(); // A static array of object IDs (to ensure uniqueness)
@@ -25,6 +26,7 @@ export class Room {
     this.id = roomJson.id;
     this.name = roomJson.name;
     this.desc = roomJson.desc;
+    this.mapCoords = [roomJson.mapCoords.x, roomJson.mapCoords.y];
     this.exits = new Array<string>(NUM_EXITS);
     this.exits[0] = roomJson.exits.north;
     this.exits[1] = roomJson.exits.east;
@@ -133,6 +135,20 @@ export class Room {
     }
     return true;
   }
+
+  /**
+   * Get the direction of the exit to a given room
+   * @param id The ID of the room searching for
+   * @returns The direction of the exit that leads into the given room, or null if it doesn't exist
+   */
+  getExitFromId(id: string): number {
+    for (let i = 0; i < this.exits.length; i++) {
+      if (this.exits[i] === id) {
+        return i;
+      }
+    }
+    return null;
+  }
 }
 
 /**
@@ -142,6 +158,10 @@ export interface RoomJson {
   id: string;
   name: string;
   desc: string;
+  mapCoords: {
+    x: number;
+    y: number;
+  }
   exits: {
     north: string, // This is the id of the room to the north, "" if cannot go this direction
     east: string,

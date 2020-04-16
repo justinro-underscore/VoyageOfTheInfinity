@@ -6,6 +6,10 @@
       "id": "room_drone",
       "name": "The Drone Cockpit Room",
       "desc": "This room is where all the repair drones are stationed.",
+      "mapCoords": {
+        "x": 3,
+        "y": 12
+      },
       "exits": {
         "north": "room_chambers",
         "east": "",
@@ -18,6 +22,10 @@
       "id": "room_chambers",
       "name": "The Cryostasis Room",
       "desc": "This is where the passengers of The Infinity enter cryosleep during long expeditions.",
+      "mapCoords": {
+        "x": 3,
+        "y": 11
+      },
       "exits": {
         "north": "room_fitness",
         "east": "room_lodging",
@@ -30,6 +38,10 @@
       "id": "room_fitness",
       "name": "The Fitness Room",
       "desc": "This room, well geared with various fitness equipment, entrusts that passengers of The Infinity are in peak physical condition.",
+      "mapCoords": {
+        "x": 3,
+        "y": 10
+      },
       "exits": {
         "north": "",
         "east": "",
@@ -42,6 +54,10 @@
       "id": "room_lodging",
       "name": "Lodging",
       "desc": "This room is used by staff and personnel to relax during the many tiresome jobs found on The Infinity.",
+      "mapCoords": {
+        "x": 4,
+        "y": 11
+      },
       "exits": {
         "north": "room_cafe",
         "east": "room_laundry",
@@ -54,6 +70,10 @@
       "id": "room_cafe",
       "name": "The Cafeteria",
       "desc": "The Cafeteria holds a large array of state of the art cutlery and exquisite ingredients for gourmet meals.",
+      "mapCoords": {
+        "x": 4,
+        "y": 10
+      },
       "exits": {
         "north": "room_water",
         "east": "room_garden",
@@ -66,6 +86,10 @@
       "id": "room_engine",
       "name": "The Engine Room",
       "desc": "This room holds the many reactors and stabilizers used to thrust the Infinity into deep space",
+      "mapCoords": {
+        "x": 4,
+        "y": 12
+      },
       "exits": {
         "north": "room_lodging",
         "east": "",
@@ -78,6 +102,10 @@
       "id": "room_water",
       "name": "The Water Supply",
       "desc": "This room holds purifiers, distillers and a large water supply tank that can last a full crew decades.",
+      "mapCoords": {
+        "x": 4,
+        "y": 9
+      },
       "exits": {
         "north": "",
         "east": "room_bio",
@@ -90,6 +118,10 @@
       "id": "room_bio",
       "name": "The Bio Lab",
       "desc": "Here biotic life is studied. Large space expeditions are no stranger to finding new life out there in the unknown and the Infinity is more than prepared for said circumstances. Microscopes, large glass tubes, beakers and et cetera litter the room.",
+      "mapCoords": {
+        "x": 5,
+        "y": 9
+      },
       "exits": {
         "north": "",
         "east": "",
@@ -102,6 +134,10 @@
       "id": "room_garden",
       "name": "The Garden",
       "desc": "The Garden produces fruits and vegetables to be eaten by passengers aboard The Infinity. Large illustrious trees and bright green plants flourish in this room.",
+      "mapCoords": {
+        "x": 5,
+        "y": 10
+      },
       "exits": {
         "north": "room_bio",
         "east": "",
@@ -114,6 +150,10 @@
       "id": "room_laundry",
       "name": "The Laundry Room",
       "desc": "This room is filled to the brim with washers and dryers. There is also a large gated area filled with cleaning supplies",
+      "mapCoords": {
+        "x": 5,
+        "y": 11
+      },
       "exits": {
         "north": "",
         "east": "",
@@ -126,6 +166,10 @@
       "id": "room_a",
       "name": "Checkpoint A",
       "desc": "This is a regroup room, where a larger circular table sits in the middle of the room. This room can be used to share meals, discuss further instructions, or just relax amongst passengers.",
+      "mapCoords": {
+        "x": 2,
+        "y": 9
+      },
       "exits": {
         "north": "room_long",
         "east": "room_closet",
@@ -138,6 +182,10 @@
       "id": "room_wash",
       "name": "The Washrooms",
       "desc": "This room is where people use the restroom, occupied with toilets, urinals and sinks",
+      "mapCoords": {
+        "x": 1,
+        "y": 9
+      },
       "exits": {
         "north": "",
         "east": "room_a",
@@ -150,6 +198,10 @@
       "id": "room_closet",
       "name": "The Closet",
       "desc": "This small room has everything needed to clean a large mess.",
+      "mapCoords": {
+        "x": 3,
+        "y": 9
+      },
       "exits": {
         "north": "",
         "east": "",
@@ -162,10 +214,14 @@
       "id": "room_long",
       "name": "The Long Hallway",
       "desc": "This long hallway separates the living quarters of the ship into functional components operating The Infinity.",
+      "mapCoords": {
+        "x": 2,
+        "y": 8
+      },
       "exits": {
         "north": "room_end",
         "east": "room_storage",
-        "south": "room_long",
+        "south": "room_a",
         "west": ""
       },
       "objects": []
@@ -174,6 +230,10 @@
       "id": "room_end",
       "name": "The Long Hallway",
       "desc": "The end of The Long Hallway. Branches off to the temperature control section and the medical section of The Infinity.",
+      "mapCoords": {
+        "x": 2,
+        "y": 7
+      },
       "exits": {
         "north": "",
         "east": "room_medical",
@@ -186,6 +246,10 @@
       "id": "room_storage",
       "name": "The Storage Room",
       "desc": "This room has large crates and containers that were to be used during the construction of the assigned mission.",
+      "mapCoords": {
+        "x": 3,
+        "y": 8
+      },
       "exits": {
         "north": "",
         "east": "room_restricted",
@@ -198,6 +262,10 @@
       "id": "room_restricted",
       "name": "The Restricted Section",
       "desc": "Apart of the storage room, The Restricted Section has dangerous, explosive, and unregulated related crates and barrels.",
+      "mapCoords": {
+        "x": 4,
+        "y": 8
+      },
       "exits": {
         "north": "",
         "east": "",
@@ -210,6 +278,10 @@
       "id": "room_medical",
       "name": "The Medical Bay",
       "desc": "The Medical Bay on The Infinity holds state of the art medical instruments to cure any ailments. A large X-Ray screen is the main focal point in the room.",
+      "mapCoords": {
+        "x": 3,
+        "y": 7
+      },
       "exits": {
         "north": "room_spa",
         "east": "room_surgical",
@@ -222,6 +294,10 @@
       "id": "room_surgical",
       "name": "The Surgical Center",
       "desc": "This room has many operating tables for well trained surgeons to perform any procedure.",
+      "mapCoords": {
+        "x": 4,
+        "y": 7
+      },
       "exits": {
         "north": "room_oxygen",
         "east": "room_chemical",
@@ -234,6 +310,10 @@
       "id": "room_oxygen",
       "name": "The Oxygen Production Room",
       "desc": "There is a large steaming tank with many other valves and pistons conjunctionally moving with one another in this room. This large intricate machine produces oxygen for passengers of The Infinity.",
+      "mapCoords": {
+        "x": 4,
+        "y": 6
+      },
       "exits": {
         "north": "",
         "east": "",
@@ -246,6 +326,10 @@
       "id": "room_chemical",
       "name": "The Chemical Lab",
       "desc": "The Chemical Lab stores many compound ingredients that can be used during scientific processing. Bubbling tubes of many colors float around the perimeter of the room.",
+      "mapCoords": {
+        "x": 5,
+        "y": 7
+      },
       "exits": {
         "north": "",
         "east": "",
@@ -255,21 +339,13 @@
       "objects": []
     },
     {
-      "id": "",
-      "name": "",
-      "desc": "",
-      "exits": {
-        "north": "",
-        "east": "",
-        "south": "",
-        "west": ""
-      },
-      "objects": []
-    },
-    {
       "id": "room_spa",
       "name": "The Spa Room",
       "desc": "The Spa Room is issued for those experiencing mental space related illnesses. This transcendent spa is heated to a perfect temperature to cleanse the mind, body, and soul.",
+      "mapCoords": {
+        "x": 3,
+        "y": 6
+      },
       "exits": {
         "north": "room_heat",
         "east": "",
@@ -282,6 +358,10 @@
       "id": "room_heat",
       "name": "The Heating Chamber",
       "desc": "This hot room contains a large pyrotheum generator that heats the ship.",
+      "mapCoords": {
+        "x": 2,
+        "y": 5
+      },
       "exits": {
         "north": "",
         "east": "room_spa",
@@ -294,6 +374,10 @@
       "id": "room_boiler",
       "name": "The Boiler Room",
       "desc": "This room regulates the temperatures produced by the Heating Chamber and The Cooling Chamber.",
+      "mapCoords": {
+        "x": 2,
+        "y": 6
+      },
       "exits": {
         "north": "room_heat",
         "east": "",
@@ -306,6 +390,10 @@
       "id": "room_cool",
       "name": "The Cooling Chamber",
       "desc": "This frigid room has a large vessel containing multiple cooling cells, attributing to The Infinity’s AC system. There are icicles dangling from the grafters above.",
+      "mapCoords": {
+        "x": 1,
+        "y": 6
+      },
       "exits": {
         "north": "room_b",
         "east": "room_boiler",
@@ -318,6 +406,10 @@
       "id": "room_b",
       "name": "Checkpoint B",
       "desc": "This is a nicer regroup room. This room is seemingly empty but has a large glass ceiling.",
+      "mapCoords": {
+        "x": 1,
+        "y": 5
+      },
       "exits": {
         "north": "room_observatory",
         "east": "",
@@ -330,6 +422,10 @@
       "id": "room_solar",
       "name": "The Solar Panel Maintenance Room.",
       "desc": "This room has a large glass wall on the west side overseeing the gargantuan solar panels. There is a control system along the wall to turn panels facing solar bodies.",
+      "mapCoords": {
+        "x": 0,
+        "y": 5
+      },
       "exits": {
         "north": "",
         "east": "room_b",
@@ -342,6 +438,10 @@
       "id": "room_observatory",
       "name": "The Observatory",
       "desc": "This beautiful room is surrounded with glass where hallways deviate in all directions. Here passengers can get an almost 360 degree view of space around them.",
+      "mapCoords": {
+        "x": 1,
+        "y": 4
+      },
       "exits": {
         "north": "room_captain",
         "east": "room_short",
@@ -354,6 +454,10 @@
       "id": "room_escape",
       "name": "The Escape Pods",
       "desc": "In case of emergency, these escape pods offer a quick getaway during an imminent crisis.",
+      "mapCoords": {
+        "x": 0,
+        "y": 4
+      },
       "exits": {
         "north": "",
         "east": "room_observatory",
@@ -366,6 +470,10 @@
       "id": "room_captain",
       "name": "The Captain's Quarters",
       "desc": "This classic Captain’s Quarters room is decorated with a large library, a modest wooden desk and a large glass wall facing the west. Next to the wall is a small little hatch that one could fit through.",
+      "mapCoords": {
+        "x": 1,
+        "y": 3
+      },
       "exits": {
         "north": "",
         "east": "",
@@ -378,6 +486,10 @@
       "id": "room_cescape",
       "name": "The Captain's Escape Pod",
       "desc": "This hidden escape pod is like that of the other pods on the ship, however it is speculated that this one is unregulated and a secret to other passengers of The Infinity.",
+      "mapCoords": {
+        "x": 0,
+        "y": 3
+      },
       "exits": {
         "north": "",
         "east": "room_captain",
@@ -390,6 +502,10 @@
       "id": "room_short",
       "name": "The Short Hallway",
       "desc": "This hallway is a bridge from the observation deck to the command center.",
+      "mapCoords": {
+        "x": 2,
+        "y": 4
+      },
       "exits": {
         "north": "room_comm",
         "east": "room_shield",
@@ -402,6 +518,10 @@
       "id": "room_shield",
       "name": "The Shield Maintenance Room",
       "desc": "This compact room has large, blue, pulsating generators that emit a plasma that surround The Infinity to ensure safety.",
+      "mapCoords": {
+        "x": 3,
+        "y": 4
+      },
       "exits": {
         "north": "",
         "east": "",
@@ -414,6 +534,10 @@
       "id": "room_comm",
       "name": "The Communications Array",
       "desc": "This large board room has many blinking lights, screens with different rooms on them and panels to keep the ship steady. There is a small section in this room that is used to relay messages back to home base with database of all prerecorded messages to The Infinity.",
+      "mapCoords": {
+        "x": 2,
+        "y": 3
+      },
       "exits": {
         "north": "",
         "east": "room_confrence",
@@ -426,6 +550,10 @@
       "id": "room_confrence",
       "name": "The Conference Room",
       "desc": "This organized conference room, stationed with laptops, desks and filing cabinets is used to debrief any information gathered from the Communications Array. There is a large holographic image on the south wall illustrating the ship’s trajectory and anything that might show up on exterior proximity radars.",
+      "mapCoords": {
+        "x": 3,
+        "y": 3
+      },
       "exits": {
         "north": "room_gravity",
         "east": "room_control",
@@ -438,6 +566,10 @@
       "id": "room_control",
       "name": "The Control Room",
       "desc": "This room is cramped with various sparking wires and outlets. This complicated mazes or wires and circuit boards ensure functional electricity to be properly regulated amongst the ship.",
+      "mapCoords": {
+        "x": 4,
+        "y": 3
+      },
       "exits": {
         "north": "",
         "east": "",
@@ -450,6 +582,10 @@
       "id": "room_gravity",
       "name": "The Gravity Room",
       "desc": "This room is suspended with a thin grated bridge leading to an ominous spire that creates artificial gravity to The Infinity. Below the grated bridge is what seems to be an endless pit.",
+      "mapCoords": {
+        "x": 3,
+        "y": 2
+      },
       "exits": {
         "north": "",
         "east": "room_gate",
@@ -462,6 +598,10 @@
       "id": "room_gate",
       "name": "The Cockpit Gate",
       "desc": "A large indestructible gate stands in the way, separating the passengers and crew from The Cockpit. A small keypad is what is seemingly used to open the gate.",
+      "mapCoords": {
+        "x": 4,
+        "y": 2
+      },
       "exits": {
         "north": "room_c",
         "east": "",
@@ -474,6 +614,10 @@
       "id": "room_c",
       "name": "Checkpoint C",
       "desc": "This eerie, quiet, empty regroup room separates the entirety of The Infinity to the Cockpit forward north.",
+      "mapCoords": {
+        "x": 4,
+        "y": 1
+      },
       "exits": {
         "north": "room_cockpit",
         "east": "",
@@ -486,6 +630,10 @@
       "id": "room_cockpit",
       "name": "The Cockpit",
       "desc": "This is the very front of The Infinity. It oversees all facets of the ship. There is a large glass wall facing north where the impending black hole lies. There are buttons and levers along the wall that offer as an override to any of the systems on board.",
+      "mapCoords": {
+        "x": 4,
+        "y": 0
+      },
       "exits": {
         "north": "",
         "east": "",

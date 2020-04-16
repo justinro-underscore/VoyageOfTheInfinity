@@ -114,6 +114,18 @@ export class GameMap {
     return true;
   }
 
+  /**
+   * Returns an instance of the room desired
+   * @param id The ID of the room desired
+   * @returns If ID is valid, return the room. Else, return null
+   */
+  getRoom(id: string): Room {
+    if (this.rooms.has(id)) {
+      return this.rooms.get(id);
+    }
+    return null;
+  }
+
   /***********************
    *   PRIVATE METHODS   *
    ***********************/

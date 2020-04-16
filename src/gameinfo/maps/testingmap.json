@@ -6,6 +6,10 @@
       "id": "rm_nw",
       "name": "Room NW",
       "desc": "This room is northwest of everything else",
+      "mapCoords": {
+        "x": 0,
+        "y": 0
+      },
       "exits": {
         "north": "",
         "east": "rm_n",
@@ -18,6 +22,10 @@
       "id": "rm_n",
       "name": "Room N",
       "desc": "This room is at the top",
+      "mapCoords": {
+        "x": 1,
+        "y": 0
+      },
       "exits": {
         "north": "",
         "east": "rm_ne",
@@ -45,6 +53,10 @@
       "id": "rm_ne",
       "name": "Room NE",
       "desc": "This room is in the top right corner\nNext line!",
+      "mapCoords": {
+        "x": 2,
+        "y": 0
+      },
       "exits": {
         "north": "",
         "east": "",
@@ -57,6 +69,10 @@
       "id": "rm_start",
       "name": "Starting Room",
       "desc": "This room is in the middle and is the starting place! Go south for use testing",
+      "mapCoords": {
+        "x": 1,
+        "y": 1
+      },
       "exits": {
         "north": "rm_n",
         "east": "rm_e",
@@ -98,9 +114,13 @@
       "id": "rm_e",
       "name": "Room E",
       "desc": "This room is to the east",
+      "mapCoords": {
+        "x": 2,
+        "y": 1
+      },
       "exits": {
         "north": "rm_ne",
-        "east": "",
+        "east": "rm_use_test_4",
         "south": "rm_bottom_left",
         "west": "rm_start"
       },
@@ -132,6 +152,10 @@
       "id": "rm_bottom_left",
       "name": "Bottom left corner",
       "desc": "This room is in the corner and not directly connected to anything else\nThere are exits to the east and north\nThere is a locked door to the south",
+      "mapCoords": {
+        "x": 0,
+        "y": 2
+      },
       "exits": {
         "north": "rm_start",
         "east": "rm_e",
@@ -159,6 +183,10 @@
       "id": "rm_unlocked_room",
       "name": "Unlocked Room",
       "desc": "Ay, you got in!\nThere is an exit to the north",
+      "mapCoords": {
+        "x": 0,
+        "y": 3
+      },
       "exits": {
         "north": "rm_bottom_left",
         "east": "",
@@ -171,6 +199,10 @@
       "id": "rm_use_test_1",
       "name": "Use Test 1",
       "desc": "Test single object for use and with",
+      "mapCoords": {
+        "x": 1,
+        "y": 3
+      },
       "exits": {
         "north": "rm_start",
         "east": "rm_use_test_2",
@@ -198,8 +230,12 @@
       "id": "rm_use_test_2",
       "name": "Use Test 2",
       "desc": "Test multiple objects for use, one for with",
+      "mapCoords": {
+        "x": 2,
+        "y": 3
+      },
       "exits": {
-        "north": "rm_start",
+        "north": "",
         "east": "rm_use_test_3",
         "south": "",
         "west": "rm_use_test_1"
@@ -232,8 +268,12 @@
       "id": "rm_use_test_3",
       "name": "Use Test 3",
       "desc": "Test one object for use, multiple for with",
+      "mapCoords": {
+        "x": 3,
+        "y": 3
+      },
       "exits": {
-        "north": "rm_start",
+        "north": "",
         "east": "rm_use_test_4",
         "south": "",
         "west": "rm_use_test_2"
@@ -266,8 +306,12 @@
       "id": "rm_use_test_4",
       "name": "Use Test 4",
       "desc": "Test multiple objects for both use and with",
+      "mapCoords": {
+        "x": 4,
+        "y": 3
+      },
       "exits": {
-        "north": "rm_start",
+        "north": "rm_e",
         "east": "",
         "south": "",
         "west": "rm_use_test_3"
