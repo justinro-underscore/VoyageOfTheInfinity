@@ -1,5 +1,5 @@
 import "phaser";
-import { Room } from '../gameobjects/room';
+import { Room, RoomExitStatus } from '../gameobjects/room';
 import { MapHandler } from '../handler/mapHandler';
 
 class MapUI {
@@ -28,11 +28,13 @@ class MapUI {
     this.infoBox.setOrigin(0, 0);
     this.infoBox.setStrokeStyle(4, 0xffffff);
     this.infoBox.setScrollFactor(0);
+    this.infoBox.setDepth(20);
     this.objsBox = scene.add.rectangle((scene.cameras.main.x + scene.cameras.main.width) - (MapUI.OBJS_BOX_WIDTH + MapUI.BOX_OFFSET[0]),
       scene.cameras.main.y + MapUI.BOX_OFFSET[1], MapUI.OBJS_BOX_WIDTH, MapUI.BOX_HEIGHT, 0x222222, 0.9);
     this.objsBox.setOrigin(0, 0);
     this.objsBox.setStrokeStyle(4, 0xffffff);
     this.objsBox.setScrollFactor(0);
+    this.objsBox.setDepth(20);
 
     const textOffset = 10;
     this.infoText = scene.add.text(this.infoBox.x + textOffset, this.infoBox.y + textOffset, "", {
@@ -52,7 +54,9 @@ class MapUI {
       }
     );
     this.infoText.setScrollFactor(0);
+    this.infoText.setDepth(21);
     this.objsText.setScrollFactor(0);
+    this.objsText.setDepth(21);
 
     this.setRoom(scene.currRoom.room);
   }
@@ -126,6 +130,44 @@ class RoomBlock {
       wordWrap: { width: RoomBlock.ROOM_SIZE[0] - (textOffset * 2), useAdvancedWrap: true }
     });
     textName.setPosition(this.coords[0] + (RoomBlock.ROOM_SIZE[0] / 2) - (textName.getBounds().width / 2), this.coords[1] + (RoomBlock.ROOM_SIZE[1] / 2) - (textName.getBounds().height / 2));
+
+    if (this.room.visited) {
+      this.setExitIcons(scene);
+    }
+  }
+
+  private setExitIcons(scene: Phaser.Scene) {
+    this.room.exits.forEach((exit, i) => {
+      let obj = null;
+      if (exit[1] === RoomExitStatus.LOCKED) {
+        let exitCoords = RoomBlock.getExitPoint(i, this.coords[0], this.coords[1]);
+        obj = scene.add.image(exitCoords[0], exitCoords[1], "lock");
+        obj.setTint(0x44ff44);
+      }
+      else if (exit[1] === RoomExitStatus.JAMMED) {
+        let exitCoords = RoomBlock.getExitPoint(i, this.coords[0], this.coords[1]);
+        obj = scene.add.image(exitCoords[0], exitCoords[1], "x");
+      }
+
+      if (obj != null) {
+        obj.setScale(0.1);
+        switch (i) {
+          case 0:
+            obj.y -= obj.displayHeight;
+            break;
+          case 1:
+            obj.x += obj.displayWidth;
+            break;
+          case 2:
+            obj.y += obj.displayHeight;
+            break;
+          case 3:
+            obj.x -= obj.displayWidth;
+            break;
+        }
+        obj.setDepth(10);
+      }
+    });
   }
 
   getCenterCoords(): [number, number] {
@@ -233,6 +275,8 @@ export class MapTerminalScene extends Phaser.Scene {
    */
   preload() {
     this.load.image("terminalScreen", 'assets/img/terminal-screen.png');
+    this.load.image("lock", 'assets/img/lock.png');
+    this.load.image("x", 'assets/img/red-x.png');
   }
 
   /**
