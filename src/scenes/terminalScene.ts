@@ -1,5 +1,5 @@
 import "phaser";
-import { InputHandler } from '../handler/inputHandler';
+import { InputHandler, InputResponseType } from '../handler/inputHandler';
 import { MapHandler } from '../handler/mapHandler';
 import { BlurPipeline } from '../shaders/blurPipeline';
 import { GrayscalePipeline } from '../shaders/grayscalePipeline';
@@ -39,21 +39,23 @@ const SCROLL_BAR_WIDTH = 5;
  * Defines the scene where user can input commands through a terminal interface
  */
 export class TerminalScene extends Phaser.Scene {
+  initData: {terminalData: string};
+
   terminalScreen: Phaser.GameObjects.Text; // Text that is shown to the user, holds all previous inputs and their responses
   commandLine: Phaser.GameObjects.Text; // Text that keeps track of what is currently input
-  currInput = ""; // The current input
+  currInput: string; // The current input
   scrollBar: Phaser.GameObjects.Image; // Scroll bar on the right side of the scene that keeps track of where the user has scrolled to
 
-  freezeInput = false; // If true, user cannot enter in any more characters
+  freezeInput: boolean; // If true, user cannot enter in any more characters
 
   cursor: Phaser.GameObjects.Text; // Text that shows where the cursor is currently positioned
-  cursorPos = 0; // Current cursor position
-  blinkCursor = false; // If the cursor is visible or not
+  cursorPos: number; // Current cursor position
+  blinkCursor: boolean; // If the cursor is visible or not
   cursorBlinkEvent: Phaser.Time.TimerEvent; // The timer event that determines the next time the cursor blink is toggled
 
-  keyDebounceReject = false; // Keeps track of if we should accept or reject user input (to avoid double inputs)
+  keyDebounceReject: boolean; // Keeps track of if we should accept or reject user input (to avoid double inputs)
 
-  lastInput = ""; // Keeps track of the last input before a call to get the previous input was made
+  lastInput: string; // Keeps track of the last input before a call to get the previous input was made
 
   shaders: Map<string, Phaser.Renderer.WebGL.WebGLPipeline>;
 
@@ -61,6 +63,15 @@ export class TerminalScene extends Phaser.Scene {
     super({
       key: "TerminalScene"
     });
+  }
+
+  init(data: any){
+    if (Object.keys(data).length > 0) {
+      this.initData = <{terminalData: string}>data;
+    }
+    else {
+      this.initData = null;
+    }
   }
 
   /**
@@ -125,12 +136,16 @@ export class TerminalScene extends Phaser.Scene {
      * Set up the command line input *
      *********************************/
     this.currInput = "";
+    this.lastInput = "";
     this.commandLine = this.add.text(10, this.cameras.main.height - 30, "> ",
       { font: '16px Monospace', fill: '#77ff55' });
     this.blinkCursor = true;
     this.cursor = this.add.text(10, this.cameras.main.height - 30, "  _",
       { font: '16px Monospace', fill: '#77ff55' });
+    this.cursorPos = 0;
     this.input.keyboard.on('keydown', (event: KeyboardEvent) => this.onKeyInput(event), this);
+    this.keyDebounceReject = false;
+    this.freezeInput = false;
 
     // Start the blink
     this.cursorBlinkEvent = this.time.addEvent({
@@ -139,6 +154,10 @@ export class TerminalScene extends Phaser.Scene {
       callbackScope: this,
       loop: true
     });
+
+    if (this.initData != null) {
+      this.updateTerminalScreen(this.initData.terminalData, true);
+    }
 
     // this.shaders = new Map<string, Phaser.Renderer.WebGL.WebGLPipeline>();
     // this.shaders.set("Blur", (<Phaser.Renderer.WebGL.WebGLRenderer>this.game.renderer).addPipeline("Blur", new BlurPipeline(this.game)));
@@ -361,15 +380,19 @@ export class TerminalScene extends Phaser.Scene {
           if (this.currInput != "") {
             let response = InputHandler.submitInput(this.currInput);
 
-            // Update the terminal screen
-            this.terminalScreen.text += `\n\n> ${ this.currInput }\n${ response }`;
-            this.scrollTerminalScreenTo(this.cameras.main.height - 40 - this.terminalScreen.height); // Move the terminal screen to the bottom
-            this.updateScrollBarSize(); // Update the scroll bar
+            if (response.type === InputResponseType.STRING || response.type === InputResponseType.ERROR) {
+              // Update the terminal screen
+              this.updateTerminalScreen(`\n\n> ${ this.currInput }\n${ response.stringData }`);
 
-            // Reset all variables
-            this.currInput = "";
-            this.lastInput = "";
-            this.cursorPos = 0;
+              // Reset all variables
+              this.currInput = "";
+              this.lastInput = "";
+              this.cursorPos = 0;
+            }
+            else if (response.type === InputResponseType.SCENE_CHANGE) {
+              this.updateTerminalScreen(`\n\n> ${ this.currInput }`);
+              this.scene.start(response.sceneChangeData, {terminalData: this.terminalScreen.text});
+            }
           }
           break;
       }
@@ -392,6 +415,22 @@ export class TerminalScene extends Phaser.Scene {
       callbackScope: this,
       loop: true
     });
+  }
+
+  /**
+   * Writes data to the terminal screen and updates it accordingly
+   * @param data The strings to be added at the end of the terminal screen
+   * @param overwrite If true, overwrite the terminal screen text with the data text
+   */
+  private updateTerminalScreen(data: string, overwrite: boolean=false) {
+    if (overwrite) {
+      this.terminalScreen.text = data;
+    }
+    else {
+      this.terminalScreen.text += data;
+    }
+    this.scrollTerminalScreenTo(this.cameras.main.height - 40 - this.terminalScreen.height); // Move the terminal screen to the bottom
+    this.updateScrollBarSize(); // Update the scroll bar
   }
 
   /**

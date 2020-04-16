@@ -97,7 +97,7 @@ class MapUI {
 
 class RoomBlock {
   static ROOM_SIZE = [150, 100];
-  static roomLinks = new Set<string>();
+  static roomLinks: Set<string>;
 
   coords: [number, number];
   room: Room;
@@ -257,6 +257,8 @@ class RoomBlock {
 }
 
 export class MapTerminalScene extends Phaser.Scene {
+  terminalSceneData: {terminalData: string};
+
   currRoom: RoomBlock;
   roomMap: Map<string, RoomBlock>
 
@@ -268,6 +270,10 @@ export class MapTerminalScene extends Phaser.Scene {
     super({
       key: "MapTerminalScene"
     });
+  }
+
+  init(data: any) {
+    this.terminalSceneData = <{terminalData: string}>data;
   }
 
   /**
@@ -291,7 +297,7 @@ export class MapTerminalScene extends Phaser.Scene {
     background.setDisplaySize(this.cameras.main.width, this.cameras.main.height);
     background.setScrollFactor(0);
 
-    this.debugVisitRooms();
+    // this.debugVisitRooms();
     this.setupRooms();
     let currRoomCoords = this.currRoom.getCenterCoords();
     this.cameras.main.centerOn(currRoomCoords[0], currRoomCoords[1]);
@@ -304,27 +310,27 @@ export class MapTerminalScene extends Phaser.Scene {
     this.mapUI = new MapUI(this);
   }
 
-  private debugVisitRooms() {
-    if (MapHandler.instanceName === "voyage") {
-      MapHandler.getRoom("room_drone").setVisited(true);
-      MapHandler.getRoom("room_chambers").setVisited(true);
-      MapHandler.getRoom("room_lodging").setVisited(true);
-      MapHandler.getRoom("room_lodging").setVisited(true);
-      MapHandler.getRoom("room_engine").setVisited(true);
-      MapHandler.movePlayer(0);
-    }
-    else if (MapHandler.instanceName === "testing") {
-      MapHandler.getRoom("rm_start").setVisited(true);
-      MapHandler.getRoom("rm_use_test_1").setVisited(true);
-      MapHandler.getRoom("rm_bottom_left").setVisited(true);
-      MapHandler.movePlayer(3);
-    }
-  }
+  // private debugVisitRooms() {
+  //   if (MapHandler.instanceName === "voyage") {
+  //     MapHandler.getRoom("room_drone").setVisited(true);
+  //     MapHandler.getRoom("room_chambers").setVisited(true);
+  //     MapHandler.getRoom("room_lodging").setVisited(true);
+  //     MapHandler.getRoom("room_lodging").setVisited(true);
+  //     MapHandler.getRoom("room_engine").setVisited(true);
+  //     MapHandler.movePlayer(0);
+  //   }
+  //   else if (MapHandler.instanceName === "testing") {
+  //     MapHandler.getRoom("rm_start").setVisited(true);
+  //     MapHandler.getRoom("rm_use_test_1").setVisited(true);
+  //     MapHandler.getRoom("rm_bottom_left").setVisited(true);
+  //     MapHandler.movePlayer(3);
+  //   }
+  // }
 
   private onKeyDown(event: KeyboardEvent) {
     switch (event.keyCode) {
       case 27: // Escape
-        this.scene.remove("MapTerminalScene");
+        this.scene.start("TerminalScene", this.terminalSceneData);
         break;
       case 32: // Space
         this.mapUI.toggleActivated();
@@ -363,6 +369,7 @@ export class MapTerminalScene extends Phaser.Scene {
 
   private setupRooms() {
     this.roomMap = new Map<string, RoomBlock>();
+    RoomBlock.roomLinks = new Set<string>();
     let startingId = MapHandler.getGameMap().playerPos;
     this.createRoom(startingId);
     this.currRoom = this.roomMap.get(startingId);

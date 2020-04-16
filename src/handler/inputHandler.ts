@@ -14,10 +14,10 @@ class MultipleObjects extends Error {
 }
 
 class OverrideInput {
-  func: (inputStr: string) => string;
+  func: (inputStr: string) => InputResponse;
   data: any;
 
-  constructor(func: (inputStr: string) => string, data: any) {
+  constructor(func: (inputStr: string) => InputResponse, data: any) {
     this.func = func;
     this.data = data;
   }
@@ -28,12 +28,39 @@ enum ObjectLocation {
   INVENTORY
 }
 
+export enum InputResponseType {
+  ERROR,
+  STRING,
+  SCENE_CHANGE
+}
+
+export class InputResponse {
+  type: InputResponseType;
+  stringData: string = null;
+  sceneChangeData: string = null; // The scene key to change to
+
+  constructor(type: InputResponseType, data?: any) {
+    this.type = type;
+    switch (type) {
+      case InputResponseType.STRING:
+      case InputResponseType.ERROR:
+        this.stringData = <string>data;
+        break;
+      case InputResponseType.SCENE_CHANGE:
+        this.sceneChangeData = <string>data;
+        break;
+      default:
+        console.error(`Input Response did not account for type {${ type }}`);
+    }
+  }
+}
+
 export class InputHandler {
   static overrideInput: OverrideInput = null;
   static previousInputs = new Array<string>();
   static currPrevInputPointer = -1;
 
-  static submitInput(inputStr: string): string {
+  static submitInput(inputStr: string): InputResponse {
     InputHandler.currPrevInputPointer = -1;
     if (InputHandler.overrideInput === null) {
       InputHandler.previousInputs.unshift(inputStr);
@@ -149,10 +176,11 @@ export class InputHandler {
     return EventHandler.runEvent(useObj);
   }
 
-  private static getCommandObj(command: string): {validate: (objs: Array<string>) => boolean, execute: (objs: Array<string>) => string} {
+  private static getCommandObj(command: string): {responseType: InputResponseType, validate: (objs: Array<string>) => boolean, execute: (objs: Array<string>) => string} {
     switch (command) {
       case "examine":
         return {
+          responseType: InputResponseType.STRING,
           validate: (objs: Array<string>): boolean => {
             return true;
           },
@@ -180,6 +208,7 @@ export class InputHandler {
       case "go":
       case "walk":
         return {
+          responseType: InputResponseType.STRING,
           validate: (objs: Array<string>): boolean => {
             return true;
           },
@@ -216,6 +245,7 @@ export class InputHandler {
 
       case "take":
         return {
+          responseType: InputResponseType.STRING,
           validate: (objs: Array<string>): boolean => {
             return true;
           },
@@ -239,6 +269,7 @@ export class InputHandler {
 
       case "drop":
         return {
+          responseType: InputResponseType.STRING,
           validate: (objs: Array<string>): boolean => {
             return true;
           },
@@ -263,6 +294,7 @@ export class InputHandler {
       case "inventory":
       case "inv":
         return {
+          responseType: InputResponseType.STRING,
           validate: (objs: Array<string>): boolean => {
             return true;
           },
@@ -282,6 +314,7 @@ export class InputHandler {
 
       case "use":
         return {
+          responseType: InputResponseType.STRING,
           validate: (objs: Array<string>): boolean => {
             return true;
           },
@@ -321,19 +354,33 @@ export class InputHandler {
             }
           }
         }
+
+      case "map":
+        return {
+          responseType: InputResponseType.SCENE_CHANGE,
+          validate: (objs: Array<string>): boolean => {
+            return true;
+          },
+          execute: (objs: Array<string>): string => {
+            return "MapTerminalScene";
+          }
+        }
     }
     return null;
   }
 
-  private static handleCommand(command: string, objs: Array<string>): string {
+  private static handleCommand(command: string, objs: Array<string>): InputResponse {
     const commandObj = InputHandler.getCommandObj(command);
+    let response = new InputResponse(InputResponseType.ERROR, "Command not recognized!");
     if (commandObj != null) {
       if (commandObj.validate(objs)) {
-        return commandObj.execute(objs);
+        response = new InputResponse(commandObj.responseType, commandObj.execute(objs));
       }
-      return `Error, invalid use of the command ${ command }`;
+      else {
+        response = new InputResponse(InputResponseType.ERROR, `Error, invalid use of the command ${ command }`);
+      }
     }
-    return "Command not recognized"
+    return response;
   }
 
   private static multipleObjectsDetectedPrompt(multObj: MultipleObjects): string {
@@ -364,7 +411,7 @@ export class InputHandler {
     }
   }
 
-  private static chooseObject(inputStr: string): string {
+  private static chooseObject(inputStr: string): InputResponse {
     let objs = InputHandler.overrideInput.data.objs;
     let num = Number(inputStr);
     let result = `${ inputStr } was not a possible choice`
@@ -374,6 +421,6 @@ export class InputHandler {
     else {
       InputHandler.overrideInput = null;
     }
-    return result;
+    return new InputResponse(InputResponseType.STRING, result);
   }
 }
