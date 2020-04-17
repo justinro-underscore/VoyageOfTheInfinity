@@ -8,6 +8,7 @@ class MapUI {
   private static BOX_HEIGHT = 300;
   private static INFO_BOX_WIDTH = 400;
   private static OBJS_BOX_WIDTH = 300;
+  private static INSTRUCT_OFFSET = 15;
 
   private scene: MapTerminalScene;
 
@@ -16,8 +17,12 @@ class MapUI {
   infoText: Phaser.GameObjects.Text;
   objsBox: Phaser.GameObjects.Rectangle;
   objsText: Phaser.GameObjects.Text;
+  escBox: Phaser.GameObjects.Rectangle;
+  escText: Phaser.GameObjects.Text;
+  spaceBox: Phaser.GameObjects.Rectangle;
+  spaceText: Phaser.GameObjects.Text;
 
-  constructor(scene: MapTerminalScene) {
+  constructor(scene: MapTerminalScene, activated: boolean=true) {
     this.scene = scene;
     let newCoords = scene.currRoom.getCenterCoords();
     scene.cameras.main.pan(newCoords[0], newCoords[1] - MapUI.CAMERA_OFFSET, 0, "", true);
@@ -58,20 +63,70 @@ class MapUI {
     this.objsText.setScrollFactor(0);
     this.objsText.setDepth(21);
 
+    const instructTextOffset = 5;
+    this.spaceText = scene.add.text(0, 0, "Space", {
+        fontSize: 20,
+        fontFamily: "Monospace",
+        align: "left",
+        color: "#ffffff"
+      }
+    );
+    this.spaceText.setPosition(scene.cameras.main.x + MapUI.INSTRUCT_OFFSET,
+      scene.cameras.main.y + scene.cameras.main.height - (this.spaceText.height + MapUI.INSTRUCT_OFFSET));
+    this.spaceText.setScrollFactor(0);
+    this.spaceText.setDepth(21);
+    this.spaceBox = scene.add.rectangle(this.spaceText.x - instructTextOffset, this.spaceText.y - instructTextOffset,
+      this.spaceText.width + (2 * instructTextOffset), this.spaceText.height + (2 * instructTextOffset), 0x444444, 0.5);
+    this.spaceBox.setOrigin(0, 0);
+    this.spaceBox.setStrokeStyle(3, 0xffffff);
+    this.spaceBox.setScrollFactor(0);
+    this.spaceBox.setDepth(20);
+    this.spaceText.text = "Space to hide UI";
+
+    this.escText = scene.add.text(0, 0, "Esc to return to terminal", {
+        fontSize: 20,
+        fontFamily: "Monospace",
+        align: "left",
+        color: "#ffffff"
+      }
+    );
+    this.escText.setPosition(scene.cameras.main.x + scene.cameras.main.width - (this.escText.width + MapUI.INSTRUCT_OFFSET),
+      scene.cameras.main.y + scene.cameras.main.height - (this.escText.height + MapUI.INSTRUCT_OFFSET));
+    this.escText.setScrollFactor(0);
+    this.escText.setDepth(21);
+    this.escText.text = "Esc";
+    this.escBox = scene.add.rectangle(this.escText.x - instructTextOffset, this.escText.y - instructTextOffset,
+      this.escText.width + (2 * instructTextOffset), this.escText.height + (2 * instructTextOffset), 0x444444, 0.5);
+    this.escBox.setOrigin(0, 0);
+    this.escBox.setStrokeStyle(3, 0xffffff);
+    this.escBox.setScrollFactor(0);
+    this.escBox.setDepth(20);
+    this.escText.text = "Esc to return to terminal";
+
     this.setRoom(scene.currRoom.room);
+
+    if (!activated) {
+      this.toggleActivated(true);
+    }
   }
 
-  toggleActivated() {
+  toggleActivated(immediate: boolean=false) {
     this.activated = !this.activated;
     let newCoords = this.scene.currRoom.getCenterCoords();
     this.scene.cameras.main.pan(newCoords[0], newCoords[1] - (this.activated ? MapUI.CAMERA_OFFSET : 0),
-      200, "Quad.easeInOut", true);
+      (immediate ? 0 : 200), "Quad.easeInOut", true);
     this.scene.tweens.add({
-      targets: [this.infoBox, this.infoText, this.objsBox, this.objsText],
+      targets: [this.infoBox, this.infoText, this.objsBox, this.objsText, this.escBox, this.escText],
       alpha: (this.activated ? 1 : 0),
-      duration: 150,
+      duration: (immediate ? 0 : 150),
       ease: "Quad.easeOut"
     });
+    if (this.activated) {
+      this.spaceText.text = this.spaceText.text.replace("show", "hide");
+    }
+    else {
+      this.spaceText.text = this.spaceText.text.replace("hide", "show");
+    }
   }
 
   getActivated() {
