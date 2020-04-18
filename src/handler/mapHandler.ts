@@ -34,6 +34,10 @@ export class MapHandler {
     return this.instance.gameMap.getObjects(objName);
   }
 
+  static getObjectFromID(objID: string): GameObject {
+    return this.instance.gameMap.getObjectFromID(objID);
+  }
+
   static addObject(obj: GameObject) {
     this.instance.gameMap.addObject(obj);
   }

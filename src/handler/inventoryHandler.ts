@@ -25,6 +25,20 @@ export class InventoryHandler {
   }
 
   /**
+   * Attempts to get a given object from the inventory from ID
+   * @param objID The ID of the object desired
+   * @returns The game object if it exists, null otherwise
+   */
+  getObjectFromID(objID: string): GameObject {
+    for (let obj of InventoryHandler.objectsInInventory) {
+      if (obj.id === objID) {
+        return obj;
+      }
+    }
+    return null;
+  }
+
+  /**
    * Adds an object to the inventory
    * @param obj The game object to add to the inventory
    */

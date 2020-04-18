@@ -80,6 +80,21 @@ export class GameMap {
   }
 
   /**
+   * Attempts to get a given object from the map from ID
+   * @param objID The ID of the object desired
+   * @returns The game object if it exists, null otherwise
+   */
+  getObjectFromID(objID: string): GameObject {
+    for (let room of Array.from(this.rooms.values())) {
+      let res = room.getObjectFromID(objID);
+      if (res != null) {
+        return res;
+      }
+    }
+    return null;
+  }
+
+  /**
    * @see Room.addObject
    * @param obj @see Room.addObject
    */

@@ -112,8 +112,20 @@ export class Room {
       if (obj.equals(objName)) {
         objs.push(obj);
       }
-    })
+    });
     return objs;
+  }
+
+  /**
+   * Get object from its ID
+   * @param objID The ID of the object desired
+   * @returns The object if it exists, otherwise null
+   */
+  getObjectFromID(objID: string): GameObject {
+    if (this.objects.has(objID)) {
+      return this.objects.get(objID);
+    }
+    return null;
   }
 
   /**
