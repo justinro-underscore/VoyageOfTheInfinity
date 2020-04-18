@@ -39,7 +39,9 @@ const SCROLL_BAR_WIDTH = 5;
  * Defines the scene where user can input commands through a terminal interface
  */
 export class TerminalScene extends Phaser.Scene {
-  initData: {terminalData: string};
+  initData: {terminalData: string}; // Defines the data sent in from the scene that started this scene
+
+  private static TERMINAL_HEIGHT: number; // Const that defines the height of the terminal screen
 
   terminalScreen: Phaser.GameObjects.Text; // Text that is shown to the user, holds all previous inputs and their responses
   commandLine: Phaser.GameObjects.Text; // Text that keeps track of what is currently input
@@ -86,6 +88,8 @@ export class TerminalScene extends Phaser.Scene {
    * Set up all game elements that are shown to the user
    */
   create() {
+    TerminalScene.TERMINAL_HEIGHT = this.cameras.main.height - 40;
+
     /*************************
      * Set up the background *
      *************************/
@@ -98,7 +102,7 @@ export class TerminalScene extends Phaser.Scene {
      ******************************/
     // Create a mask (so that the terminal screen does not reach the bottom of the screen which is reserved for user input)
     let graphics = this.make.graphics({});
-    graphics.fillRect(0, 0, this.cameras.main.width, this.cameras.main.height - 40);
+    graphics.fillRect(0, 0, this.cameras.main.width, TerminalScene.TERMINAL_HEIGHT);
     let mask = new Phaser.Display.Masks.GeometryMask(this, graphics);
 
     this.terminalScreen = this.add.text(10, 10, MapHandler.getCurrRoomInfo(true), {
@@ -114,7 +118,7 @@ export class TerminalScene extends Phaser.Scene {
      ***********************************************/
     this.scrollBar = this.add.image(this.cameras.main.width - SCROLL_BAR_WIDTH, 0, "scrollBar").setInteractive();
     this.scrollBar.setOrigin(0, 0);
-    this.scrollBar.setDisplaySize(SCROLL_BAR_WIDTH, this.cameras.main.height - 40); // Start out the full size of the terminal screen
+    this.scrollBar.setDisplaySize(SCROLL_BAR_WIDTH, TerminalScene.TERMINAL_HEIGHT); // Start out the full size of the terminal screen
     this.scrollBar.setTint(0x77ff55); // Should be the color of the text
 
     // Set up draggable functionality
@@ -215,9 +219,9 @@ export class TerminalScene extends Phaser.Scene {
    * @param newY The new Y-value the terminal screen should move to
    */
   private scrollTerminalScreenTo(newY: number) {
-    if (this.terminalScreen.height > this.cameras.main.height - 40) {
+    if (this.terminalScreen.height > TerminalScene.TERMINAL_HEIGHT) {
       this.terminalScreen.y = newY;
-      this.terminalScreen.y = Phaser.Math.Clamp(this.terminalScreen.y, this.cameras.main.height - 40 - this.terminalScreen.height, 10);
+      this.terminalScreen.y = Phaser.Math.Clamp(this.terminalScreen.y, TerminalScene.TERMINAL_HEIGHT - this.terminalScreen.height, 10);
     }
   }
 
@@ -228,7 +232,7 @@ export class TerminalScene extends Phaser.Scene {
    */
   private moveScrollBar(newY: number) {
     this.scrollBar.y = newY;
-    this.scrollBar.y = Phaser.Math.Clamp(this.scrollBar.y, 0, this.cameras.main.height - 40 - this.scrollBar.displayHeight);
+    this.scrollBar.y = Phaser.Math.Clamp(this.scrollBar.y, 0, TerminalScene.TERMINAL_HEIGHT - this.scrollBar.displayHeight);
 
     // Calculate where the terminal screen should move to
     const [m, b] = this.getMB();
@@ -241,15 +245,14 @@ export class TerminalScene extends Phaser.Scene {
    * Will always be called when a new input is registered
    */
   private updateScrollBarSize() {
-    const screenHeight = this.cameras.main.height - 40; // TODO Abstract this out so it doesn't need to be recalculated every time
     // Only change the size if the terminal screen height has surpassed its masking
-    if (this.terminalScreen.height > screenHeight) {
+    if (this.terminalScreen.height > TerminalScene.TERMINAL_HEIGHT) {
       this.scrollBar.setVisible(true);
       // Set the height with HELLA maths (see notebook for description of how I got this)
-      let scrollBarHeight = (screenHeight * screenHeight) / this.terminalScreen.height;
-      scrollBarHeight = Phaser.Math.Clamp(scrollBarHeight, 3, screenHeight); // Height should never be less than 3 pixels (but we shouldn't really ever get there)
+      let scrollBarHeight = (TerminalScene.TERMINAL_HEIGHT * TerminalScene.TERMINAL_HEIGHT) / this.terminalScreen.height;
+      scrollBarHeight = Phaser.Math.Clamp(scrollBarHeight, 3, TerminalScene.TERMINAL_HEIGHT); // Height should never be less than 3 pixels (but we shouldn't really ever get there)
       this.scrollBar.setDisplaySize(SCROLL_BAR_WIDTH, scrollBarHeight);
-      this.scrollBar.y = screenHeight - scrollBarHeight; // Set scroll bar location to bottom of screen
+      this.scrollBar.y = TerminalScene.TERMINAL_HEIGHT - scrollBarHeight; // Set scroll bar location to bottom of screen
     }
     else {
       this.scrollBar.setVisible(false); // Hide the scroll bar if we don't need it
@@ -273,8 +276,7 @@ export class TerminalScene extends Phaser.Scene {
    */
   private getMB(): [number, number] {
     // Calculate m & b with HELLA maths (see notebook for description of how I got this)
-    const screenHeight = this.cameras.main.height - 40;
-    const m = (screenHeight - this.scrollBar.displayHeight) / (screenHeight - this.terminalScreen.height - 10);
+    const m = (TerminalScene.TERMINAL_HEIGHT - this.scrollBar.displayHeight) / (TerminalScene.TERMINAL_HEIGHT - this.terminalScreen.height - 10);
     const b = -10 * m;
     return [m, b];
   }
@@ -429,7 +431,7 @@ export class TerminalScene extends Phaser.Scene {
     else {
       this.terminalScreen.text += data;
     }
-    this.scrollTerminalScreenTo(this.cameras.main.height - 40 - this.terminalScreen.height); // Move the terminal screen to the bottom
+    this.scrollTerminalScreenTo(TerminalScene.TERMINAL_HEIGHT - this.terminalScreen.height); // Move the terminal screen to the bottom
     this.updateScrollBarSize(); // Update the scroll bar
   }
 
