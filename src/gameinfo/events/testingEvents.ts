@@ -2,6 +2,7 @@ import { EventObject } from "../../gameobjects/eventObject";
 import { MapHandler } from "../../handler/mapHandler";
 import { RoomExitStatus } from "../../gameobjects/room";
 import { GameObject } from '../../gameobjects/gameObject';
+import { InventoryHandler } from '../../handler/inventoryHandler';
 
 export const TestingEventMap: EventObject = {
   useEvents: [
@@ -83,6 +84,16 @@ export const TestingEventMap: EventObject = {
       event: () => {
         return `Used Use 2 with With 2!`;
       }
+    },
+    {
+      useObj: "obj_idol",
+      withObj: "obj_pedestal",
+      event: () => {
+        if (MapHandler.getRoom("rm_ne").exits[1][1] === RoomExitStatus.LOCKED) { // Idol has not been taken
+          return null;
+        }
+        return "You cannot place the idol back on the pedestal";
+      }
     }
   ],
   commandEvents: [
@@ -92,9 +103,8 @@ export const TestingEventMap: EventObject = {
         {
           useObj: "obj_spawner",
           event: () => {
-            let room = MapHandler.getRoom("rm_ne");
-            // TODO add search from object ID
-            if (room.getObjects("new object").length === 0) { // TODO Check if it exists in the game world / in inventory
+            if (MapHandler.getObjectFromID("obj_new_obj") === null && InventoryHandler.getObjectFromID("obj_new_obj") === null) {
+              let room = MapHandler.getRoom("rm_ne");
               let obj = new GameObject({
                 id: "obj_new_obj",
                 name: "New Object",
@@ -106,6 +116,32 @@ export const TestingEventMap: EventObject = {
               return `An object has been spawned!`;
             }
             return null;
+          }
+        }
+      ]
+    },
+    {
+      command: "take",
+      events: [
+        {
+          useObj: "obj_idol",
+          event: () => {
+            if (MapHandler.getRoom("rm_ne").exits[1][1] === RoomExitStatus.LOCKED) {
+              let idol = MapHandler.getObjectFromID("obj_idol");
+              InventoryHandler.addObject(idol);
+              MapHandler.removeObject(idol);
+              idol.desc = "The idol is blazingly gold";
+              MapHandler.getObjectFromID("obj_pedestal").desc = "An ornate pedestal that used to hold the idol. It warns you that you are an idiot";
+              MapHandler.getRoom("rm_ne").setExitStatus("east", RoomExitStatus.UNLOCKED);
+              return "As you remove the idol from its pedestal, an inlet on the top of the pedestal depresses. There is a rumbling and the door next to you opens...";
+            }
+            return null;
+          }
+        },
+        {
+          useObj: "obj_boulder",
+          event: () => {
+            return "I'm sorry, did you just try to pick up this boulder?";
           }
         }
       ]

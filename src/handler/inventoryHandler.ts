@@ -29,7 +29,7 @@ export class InventoryHandler {
    * @param objID The ID of the object desired
    * @returns The game object if it exists, null otherwise
    */
-  getObjectFromID(objID: string): GameObject {
+  static getObjectFromID(objID: string): GameObject {
     for (let obj of InventoryHandler.objectsInInventory) {
       if (obj.id === objID) {
         return obj;

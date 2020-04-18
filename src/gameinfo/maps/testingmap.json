@@ -52,16 +52,17 @@
     {
       "id": "rm_ne",
       "name": "Room NE",
-      "desc": "This room is in the top right corner\nNext line!",
+      "desc": "This room is in the top right corner\nNext line!\nThere is a locked door leading east",
       "mapCoords": {
         "x": 2,
         "y": 0
       },
       "exits": {
         "north": "",
-        "east": "",
+        "east": "rm_boulder",
         "south": "rm_e",
-        "west": "rm_n"
+        "west": "rm_n",
+        "locked": ["east"]
       },
       "objects": [
         {
@@ -69,6 +70,44 @@
           "name": "Spawner",
           "altNames": ["Object Spawner"],
           "desc": "Examine me to spawn an object!",
+          "pickupable": false
+        },
+        {
+          "id": "obj_idol",
+          "name": "Idol",
+          "altNames": ["Golden Idol"],
+          "desc": "The idol glistens, beckoning you to take it. It is centered on top of an ornate pedestal",
+          "pickupable": true
+        },
+        {
+          "id": "obj_pedestal",
+          "name": "Pedestal",
+          "altNames": [],
+          "desc": "An ornate pedestal that holds the idol. It warns adventurers against attempting to take the idol",
+          "pickupable": false
+        }
+      ]
+    },
+    {
+      "id": "rm_boulder",
+      "name": "Big Boulder",
+      "desc": "Oh no it's a big boulder! Run!",
+      "mapCoords": {
+        "x": 3,
+        "y": 0
+      },
+      "exits": {
+        "north": "",
+        "east": "",
+        "south": "",
+        "west": "rm_ne"
+      },
+      "objects": [
+        {
+          "id": "obj_boulder",
+          "name": "Big Boulder",
+          "altNames": ["Boulder"],
+          "desc": "There's a really big boulder, it's going to crush you",
           "pickupable": false
         }
       ]
