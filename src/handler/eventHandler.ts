@@ -70,10 +70,14 @@ export class EventHandler {
     if (withObject != null) {
       let key = `{${ useObject.id }} {${ withObject.id }}`;
       if (EventHandler.multipleObjsEventMap.has(key)) {
-        return EventHandler.multipleObjsEventMap.get(key)();
+        let res = EventHandler.multipleObjsEventMap.get(key)();
+        if (res != null) {
+          return res;
+        }
+        return `Cannot use ${ useObject.name } with ${ withObject.name }`;
       }
       else if (EventHandler.multipleObjsEventMap.has(`{${ withObject.id }} {${ useObject.id }}`)) {
-        return `Cannot use ${ useObject.name } with ${ withObject.name } (Hint: try reversing them)`;
+        return `Cannot use ${ useObject.name } with ${ withObject.name } (Hint: try reversing them)`; // TODO Should we even have this?
       }
       else {
         return `Cannot use ${ useObject.name } with ${ withObject.name }`;
@@ -81,7 +85,11 @@ export class EventHandler {
     }
     else {
       if (EventHandler.singleObjEventMap.has(useObject.id)) {
-        return EventHandler.singleObjEventMap.get(useObject.id)();
+        let res = EventHandler.singleObjEventMap.get(useObject.id)(); // Could not put this in the if statement because it would run the event twice (and we don't want that)
+        if (res != null) {
+          return res;
+        }
+        return `Cannot use ${ useObject.name } on its own`;
       }
       else {
         return `Cannot use ${ useObject.name } on its own`;
