@@ -170,5 +170,5 @@ export class GameMap {
 export interface GameMapJson {
   name: string;
   starting_room: string;
-  rooms: [RoomJson];
+  rooms: RoomJson[];
 }

@@ -222,8 +222,8 @@ export interface RoomJson {
     east: string,
     south: string,
     west: string,
-    locked?: [string],
-    jammed?: [string]
+    locked?: string[],
+    jammed?: string[]
   };
   objects: [GameObjectJson];
 }
