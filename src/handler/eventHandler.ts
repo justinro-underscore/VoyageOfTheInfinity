@@ -1,3 +1,4 @@
+import { EventObject } from "../gameobjects/eventObject";
 import { GameObject } from "../gameobjects/gameObject";
 import { TestingEventMap } from "../gameinfo/events/testingEvents";
 
@@ -11,7 +12,7 @@ export class EventHandler {
   /*
    * Can have multiple event maps for different scenarios. Links keys with their event maps
    */
-  private static availableEventMaps: Map<string, {events: {useObj: string, withObj?: string, event: () => string}[]}> = new Map([
+  private static availableEventMaps: Map<string, EventObject> = new Map([
     ["testing", TestingEventMap]
   ]);
 

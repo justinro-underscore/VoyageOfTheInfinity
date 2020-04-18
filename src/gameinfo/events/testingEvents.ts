@@ -1,7 +1,8 @@
+import { EventObject } from "../../gameobjects/eventObject";
 import { MapHandler } from "../../handler/mapHandler";
 import { RoomExitStatus } from "../../gameobjects/room";
 
-export const TestingEventMap: {events: {useObj: string, withObj?: string, event: () => string}[]} = {
+export const TestingEventMap: EventObject = {
   events: [
     {
       useObj: "obj_key1",
