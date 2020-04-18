@@ -108,11 +108,19 @@ export class InputHandler {
 
   private static examineObject(obj: GameObject): string {
     InputHandler.overrideInput = null;
+    let commandEventOutcome = EventHandler.runCommandEvent("examine", obj);
+    if (commandEventOutcome != null) {
+      return commandEventOutcome;
+    }
     return obj.desc;
   }
 
   private static takeObject(obj: GameObject): string {
     InputHandler.overrideInput = null;
+    let commandEventOutcome = EventHandler.runCommandEvent("take", obj);
+    if (commandEventOutcome != null) {
+      return commandEventOutcome;
+    }
     if (obj.pickupable) {
       InventoryHandler.addObject(obj);
       if (!MapHandler.removeObject(obj)) {
@@ -127,6 +135,10 @@ export class InputHandler {
 
   private static dropObject(obj: GameObject): string {
     InputHandler.overrideInput = null;
+    let commandEventOutcome = EventHandler.runCommandEvent("drop", obj);
+    if (commandEventOutcome != null) {
+      return commandEventOutcome;
+    }
     if (!InventoryHandler.removeObject(obj)) {
       console.error(`Dropped an object that was not in the inventory: {${ obj.id }}`);
     }
@@ -164,7 +176,7 @@ export class InputHandler {
     let useObj = <GameObject>InputHandler.overrideInput.data.useObj;
     InputHandler.overrideInput = null;
     if (useObj.id != withObj.id) {
-      return EventHandler.runEvent(useObj, withObj);
+      return EventHandler.runUseEvent(useObj, withObj);
     }
     else {
       return "Cannot use an object with itself!";
@@ -173,7 +185,7 @@ export class InputHandler {
 
   private static useSingleObject(useObj: GameObject): string {
     InputHandler.overrideInput = null;
-    return EventHandler.runEvent(useObj);
+    return EventHandler.runUseEvent(useObj);
   }
 
   private static getCommandObj(command: string): {responseType: InputResponseType, validate: (objs: Array<string>) => boolean, execute: (objs: Array<string>) => string} {

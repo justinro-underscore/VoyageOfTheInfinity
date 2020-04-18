@@ -1,9 +1,10 @@
 import { EventObject } from "../../gameobjects/eventObject";
 import { MapHandler } from "../../handler/mapHandler";
 import { RoomExitStatus } from "../../gameobjects/room";
+import { GameObject } from '../../gameobjects/gameObject';
 
 export const TestingEventMap: EventObject = {
-  events: [
+  useEvents: [
     {
       useObj: "obj_key1",
       withObj: "obj_door1",
@@ -82,6 +83,32 @@ export const TestingEventMap: EventObject = {
       event: () => {
         return `Used Use 2 with With 2!`;
       }
+    }
+  ],
+  commandEvents: [
+    {
+      command: "examine",
+      events: [
+        {
+          useObj: "obj_spawner",
+          event: () => {
+            let room = MapHandler.getRoom("rm_ne");
+            // TODO add search from object ID
+            if (room.getObjects("new object").length === 0) { // TODO Check if it exists in the game world / in inventory
+              let obj = new GameObject({
+                id: "obj_new_obj",
+                name: "New Object",
+                altNames: [],
+                desc: "This object was created from the spawner!",
+                pickupable: true
+              });
+              room.addObject(obj);
+              return `An object has been spawned!`;
+            }
+            return null;
+          }
+        }
+      ]
     }
   ]
 };

@@ -48,7 +48,7 @@ export class GameObject {
 export interface GameObjectJson {
   id: string;
   name: string;
-  altNames: [string]; // List of alternative names this object will respond to (e.g. "Door Key" may also respond to the keyword "key")
+  altNames: string[]; // List of alternative names this object will respond to (e.g. "Door Key" may also respond to the keyword "key")
   desc: string;
   pickupable: boolean; // If true, this object can be placed in the user's inventory
 }

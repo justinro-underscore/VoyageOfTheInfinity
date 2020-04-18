@@ -63,7 +63,15 @@
         "south": "rm_e",
         "west": "rm_n"
       },
-      "objects": []
+      "objects": [
+        {
+          "id": "obj_spawner",
+          "name": "Spawner",
+          "altNames": ["Object Spawner"],
+          "desc": "Examine me to spawn an object!",
+          "pickupable": false
+        }
+      ]
     },
     {
       "id": "rm_start",

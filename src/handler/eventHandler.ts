@@ -1,4 +1,4 @@
-import { EventObject } from "../gameobjects/eventObject";
+import { EventObject } from '../gameobjects/eventObject';
 import { GameObject } from "../gameobjects/gameObject";
 import { TestingEventMap } from "../gameinfo/events/testingEvents";
 
@@ -9,6 +9,7 @@ import { TestingEventMap } from "../gameinfo/events/testingEvents";
 export class EventHandler {
   private static multipleObjsEventMap: Map<string, () => string>; // Links use objects and with objects (format: "${ use_obj } ${ with_obj }") with their event
   private static singleObjEventMap: Map<string, () => string>; // Links use objects that can be used on their own with their event
+  private static commandEventMap: Map<string, Map<string, () => string>>; // Links commands and their objects to events
   /*
    * Can have multiple event maps for different scenarios. Links keys with their event maps
    */
@@ -27,7 +28,11 @@ export class EventHandler {
     else {
       EventHandler.multipleObjsEventMap = new Map<string, () => string>();
       EventHandler.singleObjEventMap = new Map<string, () => string>();
-      EventHandler.availableEventMaps.get(eventMapKey).events.forEach(eventData => {
+      EventHandler.commandEventMap = new Map<string, Map<string, () => string>>();
+
+      let eventObj = this.availableEventMaps.get(eventMapKey);
+      // Add use events
+      eventObj.useEvents.forEach(eventData => {
         if (eventData.hasOwnProperty("withObj")) {
           EventHandler.multipleObjsEventMap.set(`{${ eventData.useObj }} {${ eventData.withObj }}`, eventData.event); // Where the key format is defined
         }
@@ -35,6 +40,23 @@ export class EventHandler {
           EventHandler.singleObjEventMap.set(`${ eventData.useObj }`, eventData.event); // Where the key format is defined
         }
       });
+      // Add general command events
+      if (eventObj.commandEvents != null) {
+        eventObj.commandEvents.forEach(commandData => {
+          if (!EventHandler.commandEventMap.has(commandData.command)) { // Check that command is instantiated
+            EventHandler.commandEventMap.set(commandData.command, new Map<string, () => string>());
+          }
+          let eventMap = EventHandler.commandEventMap.get(commandData.command);
+          commandData.events.forEach(eventData => {
+            if (eventMap.has(eventData.useObj)) { // Cannot have conflicting events
+              console.error(`Command event {${ commandData.command }} for object {${ eventData.useObj }} defined more than once!`);
+            }
+            else {
+              eventMap.set(eventData.useObj, eventData.event);
+            }
+          });
+        });
+      }
     }
   }
 
@@ -44,7 +66,7 @@ export class EventHandler {
    * @param withObject The object being used on, if none provided tries to use useObj on its own
    * @returns The outcome of the event
    */
-  static runEvent(useObject: GameObject, withObject?: GameObject): string {
+  static runUseEvent(useObject: GameObject, withObject?: GameObject): string {
     if (withObject != null) {
       let key = `{${ useObject.id }} {${ withObject.id }}`;
       if (EventHandler.multipleObjsEventMap.has(key)) {
@@ -65,5 +87,22 @@ export class EventHandler {
         return `Cannot use ${ useObject.name } on its own`;
       }
     }
+  }
+
+  /**
+   * Attempts to run an event from a command on a given object
+   * @param command The command being run on the object
+   * @param useObject The object being acted upon
+   * @returns The outcome of the event, or null if the standard functionality of command should be executed
+   */
+  static runCommandEvent(command: string, useObject: GameObject): string {
+    if (EventHandler.commandEventMap.has(command)) {
+      let eventMap = EventHandler.commandEventMap.get(command);
+      if (eventMap.has(useObject.id)) {
+        return eventMap.get(useObject.id)();
+      }
+      return null;
+    }
+    return null;
   }
 }
