@@ -222,41 +222,55 @@ class RoomBlock {
   constructor(scene: Phaser.Scene, id: string) {
     // Sets the room reference
     this.room = MapHandler.getRoom(id);
-    // Sets the room's coordinates based on the map coordinates of the room
-    this.coords = [this.room.mapCoords[0] * RoomBlock.ROOM_SIZE[0] * 2, this.room.mapCoords[1] * RoomBlock.ROOM_SIZE[1] * 2];
 
-    // Define room colors and text
-    let backgroundColor = 0xdddddd;
-    let strokeColor = 0xffffff;
-    let textColor = "#ffffff";
-    let roomText = this.room.name;
-    if (!this.room.visited) {
-      backgroundColor = 0x222222;
-      strokeColor = 0x888888;
-      textColor = "#dddddd";
-      roomText = "???";
+    // Check for validity
+    let valid = this.room.visited; // Room is valid if visited
+    if (!valid) { // If not visited, room is valid if it is adjacent to a visited room
+      this.room.exits.forEach(exit => {
+        if (exit[0] != "" && MapHandler.getRoom(exit[0]).visited) {
+          valid = true;
+        }
+      });
     }
 
-    // Create the room block
-    let rect = scene.add.rectangle(this.coords[0] + (RoomBlock.ROOM_SIZE[0] / 2), this.coords[1] + (RoomBlock.ROOM_SIZE[1] / 2), RoomBlock.ROOM_SIZE[0], RoomBlock.ROOM_SIZE[1], backgroundColor, 0);
-    rect.setStrokeStyle(4, strokeColor, 1);
-    rect.setDepth(5); // Put the rectangle over the link lines
+    // Only create the RoomBlock if the room is valid
+    if (valid) {
+      // Sets the room's coordinates based on the map coordinates of the room
+      this.coords = [this.room.mapCoords[0] * RoomBlock.ROOM_SIZE[0] * 2, this.room.mapCoords[1] * RoomBlock.ROOM_SIZE[1] * 2];
 
-    const textOffset = 5;
-    let textName = scene.add.text(0, 0, roomText, {
-      fontSize: 20,
-      fontFamily: "Monospace",
-      align: "center",
-      color: textColor,
-      alpha: 0.7,
-      wordWrap: { width: RoomBlock.ROOM_SIZE[0] - (textOffset * 2), useAdvancedWrap: true }
-    });
-    textName.setPosition(this.coords[0] + (RoomBlock.ROOM_SIZE[0] / 2) - (textName.getBounds().width / 2), this.coords[1] + (RoomBlock.ROOM_SIZE[1] / 2) - (textName.getBounds().height / 2));
-    textName.setDepth(6); // Put the text over the rectangle
+      // Define room colors and text
+      let backgroundColor = 0xdddddd;
+      let strokeColor = 0xffffff;
+      let textColor = "#ffffff";
+      let roomText = this.room.name;
+      if (!this.room.visited) {
+        backgroundColor = 0x222222;
+        strokeColor = 0x888888;
+        textColor = "#dddddd";
+        roomText = "???";
+      }
 
-    // Check if we need to add exit icons
-    if (this.room.visited) {
-      this.setExitIcons(scene);
+      // Create the room block
+      let rect = scene.add.rectangle(this.coords[0] + (RoomBlock.ROOM_SIZE[0] / 2), this.coords[1] + (RoomBlock.ROOM_SIZE[1] / 2), RoomBlock.ROOM_SIZE[0], RoomBlock.ROOM_SIZE[1], backgroundColor, 0);
+      rect.setStrokeStyle(4, strokeColor, 1);
+      rect.setDepth(5); // Put the rectangle over the link lines
+
+      const textOffset = 5;
+      let textName = scene.add.text(0, 0, roomText, {
+        fontSize: 20,
+        fontFamily: "Monospace",
+        align: "center",
+        color: textColor,
+        alpha: 0.7,
+        wordWrap: { width: RoomBlock.ROOM_SIZE[0] - (textOffset * 2), useAdvancedWrap: true }
+      });
+      textName.setPosition(this.coords[0] + (RoomBlock.ROOM_SIZE[0] / 2) - (textName.getBounds().width / 2), this.coords[1] + (RoomBlock.ROOM_SIZE[1] / 2) - (textName.getBounds().height / 2));
+      textName.setDepth(6); // Put the text over the rectangle
+
+      // Check if we need to add exit icons
+      if (this.room.visited) {
+        this.setExitIcons(scene);
+      }
     }
   }
 
@@ -537,18 +551,21 @@ export class MapTerminalScene extends Phaser.Scene {
    */
   private moveCurrRoom(dir: number) {
     if (this.currRoom.room.exits[dir][0] != "") { // Make sure the player can move in this direction
-      this.currRoom = this.roomMap.get(this.currRoom.room.exits[dir][0]); // Set the new room
-      // Set the UI to reflect this move
-      let newCoords = this.currRoom.getCenterCoords();
-      this.cameras.main.pan(newCoords[0], newCoords[1] - (this.mapUI.getActivated() ? MapUI.CAMERA_OFFSET : 0), 200, "Quad.easeInOut", true);
-      this.tweens.add({
-        targets: this.currRoomBox,
-        duration: 150,
-        x: newCoords[0],
-        y: newCoords[1],
-        ease: "Quad.easeOut"
-      });
-      this.mapUI.setRoom(this.currRoom.room);
+      let nextRoom = this.roomMap.get(this.currRoom.room.exits[dir][0]);
+      if (this.currRoom.room.visited || nextRoom.room.visited) { // Only move if this room is visited or next room is visited
+        this.currRoom = nextRoom; // Set the new room
+        // Set the UI to reflect this move
+        let newCoords = this.currRoom.getCenterCoords();
+        this.cameras.main.pan(newCoords[0], newCoords[1] - (this.mapUI.getActivated() ? MapUI.CAMERA_OFFSET : 0), 200, "Quad.easeInOut", true);
+        this.tweens.add({
+          targets: this.currRoomBox,
+          duration: 150,
+          x: newCoords[0],
+          y: newCoords[1],
+          ease: "Quad.easeOut"
+        });
+        this.mapUI.setRoom(this.currRoom.room);
+      }
     }
   }
 
@@ -578,7 +595,9 @@ export class MapTerminalScene extends Phaser.Scene {
       room.room.exits.forEach(exit => {
         if (exit[0] != "") {
           let nextRoom = this.createRoom(exit[0]); // Create the room
-          room.linkRooms(nextRoom, this); // Link the room
+          if (room.room.visited || nextRoom.room.visited) { // Only link the rooms if one of them has been visited
+            room.linkRooms(nextRoom, this);
+          }
         }
       });
 
