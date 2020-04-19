@@ -19,14 +19,14 @@ export class GameObject {
     this.name = objJson.name;
     if (this.name.toLocaleLowerCase().includes(" with ")) { // Objects cannot include the word "with" in their name as it conflicts with the use command
       // TODO Make it so that names can include "with" in their name
-      console.error(`Object name cannot contain the word \"with\" ${ this.id }`);
+      console.error(`Object name cannot contain the word "with" ${ this.id }`);
     }
     this.altNames = new Array<string>();
     if (objJson.altNames != null) {
       objJson.altNames.forEach(name => {
         this.altNames.push(name.toLocaleLowerCase());
         if (name.toLocaleLowerCase().includes(" with ")) {
-          console.error(`Object name cannot contain the word \"with\" ${ this.id }`);
+          console.error(`Object name cannot contain the word "with" ${ this.id }`);
         }
       });
     }

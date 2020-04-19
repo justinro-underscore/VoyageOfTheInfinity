@@ -216,14 +216,14 @@ export interface RoomJson {
   mapCoords: {
     x: number;
     y: number;
-  }
+  };
   exits: {
-    north: string, // This is the id of the room to the north, "" if cannot go this direction
-    east: string,
-    south: string,
-    west: string,
-    locked?: string[],
-    jammed?: string[]
+    north: string; // This is the id of the room to the north, "" if cannot go this direction
+    east: string;
+    south: string;
+    west: string;
+    locked?: string[];
+    jammed?: string[];
   };
   objects: [GameObjectJson];
 }
