@@ -379,12 +379,13 @@ export class TerminalScene extends Phaser.Scene {
           break;
         // If enter, accept current input
         case KeyCodeCateogry.ENTER:
-          if (this.currInput != "") {
-            let response = InputHandler.submitInput(this.currInput);
+          let inputStr = this.currInput.trim();
+          if (inputStr != "") {
+            let response = InputHandler.submitInput(inputStr);
 
             if (response.type === InputResponseType.STRING || response.type === InputResponseType.ERROR) {
               // Update the terminal screen
-              this.updateTerminalScreen(`\n\n> ${ this.currInput }\n${ response.stringData }`);
+              this.updateTerminalScreen(`\n\n> ${ inputStr }\n${ response.stringData }`);
 
               // Reset all variables
               this.currInput = "";
@@ -392,7 +393,7 @@ export class TerminalScene extends Phaser.Scene {
               this.cursorPos = 0;
             }
             else if (response.type === InputResponseType.SCENE_CHANGE) {
-              this.updateTerminalScreen(`\n\n> ${ this.currInput }`);
+              this.updateTerminalScreen(`\n\n> ${ inputStr }`);
               this.scene.start(response.sceneChangeData, {terminalData: this.terminalScreen.text});
             }
           }
