@@ -1,6 +1,6 @@
 import "phaser";
-import { Room, RoomExitStatus } from '../gameobjects/room';
-import { MapHandler } from '../handler/mapHandler';
+import { Room, RoomExitStatus } from "../gameobjects/room";
+import { MapHandler } from "../handler/mapHandler";
 
 /**
  * Defines the user interface for the map
@@ -440,9 +440,9 @@ export class MapTerminalScene extends Phaser.Scene {
    * Loads the images
    */
   preload() {
-    this.load.image("terminalScreen", 'assets/img/terminal-screen.png');
-    this.load.image("lock", 'assets/img/lock.png');
-    this.load.image("x", 'assets/img/red-x.png');
+    this.load.image("terminalScreen", "assets/img/terminal-screen.png");
+    this.load.image("lock", "assets/img/lock.png");
+    this.load.image("x", "assets/img/red-x.png");
   }
 
   /**
@@ -473,7 +473,7 @@ export class MapTerminalScene extends Phaser.Scene {
     this.currRoomBox.setStrokeStyle(4, 0xffffff);
     this.mapUI = new MapUI(this);
 
-    this.input.keyboard.on('keydown', this.onKeyDown, this);
+    this.input.keyboard.on("keydown", this.onKeyDown, this);
   }
 
   /***********************

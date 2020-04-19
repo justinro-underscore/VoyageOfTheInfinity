@@ -1,4 +1,4 @@
-import { GameObject, GameObjectJson } from './gameObject';
+import { GameObject, GameObjectJson } from "./gameObject";
 
 // Defines how many exits a room has
 const EXIT_CODES = {

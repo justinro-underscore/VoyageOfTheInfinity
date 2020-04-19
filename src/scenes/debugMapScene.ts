@@ -1,6 +1,6 @@
 import "phaser";
-import { GameMap } from '../gameobjects/gameMap';
-import { MapHandler } from '../handler/mapHandler';
+import { GameMap } from "../gameobjects/gameMap";
+import { MapHandler } from "../handler/mapHandler";
 
 // Defines the number of exits each room has
 const NUM_EXITS = 4;
@@ -22,28 +22,28 @@ class DebugMapRoom {
    * @param scene A reference to the scene this resides in
    */
   constructor(x: number, y: number, scene: DebugMapScene) {
-    this.box = scene.add.image(x, y, 'box');
+    this.box = scene.add.image(x, y, "box");
 
     // Create the exits
     this.lines = new Array<Phaser.GameObjects.Image>(NUM_EXITS);
-    this.lines[0] = scene.add.image(x, y - 300, 'line').setAngle(90);
-    this.lines[1] = scene.add.image(x + 400, y, 'line');
-    this.lines[2] = scene.add.image(x, y + 300, 'line').setAngle(90);
-    this.lines[3] = scene.add.image(x - 400, y, 'line');
+    this.lines[0] = scene.add.image(x, y - 300, "line").setAngle(90);
+    this.lines[1] = scene.add.image(x + 400, y, "line");
+    this.lines[2] = scene.add.image(x, y + 300, "line").setAngle(90);
+    this.lines[3] = scene.add.image(x - 400, y, "line");
     this.roomExits = new Array<Phaser.GameObjects.Text>(NUM_EXITS);
     this.roomExits[0] = scene.add.text(x + 10, y - 290, "",
-    { font: '20px Arial', fill: '#000000' });
+      { font: "20px Arial", fill: "#000000" });
     this.roomExits[1] = scene.add.text(x + 390, y + 10, "",
-    { font: '20px Arial', fill: '#000000' }).setAngle(90);
+      { font: "20px Arial", fill: "#000000" }).setAngle(90);
     this.roomExits[2] = scene.add.text(x + 10, y + 270, "",
-    { font: '20px Arial', fill: '#000000' });
+      { font: "20px Arial", fill: "#000000" });
     this.roomExits[3] = scene.add.text(x - 390, y - 10, "",
-    { font: '20px Arial', fill: '#000000' }).setAngle(270);
+      { font: "20px Arial", fill: "#000000" }).setAngle(270);
 
     // Set the room info
     this.roomInfo = scene.add.text(x - 290, y - 190, "", {
       fontSize: 20,
-      fontFamily: 'Arial',
+      fontFamily: "Arial",
       align: "left",
       color: "#000000",
       wordWrap: { width: 580, useAdvancedWrap: false }
@@ -118,8 +118,8 @@ export class DebugMapScene extends Phaser.Scene {
    * Load the images and set the gameMap reference
    */
   preload() {
-    this.load.image('line', 'assets/img/debug/debug-black-line.png');
-    this.load.image('box', 'assets/img/debug/debug-room.png');
+    this.load.image("line", "assets/img/debug/debug-black-line.png");
+    this.load.image("box", "assets/img/debug/debug-room.png");
     this.gameMap = MapHandler.getGameMap();
   }
 
@@ -127,7 +127,7 @@ export class DebugMapScene extends Phaser.Scene {
    * Set up all game assets shown to user and add functionality
    */
   create() {
-    this.input.keyboard.on('keydown', (event: KeyboardEvent) => this.onKeyInput(event), this);
+    this.input.keyboard.on("keydown", (event: KeyboardEvent) => this.onKeyInput(event), this);
     this.cameras.main.setBackgroundColor("#eeeeee");
 
     // Create the rooms

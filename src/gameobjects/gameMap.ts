@@ -1,5 +1,5 @@
-import { Room, RoomJson, RoomExitStatus } from './room';
-import { GameObject } from './gameObject';
+import { Room, RoomJson, RoomExitStatus } from "./room";
+import { GameObject } from "./gameObject";
 
 /**
  * Defines a game map object

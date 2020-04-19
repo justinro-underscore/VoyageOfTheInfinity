@@ -1,4 +1,4 @@
-import { EventObject } from '../gameobjects/eventObject';
+import { EventObject } from "../gameobjects/eventObject";
 import { GameObject } from "../gameobjects/gameObject";
 import { TestingEventMap } from "../gameinfo/events/testingEvents";
 

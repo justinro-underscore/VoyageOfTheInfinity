@@ -1,7 +1,7 @@
-import { MapHandler } from './mapHandler';
-import { InventoryHandler } from './inventoryHandler';
-import { EventHandler } from './eventHandler';
-import { GameObject } from '../gameobjects/gameObject';
+import { MapHandler } from "./mapHandler";
+import { InventoryHandler } from "./inventoryHandler";
+import { EventHandler } from "./eventHandler";
+import { GameObject } from "../gameobjects/gameObject";
 
 class MultipleObjects extends Error {
   objectsFound: Array<GameObject>;

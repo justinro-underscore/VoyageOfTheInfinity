@@ -1,8 +1,8 @@
 import "phaser";
-import { MainMenuScene } from './scenes/mainMenuScene';
-import { TerminalScene } from './scenes/terminalScene';
-import { MapTerminalScene } from './scenes/mapTerminalScene';
-import { DebugMapScene } from './scenes/debugMapScene';
+import { MainMenuScene } from "./scenes/mainMenuScene";
+import { TerminalScene } from "./scenes/terminalScene";
+import { MapTerminalScene } from "./scenes/mapTerminalScene";
+import { DebugMapScene } from "./scenes/debugMapScene";
 
 const config: Phaser.Types.Core.GameConfig = {
   title: "Voyage of the Infinity",
@@ -29,5 +29,5 @@ export class TextAdventureGame extends Phaser.Game {
 }
 
 window.onload = () => {
-  var game = new TextAdventureGame(config);
+  new TextAdventureGame(config);
 };

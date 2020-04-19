@@ -1,11 +1,11 @@
 import "phaser";
-import { InputHandler, InputResponseType } from '../handler/inputHandler';
-import { MapHandler } from '../handler/mapHandler';
-// import { BlurPipeline } from '../shaders/blurPipeline';
-// import { GrayscalePipeline } from '../shaders/grayscalePipeline';
-// import { LinesPipeline } from '../shaders/linesPipeline';
-// import { BulgePipeline } from '../shaders/bulgePipeline';
-// import { TransparentPipeline } from '../shaders/transparentPipeline';
+import { InputHandler, InputResponseType } from "../handler/inputHandler";
+import { MapHandler } from "../handler/mapHandler";
+// import { BlurPipeline } from "../shaders/blurPipeline";
+// import { GrayscalePipeline } from "../shaders/grayscalePipeline";
+// import { LinesPipeline } from "../shaders/linesPipeline";
+// import { BulgePipeline } from "../shaders/bulgePipeline";
+// import { TransparentPipeline } from "../shaders/transparentPipeline";
 
 // Defines what category each key input goes into
 enum KeyCodeCateogry {
@@ -83,8 +83,8 @@ export class TerminalScene extends Phaser.Scene {
    * Load images
    */
   preload() {
-    this.load.image("scrollBar", 'assets/img/white-pixel.png');
-    this.load.image("terminalScreen", 'assets/img/terminal-screen.png');
+    this.load.image("scrollBar", "assets/img/white-pixel.png");
+    this.load.image("terminalScreen", "assets/img/terminal-screen.png");
   }
 
   /**
@@ -125,14 +125,14 @@ export class TerminalScene extends Phaser.Scene {
     this.scrollBar.setTint(0x77ff55); // Should be the color of the text
 
     // Set up draggable functionality
-    this.scrollBar.on('pointerover', () => this.scrollBar.setTint(0xfdfdcd));
-    this.scrollBar.on('pointerout', () => this.scrollBar.setTint(0x77ff55));
+    this.scrollBar.on("pointerover", () => this.scrollBar.setTint(0xfdfdcd));
+    this.scrollBar.on("pointerout", () => this.scrollBar.setTint(0x77ff55));
     this.input.setDraggable(this.scrollBar);
-    this.input.on('drag', (_pointer: Phaser.Input.Mouse.MouseManager, _gameObjects: Array<Phaser.GameObjects.GameObject>, _x: number, y: number) => {
+    this.input.on("drag", (_pointer: Phaser.Input.Mouse.MouseManager, _gameObjects: Array<Phaser.GameObjects.GameObject>, _x: number, y: number) => {
       this.moveScrollBar(y);
     });
     // When the user scrolls their scrollwheel, move the screen & scroll bar
-    this.input.on('wheel', (_pointer: Phaser.Input.Mouse.MouseManager, _gameObjects: Array<Phaser.GameObjects.GameObject>, _deltaX: number, deltaY: number) => {
+    this.input.on("wheel", (_pointer: Phaser.Input.Mouse.MouseManager, _gameObjects: Array<Phaser.GameObjects.GameObject>, _deltaX: number, deltaY: number) => {
       const scrollDelta = deltaY * SCROLL_COEF;
       this.scrollTerminalScreenTo(this.terminalScreen.y - scrollDelta);
       this.updateScrollBarPosition();
@@ -145,12 +145,12 @@ export class TerminalScene extends Phaser.Scene {
     this.currInput = "";
     this.lastInput = "";
     this.commandLine = this.add.text(10, this.cameras.main.height - 30, "> ",
-      { font: '16px Monospace', fill: '#77ff55' });
+      { font: "16px Monospace", fill: "#77ff55" });
     this.blinkCursor = true;
     this.cursor = this.add.text(10, this.cameras.main.height - 30, "  _",
-      { font: '16px Monospace', fill: '#77ff55' });
+      { font: "16px Monospace", fill: "#77ff55" });
     this.cursorPos = 0;
-    this.input.keyboard.on('keydown', (event: KeyboardEvent) => this.onKeyInput(event), this);
+    this.input.keyboard.on("keydown", (event: KeyboardEvent) => this.onKeyInput(event), this);
     this.keyDebounceReject = false;
     this.freezeInput = false;
 
@@ -174,7 +174,7 @@ export class TerminalScene extends Phaser.Scene {
     // this.shaders.set("Bulge", (<Phaser.Renderer.WebGL.WebGLRenderer>this.game.renderer).addPipeline("Bulge", new BulgePipeline(this.game)));
 
     // this.shaders.forEach(shader => {
-    //   shader.setFloat2('resolution', <number>this.game.config.width, <number>this.game.config.height);
+    //   shader.setFloat2("resolution", <number>this.game.config.width, <number>this.game.config.height);
     //   this.cameras.main.setRenderToTexture(shader);
     //   this.cameras.main.glTexture
     // });

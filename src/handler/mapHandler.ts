@@ -1,8 +1,8 @@
-import { GameMap, GameMapJson } from '../gameobjects/gameMap';
-import testingMap from '../gameinfo/maps/testingmap.json';
-import voyageMap from '../gameinfo/maps/voyagemap.json';
-import { GameObject } from '../gameobjects/gameObject';
-import { Room } from '../gameobjects/room';
+import { GameMap, GameMapJson } from "../gameobjects/gameMap";
+import testingMap from "../gameinfo/maps/testingmap.json";
+import voyageMap from "../gameinfo/maps/voyagemap.json";
+import { GameObject } from "../gameobjects/gameObject";
+import { Room } from "../gameobjects/room";
 
 export class MapHandler {
   static instance: MapHandler;
