@@ -24,13 +24,19 @@ const CURSOR_BLINK_TIME = 800;
 const KEY_DEBOUNCE_WAIT_TIME = 1;
 
 // Define show tall the command line input is
-export const INPUT_HEIGHT = 30;
+export const COMMAND_LINE_OFFSET = 10;
+
+export interface TerminalInputConfig {
+  fontSize?: number;
+  fontColor?: string;
+}
 
 /**
  * Handles all input to the terminal screen
  */
 export class TerminalInputHandler {
   static instance: TerminalInputHandler // Can only have one instance going at a time
+  static COMMAND_LINE_HEIGHT: number; // Defines how tall the command line is
 
   private scene: Phaser.Scene; // Reference to the scene that this is being used in
 
@@ -56,9 +62,10 @@ export class TerminalInputHandler {
    * Instantiates the current instance of TerminalInputHandler
    * @param scene The scene that this is being used in
    * @param onEnterFunc Defines what happens when the input string is input
+   * @param config The configuration of the terminal
    */
-  static instantiateTerminalInput(scene: Phaser.Scene, onEnterFunc: (inputStr: string, scene: Phaser.Scene) => void) {
-    TerminalInputHandler.instance = new TerminalInputHandler(scene, onEnterFunc);
+  static instantiateTerminalInput(scene: Phaser.Scene, onEnterFunc: (inputStr: string, scene: Phaser.Scene) => void, config?: TerminalInputConfig) {
+    TerminalInputHandler.instance = new TerminalInputHandler(scene, onEnterFunc, config);
   }
 
   /**
@@ -98,6 +105,17 @@ export class TerminalInputHandler {
     }
   }
 
+  /**
+   * Gets the default terminal configuration
+   * @returns The default terminal configuration
+   */
+  static getDefaultTerminalConfig(): TerminalInputConfig {
+    return {
+      fontSize: 16,
+      fontColor: "#ffffff"
+    }
+  }
+
   /***********************
    *   PRIVATE METHODS   *
    ***********************/
@@ -106,20 +124,32 @@ export class TerminalInputHandler {
    * Creates a new instance of the TerminalInputHandler
    * @param scene The scene that this is being used in
    * @param onEnterFunc Defines what happens when the input string is input
+   * @param config The configuration of the terminal
    */
-  private constructor(scene: Phaser.Scene, onEnterFunc: (inputStr: string, scene: Phaser.Scene) => void) {
+  private constructor(scene: Phaser.Scene, onEnterFunc: (inputStr: string, scene: Phaser.Scene) => void, config?: TerminalInputConfig) {
     this.scene = scene;
+
+    let terminalConfig = TerminalInputHandler.getDefaultTerminalConfig();
+    if (config != null) {
+      if ("fontSize" in config) {
+        terminalConfig.fontSize = config.fontSize;
+      }
+      if ("fontColor" in config) {
+        terminalConfig.fontColor = config.fontColor;
+      }
+    }
 
     // Create the input
     this.currInput = "";
     this.lastInput = "";
-    this.commandLine = scene.add.text(10, scene.cameras.main.height - INPUT_HEIGHT, "> ",
-      { font: "16px Monospace", fill: "#77ff55" });
+    this.commandLine = scene.add.text(0, 0, "> ", { font: `${ terminalConfig.fontSize }px Monospace`, fill: terminalConfig.fontColor });
+    TerminalInputHandler.COMMAND_LINE_HEIGHT = this.commandLine.height;
+    this.commandLine.setPosition(COMMAND_LINE_OFFSET, scene.cameras.main.height - (COMMAND_LINE_OFFSET + TerminalInputHandler.COMMAND_LINE_HEIGHT));
 
     // Create the cursor
     this.blinkCursor = true;
-    this.cursor = scene.add.text(10, scene.cameras.main.height - INPUT_HEIGHT, "  _",
-      { font: "16px Monospace", fill: "#77ff55" });
+    this.cursor = scene.add.text(0, 0, "  _", { font: `${ terminalConfig.fontSize }px Monospace`, fill: terminalConfig.fontColor });
+    this.cursor.setPosition(COMMAND_LINE_OFFSET, scene.cameras.main.height - (COMMAND_LINE_OFFSET + TerminalInputHandler.COMMAND_LINE_HEIGHT));
     this.cursorPos = 0;
 
     // Set variables
