@@ -35,6 +35,9 @@ const SCROLL_COEF = 10;
 // How many pixels wide the scroll bar is
 const SCROLL_BAR_WIDTH = 5;
 
+// How many lines of text the terminal can take
+const MAX_NUM_TERMINAL_LINES = 90; // Equivalent to about 3 lengths of terminal height (each one being 29 lines)
+
 /**
  * Defines the scene where user can input commands through a terminal interface
  */
@@ -395,6 +398,12 @@ export class TerminalScene extends Phaser.Scene {
             else if (response.type === InputResponseType.SCENE_CHANGE) {
               this.updateTerminalScreen(`\n\n> ${ inputStr }`);
               this.scene.start(response.sceneChangeData, {terminalData: this.terminalScreen.text});
+            }
+
+            // Check if terminal screen overflows allotted text amount
+            let textArr = this.terminalScreen.text.split("\n");
+            if (textArr.length > MAX_NUM_TERMINAL_LINES) { // If there are too many lines, trim it
+              this.updateTerminalScreen(textArr.slice(textArr.length - MAX_NUM_TERMINAL_LINES).join("\n"), true);
             }
           }
           break;

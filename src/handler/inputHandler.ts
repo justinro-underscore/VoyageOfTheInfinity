@@ -55,6 +55,8 @@ export class InputResponse {
   }
 }
 
+const MAX_PREV_INPUTS = 50; // Defines how many previous inputs we keep track of
+
 export class InputHandler {
   static overrideInput: OverrideInput = null;
   static previousInputs = new Array<string>();
@@ -64,6 +66,10 @@ export class InputHandler {
     InputHandler.currPrevInputPointer = -1;
     if (InputHandler.overrideInput === null) {
       InputHandler.previousInputs.unshift(inputStr);
+      if (InputHandler.previousInputs.length > MAX_PREV_INPUTS) {
+        InputHandler.previousInputs.pop();
+      }
+
       let inputStrArr = inputStr.split(" ");
       let command = inputStrArr[0];
       let objs = inputStrArr.splice(1);
