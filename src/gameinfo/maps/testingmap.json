@@ -16,7 +16,15 @@
         "south": "",
         "west": ""
       },
-      "objects": []
+      "objects": [
+        {
+          "id": "obj_counter",
+          "name": "Counter",
+          "altNames": [],
+          "desc": "Use me to get a counter",
+          "pickupable": false
+        }
+      ]
     },
     {
       "id": "rm_n",

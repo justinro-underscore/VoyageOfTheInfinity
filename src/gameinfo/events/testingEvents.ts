@@ -4,6 +4,13 @@ import { RoomExitStatus } from "../../gameobjects/room";
 import { GameObject } from '../../gameobjects/gameObject';
 import { InventoryHandler } from '../../handler/inventoryHandler';
 
+/**
+ * Used to define any data that should be kept track of
+ */
+const eventData = {
+  counter: 0
+}
+
 export const TestingEventMap: EventObject = {
   useEvents: [
     {
@@ -83,6 +90,13 @@ export const TestingEventMap: EventObject = {
       withObj: "obj_use_test_4_with_2",
       event: () => {
         return `Used Use 2 with With 2!`;
+      }
+    },
+    {
+      useObj: "obj_counter",
+      event: () => {
+        eventData.counter += 1;
+        return `Counter is at ${ eventData.counter }`;
       }
     },
     {
