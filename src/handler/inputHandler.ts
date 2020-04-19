@@ -2,7 +2,6 @@ import { MapHandler } from './mapHandler';
 import { InventoryHandler } from './inventoryHandler';
 import { EventHandler } from './eventHandler';
 import { GameObject } from '../gameobjects/gameObject';
-import { Input } from 'phaser';
 
 class MultipleObjects extends Error {
   objectsFound: Array<GameObject>;
@@ -21,6 +20,12 @@ class OverrideInput {
     this.func = func;
     this.data = data;
   }
+}
+
+interface CommandObject {
+  responseType: InputResponseType;
+  validate: (objs: Array<string>) => boolean;
+  execute: (objs: Array<string>) => string;
 }
 
 enum ObjectLocation {
@@ -88,7 +93,7 @@ export class InputHandler {
     return InputHandler.getPrevInput(true);
   }
 
-  static getPreviousPrevInput(): {bottom: boolean, prevInput: string} {
+  static getPreviousPrevInput(): {bottom: boolean; prevInput: string} {
     if (InputHandler.currPrevInputPointer < 0) {
       return {bottom: true, prevInput: ""};
     }
@@ -194,7 +199,7 @@ export class InputHandler {
     return EventHandler.runUseEvent(useObj);
   }
 
-  private static getCommandObj(command: string): {responseType: InputResponseType, validate: (objs: Array<string>) => boolean, execute: (objs: Array<string>) => string} {
+  private static getCommandObj(command: string): CommandObject {
     switch (command) {
       case "examine":
         return {
@@ -433,7 +438,7 @@ export class InputHandler {
     let objs = InputHandler.overrideInput.data.objs;
     let num = Number(inputStr);
     let result = `${ inputStr } was not a possible choice`
-    if (num != NaN && num >= 1 && num <= objs.length) {
+    if (!isNaN(num) && num >= 1 && num <= objs.length) {
       result = InputHandler.overrideInput.data.callback(objs[num - 1]);
     }
     else {

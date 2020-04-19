@@ -33,7 +33,7 @@ export class EventHandler {
       let eventObj = this.availableEventMaps.get(eventMapKey);
       // Add use events
       eventObj.useEvents.forEach(eventData => {
-        if (eventData.hasOwnProperty("withObj")) {
+        if ("withObj" in eventData) {
           EventHandler.multipleObjsEventMap.set(`{${ eventData.useObj }} {${ eventData.withObj }}`, eventData.event); // Where the key format is defined
         }
         else {
