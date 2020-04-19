@@ -206,4 +206,4 @@ export class DebugMapScene extends Phaser.Scene {
     this.rooms[0].setRoom(this.gameMap.playerPos);
     this.gameMap.rooms.get(this.gameMap.playerPos).exits.forEach((id, i) => this.rooms[i + 1].setRoom(id[0]));
   }
-};
+}

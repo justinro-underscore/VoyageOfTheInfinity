@@ -36,7 +36,7 @@ class MapUI {
    * @param scene The scene this block is being created in
    * @param activated Defines if the UI should start activated or not
    */
-  constructor(scene: MapTerminalScene, activated: boolean=true) {
+  constructor(scene: MapTerminalScene, activated=true) {
     this.scene = scene;
     // Move the camera to center on the current room
     let newCoords = scene.currRoom.getCenterCoords();
@@ -149,7 +149,7 @@ class MapUI {
    * Shows / hides the UI depending on what state it is currently in
    * @param immediate If true, skip animations
    */
-  toggleActivated(immediate: boolean=false) {
+  toggleActivated(immediate=false) {
     this.activated = !this.activated;
 
     // Move the camera
@@ -575,7 +575,7 @@ export class MapTerminalScene extends Phaser.Scene {
       this.roomMap.set(id, room);
 
       // Recursively call this function for all adjacent rooms
-      room.room.exits.forEach((exit, i) => {
+      room.room.exits.forEach(exit => {
         if (exit[0] != "") {
           let nextRoom = this.createRoom(exit[0]); // Create the room
           room.linkRooms(nextRoom, this); // Link the room
@@ -588,4 +588,4 @@ export class MapTerminalScene extends Phaser.Scene {
       return this.roomMap.get(id);
     }
   }
-};
+}

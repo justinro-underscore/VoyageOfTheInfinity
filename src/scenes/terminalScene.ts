@@ -1,11 +1,11 @@
 import "phaser";
 import { InputHandler, InputResponseType } from '../handler/inputHandler';
 import { MapHandler } from '../handler/mapHandler';
-import { BlurPipeline } from '../shaders/blurPipeline';
-import { GrayscalePipeline } from '../shaders/grayscalePipeline';
-import { LinesPipeline } from '../shaders/linesPipeline';
-import { BulgePipeline } from '../shaders/bulgePipeline';
-import { TransparentPipeline } from '../shaders/transparentPipeline';
+// import { BlurPipeline } from '../shaders/blurPipeline';
+// import { GrayscalePipeline } from '../shaders/grayscalePipeline';
+// import { LinesPipeline } from '../shaders/linesPipeline';
+// import { BulgePipeline } from '../shaders/bulgePipeline';
+// import { TransparentPipeline } from '../shaders/transparentPipeline';
 
 // Defines what category each key input goes into
 enum KeyCodeCateogry {
@@ -21,7 +21,7 @@ enum KeyCodeCateogry {
   DELETE,
   TAB,
   INVALID
-};
+}
 
 // The amount of ticks between when the cursor blinks
 const CURSOR_BLINK_TIME = 800;
@@ -70,7 +70,7 @@ export class TerminalScene extends Phaser.Scene {
     });
   }
 
-  init(data: any){
+  init(data: any) {
     if (Object.keys(data).length > 0) {
       this.initData = <{terminalData: string}>data;
     }
@@ -434,7 +434,7 @@ export class TerminalScene extends Phaser.Scene {
    * @param data The strings to be added at the end of the terminal screen
    * @param overwrite If true, overwrite the terminal screen text with the data text
    */
-  private updateTerminalScreen(data: string, overwrite: boolean=false) {
+  private updateTerminalScreen(data: string, overwrite=false) {
     if (overwrite) {
       this.terminalScreen.text = data;
     }
@@ -481,4 +481,4 @@ export class TerminalScene extends Phaser.Scene {
         return KeyCodeCateogry.INVALID;
     }
   }
-};
+}
