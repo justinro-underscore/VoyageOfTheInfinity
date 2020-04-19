@@ -1,4 +1,5 @@
 import "phaser";
+import { TerminalInputHandler, INPUT_HEIGHT } from "../handler/terminalInputHandler";
 import { InputHandler, InputResponseType } from "../handler/inputHandler";
 import { MapHandler } from "../handler/mapHandler";
 // import { BlurPipeline } from "../shaders/blurPipeline";
@@ -6,28 +7,6 @@ import { MapHandler } from "../handler/mapHandler";
 // import { LinesPipeline } from "../shaders/linesPipeline";
 // import { BulgePipeline } from "../shaders/bulgePipeline";
 // import { TransparentPipeline } from "../shaders/transparentPipeline";
-
-// Defines what category each key input goes into
-enum KeyCodeCateogry {
-  LETTER,
-  DIGIT,
-  SPACE,
-  ENTER,
-  BACKSPACE,
-  KEY_UP,
-  KEY_LEFT,
-  KEY_RIGHT,
-  KEY_DOWN,
-  DELETE,
-  TAB,
-  INVALID
-}
-
-// The amount of ticks between when the cursor blinks
-const CURSOR_BLINK_TIME = 800;
-
-// How long to wait between key inputs
-const KEY_DEBOUNCE_WAIT_TIME = 1;
 
 // Coefficient that determines how fast a scroll moves
 const SCROLL_COEF = 10;
@@ -45,22 +24,8 @@ export class TerminalScene extends Phaser.Scene {
   initData: {terminalData: string}; // Defines the data sent in from the scene that started this scene
 
   private static TERMINAL_HEIGHT: number; // Const that defines the height of the terminal screen
-
   terminalScreen: Phaser.GameObjects.Text; // Text that is shown to the user, holds all previous inputs and their responses
-  commandLine: Phaser.GameObjects.Text; // Text that keeps track of what is currently input
-  currInput: string; // The current input
   scrollBar: Phaser.GameObjects.Image; // Scroll bar on the right side of the scene that keeps track of where the user has scrolled to
-
-  freezeInput: boolean; // If true, user cannot enter in any more characters
-
-  cursor: Phaser.GameObjects.Text; // Text that shows where the cursor is currently positioned
-  cursorPos: number; // Current cursor position
-  blinkCursor: boolean; // If the cursor is visible or not
-  cursorBlinkEvent: Phaser.Time.TimerEvent; // The timer event that determines the next time the cursor blink is toggled
-
-  keyDebounceReject: boolean; // Keeps track of if we should accept or reject user input (to avoid double inputs)
-
-  lastInput: string; // Keeps track of the last input before a call to get the previous input was made
 
   shaders: Map<string, Phaser.Renderer.WebGL.WebGLPipeline>;
 
@@ -91,7 +56,8 @@ export class TerminalScene extends Phaser.Scene {
    * Set up all game elements that are shown to the user
    */
   create() {
-    TerminalScene.TERMINAL_HEIGHT = this.cameras.main.height - 40;
+    const COMMAND_LINE_OFFSET = 10; // How much space between the terminal and the command line
+    TerminalScene.TERMINAL_HEIGHT = this.cameras.main.height - (INPUT_HEIGHT + COMMAND_LINE_OFFSET);
 
     /*************************
      * Set up the background *
@@ -142,25 +108,7 @@ export class TerminalScene extends Phaser.Scene {
     /*********************************
      * Set up the command line input *
      *********************************/
-    this.currInput = "";
-    this.lastInput = "";
-    this.commandLine = this.add.text(10, this.cameras.main.height - 30, "> ",
-      { font: "16px Monospace", fill: "#77ff55" });
-    this.blinkCursor = true;
-    this.cursor = this.add.text(10, this.cameras.main.height - 30, "  _",
-      { font: "16px Monospace", fill: "#77ff55" });
-    this.cursorPos = 0;
-    this.input.keyboard.on("keydown", (event: KeyboardEvent) => this.onKeyInput(event), this);
-    this.keyDebounceReject = false;
-    this.freezeInput = false;
-
-    // Start the blink
-    this.cursorBlinkEvent = this.time.addEvent({
-      delay: CURSOR_BLINK_TIME,
-      callback: this.blinkCursorCallback,
-      callbackScope: this,
-      loop: true
-    });
+    TerminalInputHandler.instantiateTerminalInput(this, TerminalScene.onEnter);
 
     if (this.initData != null) {
       this.updateTerminalScreen(this.initData.terminalData, true);
@@ -184,38 +132,25 @@ export class TerminalScene extends Phaser.Scene {
   //   this.shaders.get("Lines").setFloat1("time", time);
   // }
 
+  /**
+   * Writes data to the terminal screen and updates it accordingly
+   * @param data The strings to be added at the end of the terminal screen
+   * @param overwrite If true, overwrite the terminal screen text with the data text
+   */
+  updateTerminalScreen(data: string, overwrite=false) {
+    if (overwrite) {
+      this.terminalScreen.text = data;
+    }
+    else {
+      this.terminalScreen.text += data;
+    }
+    this.scrollTerminalScreenTo(TerminalScene.TERMINAL_HEIGHT - this.terminalScreen.height); // Move the terminal screen to the bottom
+    this.updateScrollBarSize(); // Update the scroll bar
+  }
+
   /***********************
    *   PRIVATE METHODS   *
    ***********************/
-
-  /**
-   * Blinks the cursor if it can
-   */
-  private blinkCursorCallback() {
-    if (!this.freezeInput) {
-      this.blinkCursor = !this.blinkCursor;
-    }
-    else {
-      this.blinkCursor = (this.cursorPos != this.currInput.length);
-    }
-
-    let cursorPadding = "  ";
-    for (let i = 0; i < this.cursorPos; i++) { cursorPadding += " "; }
-    this.cursor.x = (this.cursorPos === this.currInput.length ? 10 : 5); // If cursor is in the middle of the word, move it slightly so that the pipe isn't on top of a character
-    this.cursor.text = cursorPadding + (this.blinkCursor ? (this.cursorPos === this.currInput.length ? "_" : "|") : "");
-  }
-
-  /**
-   * Checks if we should freeze user input
-   * This should happen if the user's input has reached the end of the screen
-   */
-  private checkForFreezeInput() {
-    const width = this.cameras.main.width;
-    const offset = 40; // Determines how far from the side of the screen should be counted until the user input has reached the end of the screen
-
-    this.commandLine.text = "> " + this.currInput; // Need to get rid of cursor in order to check length
-    this.freezeInput = this.commandLine.width >= (width - offset);
-  }
 
   /**
    * Moves the terminal screen to a specified location (used for scrolling)
@@ -285,200 +220,33 @@ export class TerminalScene extends Phaser.Scene {
   }
 
   /**
-   * Defines what happens when a key is input
-   * @param keyEvent The keyboard event that calls this function
+   * Defines what happens when the user presses enter on the keyboard
+   * @param inputStr The string that is currently in the input of the command line
+   * @param scene The scene instance that contains the terminal input
    */
-  private onKeyInput(keyEvent: KeyboardEvent) {
-    if (this.keyDebounceReject) {
-      return; // Reject any input that while we are in debounce cooldown
+  private static onEnter(inputStr: string, scene: Phaser.Scene) {
+    let terminalScene = <TerminalScene>scene;
+
+    // Submit input
+    let response = InputHandler.submitInput(inputStr);
+    if (response.type === InputResponseType.STRING || response.type === InputResponseType.ERROR) {
+      // Update the terminal screen
+      terminalScene.updateTerminalScreen(`\n\n> ${ inputStr }\n${ response.stringData }`);
+
+      // Reset all variables
+      TerminalInputHandler.instance.currInput = "";
+      TerminalInputHandler.instance.lastInput = "";
+      TerminalInputHandler.instance.cursorPos = 0;
     }
-    else {
-      this.keyDebounceReject = true;
-      this.time.addEvent({
-        delay: KEY_DEBOUNCE_WAIT_TIME,
-        callback: () => {
-          this.keyDebounceReject = false;
-        },
-        callbackScope: this
-      });
+    else if (response.type === InputResponseType.SCENE_CHANGE) {
+      terminalScene.updateTerminalScreen(`\n\n> ${ inputStr }`);
+      terminalScene.scene.start(response.sceneChangeData, {terminalData: terminalScene.terminalScreen.text});
     }
 
-    const keyCat = this.getKeyCategory(keyEvent.keyCode);
-    if (keyCat != KeyCodeCateogry.INVALID) {
-      switch (keyCat) {
-        // If letter, digit, or space, append to the input string
-        case KeyCodeCateogry.LETTER:
-        case KeyCodeCateogry.DIGIT:
-        case KeyCodeCateogry.SPACE:
-          if (!this.freezeInput) {
-            let key = keyEvent.key.toLocaleLowerCase();
-            // Check if user is typing in digit while holding down shift
-            if (keyCat === KeyCodeCateogry.DIGIT && ("" + (keyEvent.keyCode - 48)) != key) {
-              key = "" + (keyEvent.keyCode - 48);
-            }
-            this.currInput = this.currInput.substring(0, this.cursorPos) + key + this.currInput.substring(this.cursorPos);
-
-            // Save this change
-            InputHandler.resetPrevInputCounter();
-            this.lastInput = this.currInput;
-
-            // Manipulate cursor
-            this.cursorPos++;
-          }
-          break;
-        // Replace input with next previous input
-        case KeyCodeCateogry.KEY_UP:
-          let newNextInput = InputHandler.getNextPrevInput();
-          if (newNextInput != "") {
-            this.currInput = newNextInput;
-          }
-          this.cursorPos = this.currInput.length; // Move cursor to the end
-          break;
-        // Replace input with previous previous input (or last edited command)
-        case KeyCodeCateogry.KEY_DOWN:
-          let newPrevInput = InputHandler.getPreviousPrevInput();
-          if (!newPrevInput.bottom && newPrevInput.prevInput != "") {
-            this.currInput = newPrevInput.prevInput;
-          }
-          else { // If we reach the bottom, set the input as the last edited input
-            this.currInput = this.lastInput;
-          }
-          this.cursorPos = this.currInput.length; // Move cursor to the end
-          break;
-        // Move cursor to the left
-        case KeyCodeCateogry.KEY_LEFT:
-          if (this.cursorPos > 0) {
-            this.cursorPos--;
-          }
-          break;
-        // Move cursor to the right
-        case KeyCodeCateogry.KEY_RIGHT:
-          if (this.cursorPos < this.currInput.length) {
-            this.cursorPos++;
-          }
-          break;
-        // If backspace, remove char behind cursor
-        case KeyCodeCateogry.BACKSPACE:
-          this.currInput = this.currInput.substring(0, this.cursorPos - 1) + this.currInput.substring(this.cursorPos);
-
-          // Move the cursor
-          if (this.cursorPos > 0) {
-            this.cursorPos--;
-          }
-
-          // Save this change
-          InputHandler.resetPrevInputCounter();
-          this.lastInput = this.currInput;
-          break;
-        // If delete, remove char in front of cursor
-        case KeyCodeCateogry.DELETE:
-          if (this.cursorPos < this.currInput.length) {
-            this.currInput = this.currInput.substring(0, this.cursorPos) + this.currInput.substring(this.cursorPos + 1);
-
-            // Save this change
-            InputHandler.resetPrevInputCounter();
-            this.lastInput = this.currInput;
-          }
-          break;
-        // If enter, accept current input
-        case KeyCodeCateogry.ENTER:
-          let inputStr = this.currInput.trim();
-          if (inputStr != "") {
-            let response = InputHandler.submitInput(inputStr);
-
-            if (response.type === InputResponseType.STRING || response.type === InputResponseType.ERROR) {
-              // Update the terminal screen
-              this.updateTerminalScreen(`\n\n> ${ inputStr }\n${ response.stringData }`);
-
-              // Reset all variables
-              this.currInput = "";
-              this.lastInput = "";
-              this.cursorPos = 0;
-            }
-            else if (response.type === InputResponseType.SCENE_CHANGE) {
-              this.updateTerminalScreen(`\n\n> ${ inputStr }`);
-              this.scene.start(response.sceneChangeData, {terminalData: this.terminalScreen.text});
-            }
-
-            // Check if terminal screen overflows allotted text amount
-            let textArr = this.terminalScreen.text.split("\n");
-            if (textArr.length > MAX_NUM_TERMINAL_LINES) { // If there are too many lines, trim it
-              this.updateTerminalScreen(textArr.slice(textArr.length - MAX_NUM_TERMINAL_LINES).join("\n"), true);
-            }
-          }
-          break;
-      }
-      this.commandLine.text = "> " + this.currInput; // Update the command line
-      this.setCursorVisible(); // After every key input, set the cursor to visible
-      this.checkForFreezeInput(); // After every key input, check if we should freeze user input (or release user input freeze)
-    }
-  }
-
-  /**
-   * Sets the cursor status to visible
-   * Also resets blinkEvent so cursor continues to blink normally
-   */
-  private setCursorVisible() {
-    this.blinkCursor = false;
-    this.blinkCursorCallback();
-    this.cursorBlinkEvent.reset({
-      delay: CURSOR_BLINK_TIME,
-      callback: this.blinkCursorCallback,
-      callbackScope: this,
-      loop: true
-    });
-  }
-
-  /**
-   * Writes data to the terminal screen and updates it accordingly
-   * @param data The strings to be added at the end of the terminal screen
-   * @param overwrite If true, overwrite the terminal screen text with the data text
-   */
-  private updateTerminalScreen(data: string, overwrite=false) {
-    if (overwrite) {
-      this.terminalScreen.text = data;
-    }
-    else {
-      this.terminalScreen.text += data;
-    }
-    this.scrollTerminalScreenTo(TerminalScene.TERMINAL_HEIGHT - this.terminalScreen.height); // Move the terminal screen to the bottom
-    this.updateScrollBarSize(); // Update the scroll bar
-  }
-
-  /**
-   * Gets the category of the keyboard input (@see KeyCodeCateogry)
-   * @param key The keycode of the keyboard input
-   * @returns The category of the keyboard input
-   */
-  private getKeyCategory(key: number): KeyCodeCateogry {
-    if (key >= 65 && key <= 90) {
-      return KeyCodeCateogry.LETTER
-    }
-    if (key >= 48 && key <= 57) {
-      return KeyCodeCateogry.DIGIT;
-    }
-    switch (key) {
-      case 8:
-        return KeyCodeCateogry.BACKSPACE;
-      case 9:
-        return KeyCodeCateogry.TAB;
-      case 10:
-      case 13:
-        return KeyCodeCateogry.ENTER;
-      case 32:
-        return KeyCodeCateogry.SPACE;
-      case 37:
-        return KeyCodeCateogry.KEY_LEFT;
-      case 38:
-        return KeyCodeCateogry.KEY_UP;
-      case 39:
-        return KeyCodeCateogry.KEY_RIGHT;
-      case 40:
-        return KeyCodeCateogry.KEY_DOWN;
-      case 46:
-        return KeyCodeCateogry.DELETE;
-      default:
-        return KeyCodeCateogry.INVALID;
+    // Check if terminal screen overflows allotted text amount
+    let textArr = terminalScene.terminalScreen.text.split("\n");
+    if (textArr.length > MAX_NUM_TERMINAL_LINES) { // If there are too many lines, trim it
+      terminalScene.updateTerminalScreen(textArr.slice(textArr.length - MAX_NUM_TERMINAL_LINES).join("\n"), true);
     }
   }
 }
