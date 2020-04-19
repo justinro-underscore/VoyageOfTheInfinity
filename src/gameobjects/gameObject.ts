@@ -22,14 +22,16 @@ export class GameObject {
       console.error(`Object name cannot contain the word \"with\" ${ this.id }`);
     }
     this.altNames = new Array<string>();
-    objJson.altNames.forEach(name => {
-      this.altNames.push(name.toLocaleLowerCase());
-      if (name.toLocaleLowerCase().includes(" with ")) {
-        console.error(`Object name cannot contain the word \"with\" ${ this.id }`);
-      }
-    });
+    if (objJson.altNames != null) {
+      objJson.altNames.forEach(name => {
+        this.altNames.push(name.toLocaleLowerCase());
+        if (name.toLocaleLowerCase().includes(" with ")) {
+          console.error(`Object name cannot contain the word \"with\" ${ this.id }`);
+        }
+      });
+    }
     this.desc = objJson.desc;
-    this.pickupable = objJson.pickupable;
+    this.pickupable = (objJson.pickupable != null ? objJson.pickupable : false);
   }
 
   /**
@@ -48,7 +50,7 @@ export class GameObject {
 export interface GameObjectJson {
   id: string;
   name: string;
-  altNames: string[]; // List of alternative names this object will respond to (e.g. "Door Key" may also respond to the keyword "key")
+  altNames?: string[]; // List of alternative names this object will respond to (e.g. "Door Key" may also respond to the keyword "key")
   desc: string;
-  pickupable: boolean; // If true, this object can be placed in the user's inventory
+  pickupable?: boolean; // If true, this object can be placed in the user's inventory. Defaults to false
 }

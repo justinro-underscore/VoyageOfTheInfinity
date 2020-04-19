@@ -20,9 +20,7 @@
         {
           "id": "obj_counter",
           "name": "Counter",
-          "altNames": [],
-          "desc": "Use me to get a counter",
-          "pickupable": false
+          "desc": "Use me to get a counter"
         }
       ]
     },
@@ -51,9 +49,7 @@
         {
           "id": "obj_desk",
           "name": "Desk",
-          "altNames": [],
-          "desc": "A simple metal desk",
-          "pickupable": false
+          "desc": "A simple metal desk"
         }
       ]
     },
@@ -90,7 +86,6 @@
         {
           "id": "obj_pedestal",
           "name": "Pedestal",
-          "altNames": [],
           "desc": "An ornate pedestal that holds the idol. It warns adventurers against attempting to take the idol",
           "pickupable": false
         }
@@ -115,8 +110,7 @@
           "id": "obj_boulder",
           "name": "Big Boulder",
           "altNames": ["Boulder"],
-          "desc": "There's a really big boulder, it's going to crush you",
-          "pickupable": false
+          "desc": "There's a really big boulder, it's going to crush you"
         }
       ]
     },
@@ -138,7 +132,6 @@
         {
           "id": "obj_tool",
           "name": "Tool",
-          "altNames": [],
           "desc": "This is a tool",
           "pickupable": true
         },
@@ -152,7 +145,6 @@
         {
           "id": "obj_chair",
           "name": "Chair",
-          "altNames": [],
           "desc": "4 legs, definitely a chair",
           "pickupable": false
         },
@@ -160,8 +152,7 @@
           "id": "obj_big_desc",
           "name": "Big Desc",
           "altNames": ["Desc"],
-          "desc": "This\nIs\nA\nPurposely\nLarge\nDescription\nIn\nOrder\nTo\nTest\nHow\nWell\nThe\nScroll\nFunctions\nIn\nThe\nNew\nType\nOf\nTerminal\nScreen\nThat\nIs\nNot\nOn\nThe\nDOM",
-          "pickupable": false
+          "desc": "This\nIs\nA\nPurposely\nLarge\nDescription\nIn\nOrder\nTo\nTest\nHow\nWell\nThe\nScroll\nFunctions\nIn\nThe\nNew\nType\nOf\nTerminal\nScreen\nThat\nIs\nNot\nOn\nThe\nDOM"
         }
       ]
     },
@@ -183,7 +174,6 @@
         {
           "id": "obj_bench",
           "name": "Bench",
-          "altNames": [],
           "desc": "It is a nice wooden bench, intricately carved",
           "pickupable": true
         },
@@ -197,7 +187,6 @@
         {
           "id": "obj_emoji",
           "name": "Emoji",
-          "altNames": [],
           "desc": "😜",
           "pickupable": true
         }
@@ -222,7 +211,6 @@
         {
           "id": "obj_key1",
           "name": "Key",
-          "altNames": [],
           "desc": "This is the key to the door",
           "pickupable": true
         },
@@ -230,8 +218,7 @@
           "id": "obj_door1",
           "name": "Door",
           "altNames": ["South Door"],
-          "desc": "It appears to be locked",
-          "pickupable": false
+          "desc": "It appears to be locked"
         }
       ]
     },
@@ -270,14 +257,12 @@
         {
           "id": "obj_use_test_1_use",
           "name": "Use",
-          "altNames": [],
           "desc": "Use",
           "pickupable": true
         },
         {
           "id": "obj_use_test_1_with",
           "name": "With",
-          "altNames": [],
           "desc": "With",
           "pickupable": false
         }
@@ -315,7 +300,6 @@
         {
           "id": "obj_use_test_2_with",
           "name": "With",
-          "altNames": [],
           "desc": "With",
           "pickupable": false
         }
@@ -339,7 +323,6 @@
         {
           "id": "obj_use_test_3_use",
           "name": "Use",
-          "altNames": [],
           "desc": "Use",
           "pickupable": true
         },
