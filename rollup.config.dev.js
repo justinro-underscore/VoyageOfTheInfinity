@@ -45,7 +45,8 @@ export default {
         commonjs({
             include: [
                 'node_modules/eventemitter3/**',
-                'node_modules/phaser/**'
+                'node_modules/phaser/**',
+                'node_modules/phaser3-rex-plugins/**'
             ],
             exclude: [
                 'node_modules/phaser/src/polyfills/requestAnimationFrame.js'
