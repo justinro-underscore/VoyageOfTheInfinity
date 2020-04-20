@@ -106,7 +106,7 @@ export class Room {
    * @param objName A string representing the object's name
    * @returns An array containing the game objects with the name (or alternate name) given
    */
-  getObjects(objName: string): Array<GameObject> {
+  getObjectsFromName(objName: string): Array<GameObject> {
     let objs = new Array<GameObject>();
     this.objects.forEach(obj => {
       if (obj.equals(objName)) {

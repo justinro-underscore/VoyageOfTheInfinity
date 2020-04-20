@@ -14,7 +14,7 @@ export class InventoryHandler {
    * @param objName A string representing the object's name
    * @returns An array containing the game objects with the name (or alternate name) given
    */
-  static getObjects(objName: string): Array<GameObject> {
+  static getObjectsFromName(objName: string): Array<GameObject> {
     let objs = new Array<GameObject>();
     InventoryHandler.objectsInInventory.forEach(obj => {
       if (obj.equals(objName)) {

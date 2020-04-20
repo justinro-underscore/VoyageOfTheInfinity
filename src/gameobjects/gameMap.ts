@@ -71,12 +71,12 @@ export class GameMap {
   }
 
   /**
-   * @see Room.getObjects
-   * @param objName @see Room.getObjects
-   * @returns @see Room.getObjects
+   * @see Room.getObjectsFromName
+   * @param objName @see Room.getObjectsFromName
+   * @returns @see Room.getObjectsFromName
    */
-  getObjects(objName: string): Array<GameObject> {
-    return this.rooms.get(this.playerPos).getObjects(objName);
+  getObjectsFromName(objName: string): Array<GameObject> {
+    return this.rooms.get(this.playerPos).getObjectsFromName(objName);
   }
 
   /**

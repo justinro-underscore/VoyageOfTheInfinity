@@ -30,8 +30,8 @@ export class MapHandler {
     return this.instance.gameMap.setRoomVisitedStatus(visited);
   }
 
-  static getObjects(objName: string): Array<GameObject> {
-    return this.instance.gameMap.getObjects(objName);
+  static getObjectsFromName(objName: string): Array<GameObject> {
+    return this.instance.gameMap.getObjectsFromName(objName);
   }
 
   static getObjectFromID(objID: string): GameObject {
