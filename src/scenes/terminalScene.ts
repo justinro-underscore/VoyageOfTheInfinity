@@ -1,5 +1,5 @@
 import "phaser";
-import { TerminalInputHandler, COMMAND_LINE_OFFSET } from '../handler/terminalInputHandler';
+import { TerminalInputHandler, COMMAND_LINE_OFFSET } from "../handler/terminalInputHandler";
 import { InputHandler, InputResponseType } from "../handler/inputHandler";
 import { MapHandler } from "../handler/mapHandler";
 // import { BlurPipeline } from "../shaders/blurPipeline";
@@ -107,7 +107,7 @@ export class TerminalScene extends Phaser.Scene {
     /*********************************
      * Set up the command line input *
      *********************************/
-    TerminalInputHandler.instantiateTerminalInput(this, TerminalScene.onEnter, { fontColor: "#77ff55" });
+    TerminalInputHandler.instantiateTerminalInput(this, TerminalScene.onEnter, InputHandler.getSuggestions(), { primaryFontColor: "#77ff55" });
 
     if (this.initData != null) {
       this.updateTerminalScreen(this.initData.terminalData, true);
@@ -229,6 +229,10 @@ export class TerminalScene extends Phaser.Scene {
     // Submit input
     let response = InputHandler.submitInput(inputStr);
     if (response.type === InputResponseType.STRING || response.type === InputResponseType.ERROR) {
+      if (response.command === "go") { // If we have moved rooms, update the suggestions
+        TerminalInputHandler.setSuggestions(InputHandler.getSuggestions());
+      }
+
       // Update the terminal screen
       terminalScene.updateTerminalScreen(`\n\n> ${ inputStr }\n${ response.stringData }`);
 

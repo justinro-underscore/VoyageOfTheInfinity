@@ -1,5 +1,5 @@
 import "phaser";
-import { TerminalInputHandler } from "../handler/terminalInputHandler";
+import { TerminalInputHandler, SuggestionObj } from "../handler/terminalInputHandler";
 import { MapHandler } from "../handler/mapHandler";
 import { EventHandler } from "../handler/eventHandler";
 
@@ -31,7 +31,10 @@ export class MainMenuScene extends Phaser.Scene {
     /*********************
      * Add terminal input *
      *********************/
-    TerminalInputHandler.instantiateTerminalInput(this, MainMenuScene.onEnter, { fontSize: 24 });
+    const mainMenuSuggestions: SuggestionObj = new Map(Object.entries({
+      "start": null
+    }));
+    TerminalInputHandler.instantiateTerminalInput(this, MainMenuScene.onEnter, mainMenuSuggestions,  { fontSize: 24 });
   }
 
   private static onEnter(inputStr: string, scene: Phaser.Scene) {

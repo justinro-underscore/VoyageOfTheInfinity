@@ -71,6 +71,14 @@ export class GameMap {
   }
 
   /**
+   * Gets a list of all the objects in a given room
+   * @param roomID The ID of the room requested, defaults to current room
+   */
+  getRoomObjects(roomID=this.playerPos): Array<GameObject> {
+    return Array.from(this.rooms.get(roomID).objects.values());
+  }
+
+  /**
    * @see Room.getObjectsFromName
    * @param objName @see Room.getObjectsFromName
    * @returns @see Room.getObjectsFromName

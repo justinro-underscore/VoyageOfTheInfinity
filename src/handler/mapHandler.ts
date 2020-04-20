@@ -30,6 +30,10 @@ export class MapHandler {
     return this.instance.gameMap.setRoomVisitedStatus(visited);
   }
 
+  static getCurrRoomObjects(): Array<GameObject> {
+    return this.instance.gameMap.getRoomObjects();
+  }
+
   static getObjectsFromName(objName: string): Array<GameObject> {
     return this.instance.gameMap.getObjectsFromName(objName);
   }

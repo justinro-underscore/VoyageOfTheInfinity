@@ -1,6 +1,7 @@
 import { MapHandler } from "./mapHandler";
 import { InventoryHandler } from "./inventoryHandler";
 import { EventHandler } from "./eventHandler";
+import { SuggestionObj } from "./terminalInputHandler";
 import { GameObject } from "../gameobjects/gameObject";
 
 class MultipleObjects extends Error {
@@ -13,16 +14,19 @@ class MultipleObjects extends Error {
 }
 
 class OverrideInput {
+  command: string;
   func: (inputStr: string) => InputResponse;
   data: any;
 
-  constructor(func: (inputStr: string) => InputResponse, data: any) {
+  constructor(command: string, func: (inputStr: string) => InputResponse, data: any) {
+    this.command = command;
     this.func = func;
     this.data = data;
   }
 }
 
 interface CommandObject {
+  getPotentialArguments: () => Map<string, Array<string>>;
   responseType: InputResponseType;
   validate: (objs: Array<string>) => boolean;
   execute: (objs: Array<string>) => string;
@@ -40,11 +44,13 @@ export enum InputResponseType {
 }
 
 export class InputResponse {
+  command: string;
   type: InputResponseType;
   stringData: string = null;
   sceneChangeData: string = null; // The scene key to change to
 
-  constructor(type: InputResponseType, data?: any) {
+  constructor(command: string, type: InputResponseType, data?: any) {
+    this.command = command;
     this.type = type;
     switch (type) {
       case InputResponseType.STRING:
@@ -66,6 +72,7 @@ export class InputHandler {
   static overrideInput: OverrideInput = null;
   static previousInputs = new Array<string>();
   static currPrevInputPointer = -1;
+  private static inputSuggestions: SuggestionObj = null;
 
   static submitInput(inputStr: string): InputResponse {
     InputHandler.currPrevInputPointer = -1;
@@ -98,6 +105,13 @@ export class InputHandler {
       return {bottom: true, prevInput: ""};
     }
     return {bottom: false, prevInput: InputHandler.getPrevInput(false)};
+  }
+
+  static getSuggestions(): SuggestionObj {
+    if (InputHandler.inputSuggestions === null) {
+      InputHandler.setSuggestions();
+    }
+    return InputHandler.inputSuggestions;
   }
 
   private static getPrevInput(next: boolean) {
@@ -159,7 +173,7 @@ export class InputHandler {
 
   private static getObjectToUseWith(useObj: GameObject): string {
     let withObjStr = <string>InputHandler.overrideInput.data.withObjStr;
-    InputHandler.overrideInput = new OverrideInput(null, {useObj: useObj, setNull: false});
+    InputHandler.overrideInput = new OverrideInput("use", null, {useObj: useObj, setNull: false});
     return InputHandler.getObjectToUseWithCallback(withObjStr);
   }
 
@@ -174,7 +188,7 @@ export class InputHandler {
       return result;
     }
     catch (multObj) {
-      InputHandler.overrideInput = new OverrideInput(InputHandler.chooseObject, {
+      InputHandler.overrideInput = new OverrideInput("use", InputHandler.chooseObject, {
         callback: InputHandler.useMultipleObjects,
         objs: (<MultipleObjects>multObj).objectsFound,
         useObj: InputHandler.overrideInput.data.useObj
@@ -199,208 +213,290 @@ export class InputHandler {
     return EventHandler.runUseEvent(useObj);
   }
 
-  private static getCommandObj(command: string): CommandObject {
-    switch (command) {
-      case "examine":
-        return {
-          responseType: InputResponseType.STRING,
-          validate: (objs: Array<string>): boolean => {
-            return true;
-          },
-          execute: (objs: Array<string>): string => {
-            if (objs.length === 0) {
-              return MapHandler.getCurrRoomInfo(true);
-            }
-            let objName = objs.join(" ");
-            try {
-              let obj = InputHandler.getObject(objName);
-              if (obj != null) {
-                return InputHandler.examineObject(obj);
-              }
-              else {
-                return `${ objName } cannot be found`;
-              }
-            }
-            catch (multObj) {
-              InputHandler.overrideInput = new OverrideInput(InputHandler.chooseObject, {callback: InputHandler.examineObject, objs: (<MultipleObjects>multObj).objectsFound});
-              return InputHandler.multipleObjectsDetectedPrompt(multObj);
-            }
+  private static VALID_COMMANDS = new Map<string, Array<string>>(Object.entries({
+    "examine": null,
+    "go": [
+      "walk"
+    ],
+    "take": null,
+    "drop": null,
+    "inventory": [
+      "inv"
+    ],
+    "use": null,
+    "map": null
+  }));
+
+  private static COMMAND_OBJS = new Map<string, CommandObject>(Object.entries({
+    "examine": {
+      getPotentialArguments: (): Map<string, Array<string>> => {
+        let objNames = MapHandler.getCurrRoomObjects().map(obj => obj.name.toLocaleLowerCase());
+        objNames = objNames.concat(InventoryHandler.objectsInInventory.map(obj => obj.name.toLocaleLowerCase()));
+        let args = new Map<string, Array<string>>();
+        objNames.forEach(name => {
+          args.set(name, null);
+        });
+        return args;
+      },
+      responseType: InputResponseType.STRING,
+      validate: (objs: Array<string>): boolean => {
+        return true;
+      },
+      execute: (objs: Array<string>): string => {
+        if (objs.length === 0) {
+          return MapHandler.getCurrRoomInfo(true);
+        }
+        let objName = objs.join(" ");
+        try {
+          let obj = InputHandler.getObject(objName);
+          if (obj != null) {
+            return InputHandler.examineObject(obj);
+          }
+          else {
+            return `${ objName } cannot be found`;
           }
         }
+        catch (multObj) {
+          InputHandler.overrideInput = new OverrideInput("examine", InputHandler.chooseObject, {callback: InputHandler.examineObject, objs: (<MultipleObjects>multObj).objectsFound});
+          return InputHandler.multipleObjectsDetectedPrompt(multObj);
+        }
+      }
+    },
 
-      case "go":
-      case "walk":
-        return {
-          responseType: InputResponseType.STRING,
-          validate: (objs: Array<string>): boolean => {
-            return true;
-          },
-          execute: (objs: Array<string>): string => {
-            let dir = -1;
-            switch (objs[0]) {
-              case "north":
-              case "n":
-                dir = 0;
-                break;
-              case "east":
-              case "e":
-                dir = 1;
-                break;
-              case "south":
-              case "s":
-                dir = 2;
-                break;
-              case "west":
-              case "w":
-                dir = 3;
-                break;
-            }
-            if (MapHandler.movePlayer(dir)) {
-              let visited = MapHandler.getCurrRoomVisited()
-              if (!visited) {
-                MapHandler.setCurrRoomVisitedStatus(true);
-              }
-              return MapHandler.getCurrRoomInfo(!visited);
-            }
-            return "Cannot go that direction!";
+    "go": {
+      getPotentialArguments: (): Map<string, Array<string>> => {
+        let dirs = ["north", "n", "east", "e", "south", "s", "west", "w"];
+        let args = new Map<string, Array<string>>();
+        dirs.forEach(dir => {
+          args.set(dir, null);
+        });
+        return args;
+      },
+      responseType: InputResponseType.STRING,
+      validate: (objs: Array<string>): boolean => {
+        return true;
+      },
+      execute: (objs: Array<string>): string => {
+        let dir = -1;
+        switch (objs[0]) {
+          case "north":
+          case "n":
+            dir = 0;
+            break;
+          case "east":
+          case "e":
+            dir = 1;
+            break;
+          case "south":
+          case "s":
+            dir = 2;
+            break;
+          case "west":
+          case "w":
+            dir = 3;
+            break;
+        }
+        if (MapHandler.movePlayer(dir)) {
+          let visited = MapHandler.getCurrRoomVisited()
+          if (!visited) {
+            MapHandler.setCurrRoomVisitedStatus(true);
+          }
+          InputHandler.setSuggestions();
+
+          return MapHandler.getCurrRoomInfo(!visited);
+        }
+        return "Cannot go that direction!";
+      }
+    },
+
+    "take": {
+      getPotentialArguments: (): Map<string, Array<string>> => {
+        let args = new Map<string, Array<string>>();
+        MapHandler.getCurrRoomObjects().filter(obj => obj.pickupable).map(obj => obj.name.toLocaleLowerCase()).forEach(name => {
+          args.set(name, null);
+        });
+        return args;
+      },
+      responseType: InputResponseType.STRING,
+      validate: (objs: Array<string>): boolean => {
+        return true;
+      },
+      execute: (objs: Array<string>): string => {
+        let objName = objs.join(" ");
+        try {
+          let obj = InputHandler.getObject(objName, [ObjectLocation.INVENTORY]);
+          if (obj != null) {
+            return InputHandler.takeObject(obj);
+          }
+          else {
+            return `${ objName } cannot be found`;
           }
         }
+        catch (multObj) {
+          InputHandler.overrideInput = new OverrideInput("take", InputHandler.chooseObject, {callback: InputHandler.takeObject, objs: (<MultipleObjects>multObj).objectsFound});
+          return InputHandler.multipleObjectsDetectedPrompt(multObj);
+        }
+      }
+    },
 
-      case "take":
-        return {
-          responseType: InputResponseType.STRING,
-          validate: (objs: Array<string>): boolean => {
-            return true;
-          },
-          execute: (objs: Array<string>): string => {
-            let objName = objs.join(" ");
-            try {
-              let obj = InputHandler.getObject(objName, [ObjectLocation.INVENTORY]);
-              if (obj != null) {
-                return InputHandler.takeObject(obj);
-              }
-              else {
-                return `${ objName } cannot be found`;
-              }
-            }
-            catch (multObj) {
-              InputHandler.overrideInput = new OverrideInput(InputHandler.chooseObject, {callback: InputHandler.takeObject, objs: (<MultipleObjects>multObj).objectsFound});
-              return InputHandler.multipleObjectsDetectedPrompt(multObj);
-            }
+    "drop": {
+      getPotentialArguments: (): Map<string, Array<string>> => {
+        let args = new Map<string, Array<string>>();
+        InventoryHandler.objectsInInventory.map(obj => obj.name.toLocaleLowerCase()).forEach(name => {
+          args.set(name, null);
+        });
+        return args;
+      },
+      responseType: InputResponseType.STRING,
+      validate: (objs: Array<string>): boolean => {
+        return true;
+      },
+      execute: (objs: Array<string>): string => {
+        let objName = objs.join(" ");
+        try {
+          let obj = InputHandler.getObject(objName, [ObjectLocation.MAP]);
+          if (obj != null) {
+            return InputHandler.dropObject(obj);
+          }
+          else {
+            return `${ objName } is not in your inventory`;
           }
         }
-
-      case "drop":
-        return {
-          responseType: InputResponseType.STRING,
-          validate: (objs: Array<string>): boolean => {
-            return true;
-          },
-          execute: (objs: Array<string>): string => {
-            let objName = objs.join(" ");
-            try {
-              let obj = InputHandler.getObject(objName, [ObjectLocation.MAP]);
-              if (obj != null) {
-                return InputHandler.dropObject(obj);
-              }
-              else {
-                return `${ objName } is not in your inventory`;
-              }
-            }
-            catch (multObj) {
-              InputHandler.overrideInput = new OverrideInput(InputHandler.chooseObject, {callback: InputHandler.dropObject, objs: (<MultipleObjects>multObj).objectsFound});
-              return InputHandler.multipleObjectsDetectedPrompt(multObj);
-            }
-          }
+        catch (multObj) {
+          InputHandler.overrideInput = new OverrideInput("drop", InputHandler.chooseObject, {callback: InputHandler.dropObject, objs: (<MultipleObjects>multObj).objectsFound});
+          return InputHandler.multipleObjectsDetectedPrompt(multObj);
         }
+      }
+    },
 
-      case "inventory":
-      case "inv":
-        return {
-          responseType: InputResponseType.STRING,
-          validate: (objs: Array<string>): boolean => {
-            return true;
-          },
-          execute: (objs: Array<string>): string => {
-            if (InventoryHandler.size === 0) {
-              return "Inventory is empty!";
+    "inventory": {
+      getPotentialArguments: (): Map<string, Array<string>> => {
+        return null;
+      },
+      responseType: InputResponseType.STRING,
+      validate: (objs: Array<string>): boolean => {
+        return true;
+      },
+      execute: (objs: Array<string>): string => {
+        if (InventoryHandler.size === 0) {
+          return "Inventory is empty!";
+        }
+        else {
+          let result = "In your inventory you have:";
+          InventoryHandler.objectsInInventory.forEach(obj => {
+            result += `\n- ${ obj.name }`;
+          });
+          return result;
+        }
+      }
+    },
+
+    "use": {
+      getPotentialArguments: (): Map<string, Array<string>> => {
+        // TODO Check to see if objects can be used
+        let objNames = MapHandler.getCurrRoomObjects().map(obj => obj.name.toLocaleLowerCase());
+        objNames = objNames.concat(InventoryHandler.objectsInInventory.map(obj => obj.name.toLocaleLowerCase()));
+        let args = new Map<string, Array<string>>();
+        objNames.forEach(name => {
+          args.set(name, objNames);
+        });
+        return args;
+      },
+      responseType: InputResponseType.STRING,
+      validate: (objs: Array<string>): boolean => {
+        return true;
+      },
+      execute: (objs: Array<string>): string => {
+        let objName = objs.join(" ");
+        if (objName.includes(" with ")) { // Use multiple objects
+          let objNames = objName.split(" with ");
+          try {
+            let useObj = InputHandler.getObject(objNames[0]);
+            if (useObj != null) {
+              InputHandler.overrideInput = new OverrideInput("use", null, {withObjStr: objNames[1]});
+              return InputHandler.getObjectToUseWith(useObj);
             }
             else {
-              let result = "In your inventory you have:";
-              InventoryHandler.objectsInInventory.forEach(obj => {
-                result += `\n- ${ obj.name }`;
-              });
-              return result;
+              return `${ objNames[0] } cannot be found`;
             }
           }
+          catch (multObj) {
+            InputHandler.overrideInput = new OverrideInput("use", InputHandler.chooseObject, {callback: InputHandler.getObjectToUseWith, objs: (<MultipleObjects>multObj).objectsFound, withObjStr: objNames[1], setNull: false});
+            return InputHandler.multipleObjectsDetectedPrompt(multObj);
+          }
         }
+        else { // Using single objects
+          try {
+            let obj = InputHandler.getObject(objName);
+            if (obj != null) {
+              return InputHandler.useSingleObject(obj);
+            }
+            else {
+              return `${ objName } cannot be found`;
+            }
+          }
+          catch (multObj) {
+            InputHandler.overrideInput = new OverrideInput("use", InputHandler.chooseObject, {callback: InputHandler.useSingleObject, objs: (<MultipleObjects>multObj).objectsFound, setNull: false});
+            return InputHandler.multipleObjectsDetectedPrompt(multObj);
+          }
+        }
+      }
+    },
 
-      case "use":
-        return {
-          responseType: InputResponseType.STRING,
-          validate: (objs: Array<string>): boolean => {
-            return true;
-          },
-          execute: (objs: Array<string>): string => {
-            let objName = objs.join(" ");
-            if (objName.includes(" with ")) { // Use multiple objects
-              let objNames = objName.split(" with ");
-              try {
-                let useObj = InputHandler.getObject(objNames[0]);
-                if (useObj != null) {
-                  InputHandler.overrideInput = new OverrideInput(null, {withObjStr: objNames[1]});
-                  return InputHandler.getObjectToUseWith(useObj);
-                }
-                else {
-                  return `${ objNames[0] } cannot be found`;
-                }
-              }
-              catch (multObj) {
-                InputHandler.overrideInput = new OverrideInput(InputHandler.chooseObject, {callback: InputHandler.getObjectToUseWith, objs: (<MultipleObjects>multObj).objectsFound, withObjStr: objNames[1], setNull: false});
-                return InputHandler.multipleObjectsDetectedPrompt(multObj);
-              }
-            }
-            else { // Using single objects
-              try {
-                let obj = InputHandler.getObject(objName);
-                if (obj != null) {
-                  return InputHandler.useSingleObject(obj);
-                }
-                else {
-                  return `${ objName } cannot be found`;
-                }
-              }
-              catch (multObj) {
-                InputHandler.overrideInput = new OverrideInput(InputHandler.chooseObject, {callback: InputHandler.useSingleObject, objs: (<MultipleObjects>multObj).objectsFound, setNull: false});
-                return InputHandler.multipleObjectsDetectedPrompt(multObj);
-              }
-            }
-          }
-        }
+    "map": {
+      getPotentialArguments: (): Map<string, Array<string>> => {
+        return null;
+      },
+      responseType: InputResponseType.SCENE_CHANGE,
+      validate: (objs: Array<string>): boolean => {
+        return true;
+      },
+      execute: (objs: Array<string>): string => {
+        return "MapTerminalScene";
+      }
+    }
+  }));
 
-      case "map":
-        return {
-          responseType: InputResponseType.SCENE_CHANGE,
-          validate: (objs: Array<string>): boolean => {
-            return true;
-          },
-          execute: (objs: Array<string>): string => {
-            return "MapTerminalScene";
-          }
+  private static getMasterCommand(command: string): string {
+    let masterKey = null;
+    if (!InputHandler.VALID_COMMANDS.has(command)) {
+      Array.from(InputHandler.VALID_COMMANDS.entries()).forEach(cmd => {
+        console.log(cmd, cmd[1] != null && command in cmd[1]);
+        if (cmd[1] != null && cmd[1].includes(command)) {
+          masterKey = cmd[0];
+          return;
         }
+      });
+    }
+    else {
+      masterKey = command;
+    }
+    return masterKey;
+  }
+
+  private static getCommandObj(command: string): CommandObject {
+    let masterKey = InputHandler.getMasterCommand(command);
+
+    if (masterKey != null) {
+      if (!InputHandler.COMMAND_OBJS.has(masterKey)) {
+        console.error(`Command ${ masterKey } is not defined`);
+      }
+      else {
+        return InputHandler.COMMAND_OBJS.get(masterKey);
+      }
     }
     return null;
   }
 
   private static handleCommand(command: string, objs: Array<string>): InputResponse {
     const commandObj = InputHandler.getCommandObj(command);
-    let response = new InputResponse(InputResponseType.ERROR, "Command not recognized!");
+    let response = new InputResponse(InputHandler.getMasterCommand(command), InputResponseType.ERROR, "Command not recognized!");
     if (commandObj != null) {
       if (commandObj.validate(objs)) {
-        response = new InputResponse(commandObj.responseType, commandObj.execute(objs));
+        response = new InputResponse(InputHandler.getMasterCommand(command), commandObj.responseType, commandObj.execute(objs));
       }
       else {
-        response = new InputResponse(InputResponseType.ERROR, `Error, invalid use of the command ${ command }`);
+        response = new InputResponse(InputHandler.getMasterCommand(command), InputResponseType.ERROR, `Error, invalid use of the command ${ command }`);
       }
     }
     return response;
@@ -417,10 +513,10 @@ export class InputHandler {
   private static getObject(objName: string, ignoreObjFrom: Array<ObjectLocation>=[]): GameObject {
     let objs = new Array<GameObject>();
     if (!ignoreObjFrom.includes(ObjectLocation.INVENTORY)) {
-      objs = objs.concat(InventoryHandler.getObjects(objName));
+      objs = objs.concat(InventoryHandler.getObjectsFromName(objName));
     }
     if (!ignoreObjFrom.includes(ObjectLocation.MAP)) {
-      objs = objs.concat(MapHandler.getObjects(objName));
+      objs = objs.concat(MapHandler.getObjectsFromName(objName));
     }
 
     if (objs.length === 0) {
@@ -435,6 +531,7 @@ export class InputHandler {
   }
 
   private static chooseObject(inputStr: string): InputResponse {
+    let command = InputHandler.overrideInput.command;
     let objs = InputHandler.overrideInput.data.objs;
     let num = Number(inputStr);
     let result = `${ inputStr } was not a possible choice`
@@ -444,6 +541,19 @@ export class InputHandler {
     else {
       InputHandler.overrideInput = null;
     }
-    return new InputResponse(InputResponseType.STRING, result);
+    return new InputResponse(command, InputResponseType.STRING, result);
+  }
+
+  private static setSuggestions() {
+    InputHandler.inputSuggestions = new Map<string, Map<string, Array<string>>>();
+    Array.from(InputHandler.VALID_COMMANDS.entries()).forEach(keyCommand => {
+      let suggObj = InputHandler.COMMAND_OBJS.get(keyCommand[0]).getPotentialArguments();
+      if (keyCommand[1] != null) {
+        keyCommand[1].forEach(command => {
+          InputHandler.inputSuggestions.set(command, suggObj);
+        });
+      }
+      InputHandler.inputSuggestions.set(keyCommand[0], suggObj);
+    });
   }
 }
