@@ -1,5 +1,5 @@
 import "phaser";
-import { TerminalInputHandler, COMMAND_LINE_OFFSET } from "../handler/terminalInputHandler";
+import { TerminalInputHandler, COMMAND_LINE_OFFSET } from '../handler/terminalInputHandler';
 import { InputHandler, InputResponseType } from "../handler/inputHandler";
 import { MapHandler } from "../handler/mapHandler";
 // import { BlurPipeline } from "../shaders/blurPipeline";
@@ -232,10 +232,7 @@ export class TerminalScene extends Phaser.Scene {
       // Update the terminal screen
       terminalScene.updateTerminalScreen(`\n\n> ${ inputStr }\n${ response.stringData }`);
 
-      // Reset all variables
-      TerminalInputHandler.instance.currInput = "";
-      TerminalInputHandler.instance.lastInput = "";
-      TerminalInputHandler.instance.cursorPos = 0;
+      TerminalInputHandler.resetInput();
     }
     else if (response.type === InputResponseType.SCENE_CHANGE) {
       terminalScene.updateTerminalScreen(`\n\n> ${ inputStr }`);

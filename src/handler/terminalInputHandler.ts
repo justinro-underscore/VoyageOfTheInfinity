@@ -26,6 +26,9 @@ const KEY_DEBOUNCE_WAIT_TIME = 1;
 // Define show tall the command line input is
 export const COMMAND_LINE_OFFSET = 10;
 
+/**
+ * Defines what configuration options are available for the terminal input
+ */
 export interface TerminalInputConfig {
   fontSize?: number;
   fontColor?: string;
@@ -40,19 +43,19 @@ export class TerminalInputHandler {
 
   private scene: Phaser.Scene; // Reference to the scene that this is being used in
 
-  commandLine: Phaser.GameObjects.Text; // Text that keeps track of what is currently input
-  currInput: string; // The current input
+  private commandLine: Phaser.GameObjects.Text; // Text that keeps track of what is currently input
+  private currInput: string; // The current input
 
-  freezeInput: boolean; // If true, user cannot enter in any more characters
+  private freezeInput: boolean; // If true, user cannot enter in any more characters
 
-  cursor: Phaser.GameObjects.Text; // Text that shows where the cursor is currently positioned
-  cursorPos: number; // Current cursor position
-  blinkCursor: boolean; // If the cursor is visible or not
-  cursorBlinkEvent: Phaser.Time.TimerEvent; // The timer event that determines the next time the cursor blink is toggled
+  private cursor: Phaser.GameObjects.Text; // Text that shows where the cursor is currently positioned
+  private cursorPos: number; // Current cursor position
+  private blinkCursor: boolean; // If the cursor is visible or not
+  private cursorBlinkEvent: Phaser.Time.TimerEvent; // The timer event that determines the next time the cursor blink is toggled
 
-  keyDebounceReject: boolean; // Keeps track of if we should accept or reject user input (to avoid double inputs)
+  private keyDebounceReject: boolean; // Keeps track of if we should accept or reject user input (to avoid double inputs)
 
-  lastInput: string; // Keeps track of the last input before a call to get the previous input was made
+  private lastInput: string; // Keeps track of the last input before a call to get the previous input was made
 
   onEnterFunc: (inputStr: string, scene: Phaser.Scene) => void; // Defines what should happen when the input string is input
                                                                 // Need the scene in order to access variables inside the scene
@@ -113,6 +116,17 @@ export class TerminalInputHandler {
     return {
       fontSize: 16,
       fontColor: "#ffffff"
+    }
+  }
+
+  /**
+   * Resets all variables, setting current input and last input to "" and cursor position to 0
+   */
+  static resetInput() {
+    if (TerminalInputHandler.instance != null) {
+      TerminalInputHandler.instance.currInput = "";
+      TerminalInputHandler.instance.lastInput = "";
+      TerminalInputHandler.instance.cursorPos = 0;
     }
   }
 
