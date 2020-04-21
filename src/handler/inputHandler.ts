@@ -238,7 +238,8 @@ export class InputHandler {
     ],
     "use": null,
     "map": null,
-    "help": null
+    "help": null,
+    "swag": null
   }));
 
   private static COMMAND_OBJS = new Map<string, CommandObject>(Object.entries({
@@ -603,7 +604,24 @@ export class InputHandler {
         }],
         desc: "shows how to use the given command"
       }]
-    }
+    },
+
+    "swag": {
+      getPotentialArguments: (): Map<string, Array<string>> => {
+        return null;
+      },
+      responseType: InputResponseType.STRING,
+      validate: (args: Array<string>): boolean => {
+        return true;
+      },
+      execute: (args: Array<string>): string => {
+        return "Ha ha, swag bro";
+      },
+      help: [{
+        desc: "swag",
+        example: "swag"
+      }]
+    },
   }));
 
   private static getMasterCommand(command: string): string {
