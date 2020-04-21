@@ -25,11 +25,22 @@ class OverrideInput {
   }
 }
 
+interface CommandObjectHelp {
+  syntax?: string;
+  args?: {
+    argName: string;
+    argOpts: string;
+    argExample: string;
+  }[];
+  desc: string;
+}
+
 interface CommandObject {
   getPotentialArguments: () => Map<string, Array<string>>;
   responseType: InputResponseType;
   validate: (args: Array<string>) => boolean;
   execute: (args: Array<string>) => string;
+  help: CommandObjectHelp[];
 }
 
 enum ObjectLocation {
@@ -42,6 +53,8 @@ export enum InputResponseType {
   STRING,
   SCENE_CHANGE
 }
+
+const dirOptions = ["north", "n", "east", "e", "south", "s", "west", "w"];
 
 export class InputResponse {
   command: string;
@@ -224,7 +237,8 @@ export class InputHandler {
       "inv"
     ],
     "use": null,
-    "map": null
+    "map": null,
+    "help": null
   }));
 
   private static COMMAND_OBJS = new Map<string, CommandObject>(Object.entries({
@@ -243,10 +257,10 @@ export class InputHandler {
         return true;
       },
       execute: (args: Array<string>): string => {
-        if (args.length === 0) {
+        let objName = args.join(" ");
+        if (args.length === 0 || objName === "room") {
           return MapHandler.getCurrRoomInfo(true);
         }
-        let objName = args.join(" ");
         try {
           let obj = InputHandler.getObject(objName);
           if (obj != null) {
@@ -260,12 +274,25 @@ export class InputHandler {
           InputHandler.overrideInput = new OverrideInput("examine", InputHandler.chooseObject, {callback: InputHandler.examineObject, objs: (<MultipleObjects>multObj).objectsFound});
           return InputHandler.multipleObjectsDetectedPrompt(multObj);
         }
-      }
+      },
+      help: [
+        {
+          desc: "get a full description of the current room"
+        },
+        {
+          args: [{
+            argName: "obj",
+            argOpts: "an object in the room or in one's inventory",
+            argExample: "triceratops dung"
+          }],
+          desc: "get a description of an object"
+        }
+      ]
     },
 
     "go": {
       getPotentialArguments: (): Map<string, Array<string>> => {
-        let dirs = ["north", "n", "east", "e", "south", "s", "west", "w"];
+        let dirs = dirOptions;
         let args = new Map<string, Array<string>>();
         dirs.forEach(dir => {
           args.set(dir, null);
@@ -306,7 +333,15 @@ export class InputHandler {
           return MapHandler.getCurrRoomInfo(!visited);
         }
         return "Cannot go that direction!";
-      }
+      },
+      help: [{
+        args: [{
+          argName: "dir",
+          argOpts: `one of the following: [${ dirOptions.reduce((dir, str) => dir + ", " + str) }]`,
+          argExample: "north"
+        }],
+        desc: "attempts to move the player in the given direction"
+      }]
     },
 
     "take": {
@@ -336,7 +371,15 @@ export class InputHandler {
           InputHandler.overrideInput = new OverrideInput("take", InputHandler.chooseObject, {callback: InputHandler.takeObject, objs: (<MultipleObjects>multObj).objectsFound});
           return InputHandler.multipleObjectsDetectedPrompt(multObj);
         }
-      }
+      },
+      help: [{
+        args: [{
+          argName: "obj",
+          argOpts: "an object in the room",
+          argExample: "golden idol"
+        }],
+        desc: "places an object in one's inventory (if possible)"
+      }]
     },
 
     "drop": {
@@ -366,7 +409,15 @@ export class InputHandler {
           InputHandler.overrideInput = new OverrideInput("drop", InputHandler.chooseObject, {callback: InputHandler.dropObject, objs: (<MultipleObjects>multObj).objectsFound});
           return InputHandler.multipleObjectsDetectedPrompt(multObj);
         }
-      }
+      },
+      help: [{
+        args: [{
+          argName: "obj",
+          argOpts: "an object in one's inventory",
+          argExample: "crystal"
+        }],
+        desc: "takes an object out of one's inventory and puts it in the room"
+      }]
     },
 
     "inventory": {
@@ -388,7 +439,10 @@ export class InputHandler {
           });
           return result;
         }
-      }
+      },
+      help: [{
+        desc: "shows what one has in their inventory"
+      }]
     },
 
     "use": {
@@ -440,7 +494,29 @@ export class InputHandler {
             return InputHandler.multipleObjectsDetectedPrompt(multObj);
           }
         }
-      }
+      },
+      help: [{
+        args: [{
+          argName: "obj",
+          argOpts: "an object in the room or in one's inventory",
+          argExample: "keypad"
+        }],
+        desc: "attempts to use the given object"
+      },
+      {
+        syntax: "$1 $2 with $3",
+        args: [{
+          argName: "useObj",
+          argOpts: "an object in the room or in one's inventory",
+          argExample: "plasma gun"
+        },
+        {
+          argName: "withObj",
+          argOpts: "an object in the room or in one's inventory, different from obj1",
+          argExample: "door"
+        }],
+        desc: "attempts to use the first object on the second object"
+      }]
     },
 
     "map": {
@@ -453,7 +529,80 @@ export class InputHandler {
       },
       execute: (args: Array<string>): string => {
         return "MapTerminalScene";
-      }
+      },
+      help: [{
+        desc: "opens the game map"
+      }]
+    },
+
+    "help": {
+      getPotentialArguments: (): Map<string, Array<string>> => {
+        let cmdNames = Array.from(InputHandler.VALID_COMMANDS.entries()).flatMap(cmd => (cmd[1] != null ? cmd[1] : []).concat([cmd[0]]));
+        let args = new Map<string, Array<string>>();
+        cmdNames.forEach(name => {
+          args.set(name, null);
+        });
+        return args;
+      },
+      responseType: InputResponseType.STRING,
+      validate: (args: Array<string>): boolean => {
+        return true;
+      },
+      execute: (args: Array<string>): string => {
+        let cmd = (args.length > 0 ? InputHandler.getMasterCommand(args[0]) : "help");
+        if (cmd != null) {
+          let helpObj = InputHandler.COMMAND_OBJS.get(cmd).help;
+          let res = "";
+          helpObj.forEach(obj => {
+            res += "\n";
+            let syntax = obj.syntax;
+            if (!("syntax" in obj)) {
+              syntax = "$1";
+              if ("args" in obj) {
+                obj.args.forEach((_, i) => {
+                  syntax += ` $${ i + 2 }`;
+                });
+              }
+            }
+            let example = syntax; // Do not replace $1 with cmd (yet)
+            syntax = syntax.replace("$1", cmd);
+            let args = ("args" in obj ? obj.args : []);
+            args.forEach((arg, i) => {
+              syntax = syntax.replace(`$${ i + 2 }`, `<${ arg.argName }>`);
+              example = example.replace(`$${ i + 2 }`, arg.argExample);
+            });
+            res += `Usage: ${ syntax }\n`;
+            args.forEach(arg => {
+              res += `\twhere <${ arg.argName }> is:\n`;
+              res += `\t\t${ arg.argOpts }\n`;
+            });
+            res += `Description: ${ obj.desc }\n`;
+            let cmds = InputHandler.VALID_COMMANDS.get(cmd);
+            if (cmds != null) {
+              res += `\tAlso responds to: [${ cmds.reduce((cmd, str) => cmd + ", " + str) }]\n`;
+            }
+            res += `Example: \`${ example.replace("$1", cmd) }\``;
+            if (cmds != null) {
+              res += ` OR \`${ example.replace("$1", cmds[0]) }\``;
+            }
+            res += "\n";
+          });
+          res = res.substr(0, res.length - 1);
+          return res;
+        }
+        return `${ args[0] } is not a valid command`;
+      },
+      help: [{
+        desc: "shows how to use the `help` command"
+      },
+      {
+        args: [{
+          argName: "command",
+          argOpts: `one of the following: [${ Array.from(InputHandler.VALID_COMMANDS.keys()).reduce((cmd, str) => cmd + ", " + str) }]`,
+          argExample: "examine"
+        }],
+        desc: "shows how to use the given command"
+      }]
     }
   }));
 
@@ -461,7 +610,6 @@ export class InputHandler {
     let masterKey = null;
     if (!InputHandler.VALID_COMMANDS.has(command)) {
       Array.from(InputHandler.VALID_COMMANDS.entries()).forEach(cmd => {
-        console.log(cmd, cmd[1] != null && command in cmd[1]);
         if (cmd[1] != null && cmd[1].includes(command)) {
           masterKey = cmd[0];
           return;
