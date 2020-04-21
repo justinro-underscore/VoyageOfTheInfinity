@@ -2,6 +2,7 @@ import "phaser";
 import { TerminalInputHandler, SuggestionObj } from "../handler/terminalInputHandler";
 import { MapHandler } from "../handler/mapHandler";
 import { EventHandler } from "../handler/eventHandler";
+import { ShaderHandler } from "../handler/shaderHandler";
 
 /**
  * Defines the initial scene that users see when they start the game
@@ -20,6 +21,11 @@ export class MainMenuScene extends Phaser.Scene {
    * Set up all game assets shown to user and adds functionality
    */
   create() {
+    /******************
+     * Set up shaders *
+     ******************/
+    ShaderHandler.instantiateShaders(this.game);
+
     /************
      * Add text *
      ************/

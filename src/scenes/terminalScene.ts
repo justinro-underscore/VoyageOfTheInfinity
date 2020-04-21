@@ -2,11 +2,7 @@ import "phaser";
 import { TerminalInputHandler, COMMAND_LINE_OFFSET } from "../handler/terminalInputHandler";
 import { InputHandler, InputResponseType } from "../handler/inputHandler";
 import { MapHandler } from "../handler/mapHandler";
-// import { BlurPipeline } from "../shaders/blurPipeline";
-// import { GrayscalePipeline } from "../shaders/grayscalePipeline";
-// import { LinesPipeline } from "../shaders/linesPipeline";
-// import { BulgePipeline } from "../shaders/bulgePipeline";
-// import { TransparentPipeline } from "../shaders/transparentPipeline";
+import { ShaderHandler } from "../handler/shaderHandler";
 
 // Coefficient that determines how fast a scroll moves
 const SCROLL_COEF = 10;
@@ -27,7 +23,8 @@ export class TerminalScene extends Phaser.Scene {
   terminalScreen: Phaser.GameObjects.Text; // Text that is shown to the user, holds all previous inputs and their responses
   scrollBar: Phaser.GameObjects.Image; // Scroll bar on the right side of the scene that keeps track of where the user has scrolled to
 
-  shaders: Map<string, Phaser.Renderer.WebGL.WebGLPipeline>;
+  shaders: Map<string, Phaser.Renderer.WebGL.WebGLPipeline>; // Defines what shaders are active right now
+  lineShaderTint: number;
 
   constructor() {
     super({
@@ -113,23 +110,19 @@ export class TerminalScene extends Phaser.Scene {
       this.updateTerminalScreen(this.initData.terminalData, true);
     }
 
-    // this.shaders = new Map<string, Phaser.Renderer.WebGL.WebGLPipeline>();
-    // this.shaders.set("Blur", (<Phaser.Renderer.WebGL.WebGLRenderer>this.game.renderer).addPipeline("Blur", new BlurPipeline(this.game)));
-    // this.shaders.set("Grayscale", (<Phaser.Renderer.WebGL.WebGLRenderer>this.game.renderer).addPipeline("Grayscale", new GrayscalePipeline(this.game)));
-    // this.shaders.set("Transparent", (<Phaser.Renderer.WebGL.WebGLRenderer>this.game.renderer).addPipeline("Transparent", new TransparentPipeline(this.game)));
-    // this.shaders.set("Lines", (<Phaser.Renderer.WebGL.WebGLRenderer>this.game.renderer).addPipeline("Lines", new LinesPipeline(this.game)));
-    // this.shaders.set("Bulge", (<Phaser.Renderer.WebGL.WebGLRenderer>this.game.renderer).addPipeline("Bulge", new BulgePipeline(this.game)));
-
-    // this.shaders.forEach(shader => {
-    //   shader.setFloat2("resolution", <number>this.game.config.width, <number>this.game.config.height);
-    //   this.cameras.main.setRenderToTexture(shader);
-    //   this.cameras.main.glTexture
-    // });
+    /******************
+     * Set up shaders *
+     ******************/
+    ShaderHandler.setRenderToShaders(this, "terminal");
   }
 
-  // update(time: number) {
-  //   this.shaders.get("Lines").setFloat1("time", time);
-  // }
+  /**
+   * Update the shaders
+   * @param time The amount of time that has passed
+   */
+  update(time: number) {
+    ShaderHandler.updateShaders(time);
+  }
 
   /**
    * Writes data to the terminal screen and updates it accordingly

@@ -1,6 +1,7 @@
 import "phaser";
 import { Room, RoomExitStatus } from "../gameobjects/room";
 import { MapHandler } from "../handler/mapHandler";
+import { ShaderHandler } from "../handler/shaderHandler";
 
 /**
  * Defines the user interface for the map
@@ -488,6 +489,19 @@ export class MapTerminalScene extends Phaser.Scene {
     this.mapUI = new MapUI(this);
 
     this.input.keyboard.on("keydown", this.onKeyDown, this);
+
+    /******************
+     * Set up shaders *
+     ******************/
+    ShaderHandler.setRenderToShaders(this, "terminal");
+  }
+
+  /**
+   * Update the shaders
+   * @param time The amount of time that has passed
+   */
+  update(time: number) {
+    ShaderHandler.updateShaders(time);
   }
 
   /***********************
