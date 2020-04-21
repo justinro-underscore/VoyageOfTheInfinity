@@ -28,8 +28,8 @@ class OverrideInput {
 interface CommandObject {
   getPotentialArguments: () => Map<string, Array<string>>;
   responseType: InputResponseType;
-  validate: (objs: Array<string>) => boolean;
-  execute: (objs: Array<string>) => string;
+  validate: (args: Array<string>) => boolean;
+  execute: (args: Array<string>) => string;
 }
 
 enum ObjectLocation {
@@ -239,14 +239,14 @@ export class InputHandler {
         return args;
       },
       responseType: InputResponseType.STRING,
-      validate: (objs: Array<string>): boolean => {
+      validate: (args: Array<string>): boolean => {
         return true;
       },
-      execute: (objs: Array<string>): string => {
-        if (objs.length === 0) {
+      execute: (args: Array<string>): string => {
+        if (args.length === 0) {
           return MapHandler.getCurrRoomInfo(true);
         }
-        let objName = objs.join(" ");
+        let objName = args.join(" ");
         try {
           let obj = InputHandler.getObject(objName);
           if (obj != null) {
@@ -273,12 +273,12 @@ export class InputHandler {
         return args;
       },
       responseType: InputResponseType.STRING,
-      validate: (objs: Array<string>): boolean => {
+      validate: (args: Array<string>): boolean => {
         return true;
       },
-      execute: (objs: Array<string>): string => {
+      execute: (args: Array<string>): string => {
         let dir = -1;
-        switch (objs[0]) {
+        switch (args[0]) {
           case "north":
           case "n":
             dir = 0;
@@ -318,11 +318,11 @@ export class InputHandler {
         return args;
       },
       responseType: InputResponseType.STRING,
-      validate: (objs: Array<string>): boolean => {
+      validate: (args: Array<string>): boolean => {
         return true;
       },
-      execute: (objs: Array<string>): string => {
-        let objName = objs.join(" ");
+      execute: (args: Array<string>): string => {
+        let objName = args.join(" ");
         try {
           let obj = InputHandler.getObject(objName, [ObjectLocation.INVENTORY]);
           if (obj != null) {
@@ -348,11 +348,11 @@ export class InputHandler {
         return args;
       },
       responseType: InputResponseType.STRING,
-      validate: (objs: Array<string>): boolean => {
+      validate: (args: Array<string>): boolean => {
         return true;
       },
-      execute: (objs: Array<string>): string => {
-        let objName = objs.join(" ");
+      execute: (args: Array<string>): string => {
+        let objName = args.join(" ");
         try {
           let obj = InputHandler.getObject(objName, [ObjectLocation.MAP]);
           if (obj != null) {
@@ -374,10 +374,10 @@ export class InputHandler {
         return null;
       },
       responseType: InputResponseType.STRING,
-      validate: (objs: Array<string>): boolean => {
+      validate: (args: Array<string>): boolean => {
         return true;
       },
-      execute: (objs: Array<string>): string => {
+      execute: (args: Array<string>): string => {
         if (InventoryHandler.size === 0) {
           return "Inventory is empty!";
         }
@@ -403,11 +403,11 @@ export class InputHandler {
         return args;
       },
       responseType: InputResponseType.STRING,
-      validate: (objs: Array<string>): boolean => {
+      validate: (args: Array<string>): boolean => {
         return true;
       },
-      execute: (objs: Array<string>): string => {
-        let objName = objs.join(" ");
+      execute: (args: Array<string>): string => {
+        let objName = args.join(" ");
         if (objName.includes(" with ")) { // Use multiple objects
           let objNames = objName.split(" with ");
           try {
@@ -448,10 +448,10 @@ export class InputHandler {
         return null;
       },
       responseType: InputResponseType.SCENE_CHANGE,
-      validate: (objs: Array<string>): boolean => {
+      validate: (args: Array<string>): boolean => {
         return true;
       },
-      execute: (objs: Array<string>): string => {
+      execute: (args: Array<string>): string => {
         return "MapTerminalScene";
       }
     }
@@ -488,12 +488,12 @@ export class InputHandler {
     return null;
   }
 
-  private static handleCommand(command: string, objs: Array<string>): InputResponse {
+  private static handleCommand(command: string, args: Array<string>): InputResponse {
     const commandObj = InputHandler.getCommandObj(command);
     let response = new InputResponse(InputHandler.getMasterCommand(command), InputResponseType.ERROR, "Command not recognized!");
     if (commandObj != null) {
-      if (commandObj.validate(objs)) {
-        response = new InputResponse(InputHandler.getMasterCommand(command), commandObj.responseType, commandObj.execute(objs));
+      if (commandObj.validate(args)) {
+        response = new InputResponse(InputHandler.getMasterCommand(command), commandObj.responseType, commandObj.execute(args));
       }
       else {
         response = new InputResponse(InputHandler.getMasterCommand(command), InputResponseType.ERROR, `Error, invalid use of the command ${ command }`);
