@@ -1,8 +1,4 @@
-import "phaser"
-// import { BlurPipeline } from "../shaders/blurPipeline";
-// import { GrayscalePipeline } from "../shaders/grayscalePipeline";
-// import { BulgePipeline } from "../shaders/bulgePipeline";
-// import { TransparentPipeline } from "../shaders/transparentPipeline";
+import "phaser";
 import { TerminalPipeline } from "../shaders/terminalPipeline";
 
 // The minimum amount of frames that must pass before the terminal is tinted
