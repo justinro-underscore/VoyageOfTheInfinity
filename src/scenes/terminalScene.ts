@@ -57,8 +57,6 @@ export class TerminalScene extends TerminalInputScene {
    * Set up all game elements that are shown to the user
    */
   create() {
-    TerminalScene.TERMINAL_HEIGHT = this.cameras.main.height - (this.COMMAND_LINE_HEIGHT + 2 * TerminalInputScene.COMMAND_LINE_OFFSET);
-
     /*************************
      * Set up the background *
      *************************/
@@ -69,25 +67,18 @@ export class TerminalScene extends TerminalInputScene {
     /******************************
      * Set up the terminal screen *
      ******************************/
-    // Create a mask (so that the terminal screen does not reach the bottom of the screen which is reserved for user input)
-    let graphics = this.make.graphics({});
-    graphics.fillRect(0, 0, this.cameras.main.width, TerminalScene.TERMINAL_HEIGHT);
-    let mask = new Phaser.Display.Masks.GeometryMask(this, graphics);
-
     this.terminalScreen = this.add.text(10, 10, MapHandler.getCurrRoomInfo(true), {
       font: "16px Monospace",
       align: "left",
       fill: "#77ff55",
       wordWrap: { width: this.cameras.main.width - 20, useAdvancedWrap: false }
     });
-    this.terminalScreen.setMask(mask);
 
     /***********************************************
      * Set up the scroll bar and its functionality *
      ***********************************************/
     this.scrollBar = this.add.image(this.cameras.main.width - SCROLL_BAR_WIDTH, 0, "scrollBar").setInteractive();
     this.scrollBar.setOrigin(0, 0);
-    this.scrollBar.setDisplaySize(SCROLL_BAR_WIDTH, TerminalScene.TERMINAL_HEIGHT); // Start out the full size of the terminal screen
     this.scrollBar.setTint(0x77ff55); // Should be the color of the text
 
     // Set up draggable functionality
@@ -110,6 +101,20 @@ export class TerminalScene extends TerminalInputScene {
      *********************************/
     this.suggestions = InputHandler.getSuggestions();
     super.createTerminalInput({ primaryFontColor: "#77ff55" });
+
+    /********************************************************
+     * Set the terminal height based on command line height *
+     ********************************************************/
+    TerminalScene.TERMINAL_HEIGHT = this.cameras.main.height - (this.COMMAND_LINE_HEIGHT + 2 * TerminalInputScene.COMMAND_LINE_OFFSET);
+
+    // Start scroll bar full size of the terminal screen
+    this.scrollBar.setDisplaySize(SCROLL_BAR_WIDTH, TerminalScene.TERMINAL_HEIGHT);
+
+    // Create a mask for terminal screen (so that it does not reach the bottom of the screen which is reserved for user input)
+    let graphics = this.make.graphics({});
+    graphics.fillRect(0, 0, this.cameras.main.width, TerminalScene.TERMINAL_HEIGHT);
+    let mask = new Phaser.Display.Masks.GeometryMask(this, graphics);
+    this.terminalScreen.setMask(mask);
 
     /*****************************************************
      * Set the terminal screen to whatever it was before *
