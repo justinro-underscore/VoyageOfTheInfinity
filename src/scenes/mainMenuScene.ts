@@ -23,6 +23,7 @@ export class MainMenuScene extends TerminalInputScene {
    */
   preload() {
     AudioHandler.loadAudio(this);
+    this.load.image("blackTerminalScreen", "assets/img/black-terminal-screen.png");
   }
 
   /**
@@ -34,6 +35,13 @@ export class MainMenuScene extends TerminalInputScene {
      ****************************/
     ShaderHandler.instantiateShaders(this.game);
     AudioHandler.instantiateAudio(this.game);
+
+    /*************************
+     * Set up the background *
+     *************************/
+    let background = this.add.image(0, 0, "blackTerminalScreen");
+    background.setOrigin(0, 0);
+    background.setDisplaySize(this.cameras.main.width, this.cameras.main.height);
 
     /************
      * Add text *
@@ -50,7 +58,20 @@ export class MainMenuScene extends TerminalInputScene {
       "start": null
     }));
     super.createTerminalInput({ fontSize: 24 });
+
+    // /**************
+    //  * Add shader *
+    //  **************/
+    // ShaderHandler.setRenderToShaders(this, "terminal");
   }
+
+  // /**
+  //  * Update the shaders
+  //  * @param time The amount of time that has passed
+  //  */
+  // update(time: number) {
+  //   ShaderHandler.updateShaders(time);
+  // }
 
   /*************************
    *   PROTECTED METHODS   *
