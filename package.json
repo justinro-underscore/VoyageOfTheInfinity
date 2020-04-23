@@ -4,9 +4,9 @@
   "description": "A brwoser-based text adventure game created with Phaser 3",
   "main": "index.js",
   "scripts": {
-    "build": "rollup --config rollup.config.dist.js",
-    "start": "http-server ./dist",
-    "dev": "rollup --watch --config rollup.config.dev.js"
+    "build": "webpack",
+    "start": "http-server",
+    "dev": "webpack --watch & live-server --port=2569"
   },
   "repository": {
     "type": "git",
@@ -18,20 +18,16 @@
     "url": "https://github.com/justinro-underscore/VoyageOfTheInfinity/issues"
   },
   "homepage": "https://github.com/justinro-underscore/VoyageOfTheInfinity#readme",
-  "dependencies": {
-    "@rollup/plugin-replace": "^2.3.0",
-    "http-server": "^0.12.1",
-    "phaser": "^3.22.0",
-    "phaser3-rex-plugins": "^1.1.11",
-    "rollup": "^1.29.0",
-    "rollup-plugin-commonjs": "^10.1.0",
-    "rollup-plugin-json": "^4.0.0",
-    "rollup-plugin-node-resolve": "^5.2.0",
-    "rollup-plugin-serve": "^1.0.1",
-    "rollup-plugin-typescript2": "^0.25.3",
-    "typescript": "^3.7.4"
-  },
   "devDependencies": {
+    "live-server": "^1.2.1",
+    "phaser": "^3.20.1",
+    "phaser3-rex-plugins": "^1.1.11",
+    "ts-loader": "^6.2.2",
+    "typescript": "^3.8.3",
+    "webpack": "^4.41.2",
+    "webpack-cli": "^3.3.10"
+  },
+  "dependencies": {
     "@typescript-eslint/eslint-plugin": "^2.28.0",
     "@typescript-eslint/parser": "^2.28.0",
     "eslint": "^6.8.0"
