@@ -1,7 +1,7 @@
 import { MapHandler } from "./mapHandler";
 import { InventoryHandler } from "./inventoryHandler";
 import { EventHandler } from "./eventHandler";
-import { SuggestionObj } from "./terminalInputHandler";
+import { SuggestionObj } from "../scenes/abstractscenes/terminalInputScene";
 import { GameObject } from "../gameobjects/gameObject";
 
 class MultipleObjects extends Error {

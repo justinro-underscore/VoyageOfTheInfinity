@@ -1,6 +1,6 @@
 import "phaser"
 import BBCodeText from "phaser3-rex-plugins/plugins/bbcodetext.js";
-import { InputHandler } from "./inputHandler";
+import { InputHandler } from "../../handler/inputHandler";
 // import { AudioHandler } from "./audioHandler";
 
 // Defines what category each key input goes into
@@ -27,9 +27,6 @@ const KEY_DEBOUNCE_WAIT_TIME = 1;
 // Defines the starting text of the command line
 const COMMAND_LINE_PROMPT = "[b]>[/b] ";
 
-// Define show tall the command line input is
-export const COMMAND_LINE_OFFSET = 10;
-
 /**
  * Defines what configuration options are available for the terminal input
  */
@@ -43,47 +40,113 @@ export interface TerminalInputConfig {
 export type SuggestionObj = Map<string, Map<string, Array<string>>>;
 
 /**
- * Handles all input to the terminal screen
+ * Scene that creates a terminal command line at the bottom of the screen
  */
-export class TerminalInputHandler {
-  static instance: TerminalInputHandler // Can only have one instance going at a time
-  static COMMAND_LINE_HEIGHT: number; // Defines how tall the command line is
+export abstract class TerminalInputScene extends Phaser.Scene {
+  static COMMAND_LINE_OFFSET = 10; // Define how far from the sides of the screen the command line is
+  COMMAND_LINE_HEIGHT: number; // Defines how tall the command line is
 
-  private scene: Phaser.Scene; // Reference to the scene that this is being used in
+  config: TerminalInputConfig; // Current configuration of the terminal input
+  commandLine: BBCodeText; // Text that keeps track of what is currently input
+  currInput: string; // The current input
 
-  private config: TerminalInputConfig; // Current configuration of the terminal input
-  private commandLine: BBCodeText; // Text that keeps track of what is currently input
-  private currInput: string; // The current input
+  freezeInput: boolean; // If true, user cannot enter in any more characters
 
-  private freezeInput: boolean; // If true, user cannot enter in any more characters
+  cursor: Phaser.GameObjects.Text; // Text that shows where the cursor is currently positioned
+  cursorPos: number; // Current cursor position
+  blinkCursor: boolean; // If the cursor is visible or not
+  cursorBlinkEvent: Phaser.Time.TimerEvent; // The timer event that determines the next time the cursor blink is toggled
 
-  private cursor: Phaser.GameObjects.Text; // Text that shows where the cursor is currently positioned
-  private cursorPos: number; // Current cursor position
-  private blinkCursor: boolean; // If the cursor is visible or not
-  private cursorBlinkEvent: Phaser.Time.TimerEvent; // The timer event that determines the next time the cursor blink is toggled
+  keyDebounceReject: boolean; // Keeps track of if we should accept or reject user input (to avoid double inputs)
 
-  private keyDebounceReject: boolean; // Keeps track of if we should accept or reject user input (to avoid double inputs)
+  lastInput: string; // Keeps track of the last input before a call to get the previous input was made
 
-  private lastInput: string; // Keeps track of the last input before a call to get the previous input was made
-
-  onEnterFunc: (inputStr: string, scene: Phaser.Scene) => void; // Defines what should happen when the input string is input
-                                                                // Need the scene in order to access variables inside the scene
-                                                                //  (in functions, cast this to subclass of Phaser.Scene)
-
-  private suggestions: SuggestionObj; // Defines the suggestions for inputs
-  private showSugg: boolean; // If true, show the suggestion
+  showSugg: boolean; // If true, show the suggestion
 
   // private keyStrokeSounds: Array<Phaser.Sound.BaseSound>; // Holds all keystroke sounds
 
+  abstract suggestions: SuggestionObj; // Defines the suggestions for inputs
+
   /**
-   * Instantiates the current instance of TerminalInputHandler
-   * @param scene The scene that this is being used in
-   * @param onEnterFunc Defines what happens when the input string is input
-   * @param suggestions Defines the suggestions for input
+   * Creates a new scene with the name of the subclass
+   * @param sceneName Name of the scene
+   */
+  constructor(sceneName: string) {
+    super({
+      key: sceneName
+    });
+  }
+
+  /**
+   * Generates the terminal input at the bottom of the screen
    * @param config The configuration of the terminal
    */
-  static instantiateTerminalInput(scene: Phaser.Scene, onEnterFunc: (inputStr: string, scene: Phaser.Scene) => void, suggestions?: SuggestionObj, config?: TerminalInputConfig) {
-    TerminalInputHandler.instance = new TerminalInputHandler(scene, onEnterFunc, suggestions, config);
+  createTerminalInput(config?: TerminalInputConfig) {
+    this.showSugg = false;
+
+    this.config = TerminalInputScene.getDefaultTerminalConfig();
+    if (config != null) {
+      if ("fontSize" in config) {
+        this.config.fontSize = config.fontSize;
+      }
+      if ("primaryFontColor" in config) {
+        this.config.primaryFontColor = config.primaryFontColor;
+      }
+      if ("secondaryFontColor" in config) {
+        this.config.secondaryFontColor = config.secondaryFontColor;
+      }
+    }
+
+    // Create the input
+    this.currInput = "";
+    this.lastInput = "";
+    this.commandLine = new BBCodeText(this, 0, 0, COMMAND_LINE_PROMPT, { fontFamily: "Monospace", fontSize: `${ this.config.fontSize }px`, color: this.config.primaryFontColor });
+    this.add.existing(this.commandLine);
+    this.COMMAND_LINE_HEIGHT = this.commandLine.height;
+    this.commandLine.setPosition(TerminalInputScene.COMMAND_LINE_OFFSET, this.cameras.main.height - (TerminalInputScene.COMMAND_LINE_OFFSET + this.COMMAND_LINE_HEIGHT));
+
+    // Create the cursor
+    this.blinkCursor = true;
+    this.cursor = this.add.text(0, 0, "  _", { font: `${ this.config.fontSize }px Monospace`, fill: this.config.primaryFontColor });
+    this.cursor.setPosition(TerminalInputScene.COMMAND_LINE_OFFSET, this.cameras.main.height - (TerminalInputScene.COMMAND_LINE_OFFSET + this.COMMAND_LINE_HEIGHT));
+    this.cursorPos = 0;
+
+    // Set variables
+    this.keyDebounceReject = false;
+    this.freezeInput = false;
+
+    // Set what happens on key input
+    this.input.keyboard.on("keydown", (event: KeyboardEvent) => this.onKeyInput(event), this);
+
+    // Start the blink
+    this.cursorBlinkEvent = this.time.addEvent({
+      delay: CURSOR_BLINK_TIME,
+      callback: this.blinkCursorCallback,
+      callbackScope: this,
+      loop: true
+    });
+
+    // // Populate the keystroke sounds
+    // this.keyStrokeSounds = [];
+    // for (let i = 1; i <= 3; i++) {
+    //   let sound = SoundHandler.getSound(`keystroke${ i }`);
+    //   if (sound != null) {
+    //     this.keyStrokeSounds.push(sound);
+    //   }
+    // }
+  }
+
+  /**
+   * Gets the default terminal configuration
+   * Must be a function instead of a const because the object kept getting overwritten
+   * @returns The default terminal configuration
+   */
+  static getDefaultTerminalConfig(): TerminalInputConfig {
+    return {
+      fontSize: 16,
+      primaryFontColor: "#ffffff",
+      secondaryFontColor: "#999999"
+    }
   }
 
   /**
@@ -121,108 +184,29 @@ export class TerminalInputHandler {
     }
   }
 
-  /**
-   * Gets the default terminal configuration
-   * @returns The default terminal configuration
-   */
-  static getDefaultTerminalConfig(): TerminalInputConfig {
-    return {
-      fontSize: 16,
-      primaryFontColor: "#ffffff",
-      secondaryFontColor: "#999999"
-    }
-  }
+  /*************************
+   *   PROTECTED METHODS   *
+   *************************/
 
   /**
    * Resets all variables, setting current input and last input to "" and cursor position to 0
    */
-  static resetInput() {
-    if (TerminalInputHandler.instance != null) {
-      TerminalInputHandler.instance.currInput = "";
-      TerminalInputHandler.instance.lastInput = "";
-      TerminalInputHandler.instance.cursorPos = 0;
-      TerminalInputHandler.instance.showSugg = false;
-    }
+  protected resetInput() {
+    this.currInput = "";
+    this.lastInput = "";
+    this.cursorPos = 0;
+    this.showSugg = false;
   }
 
   /**
-   * Sets the suggestions of the command line
-   * @param suggestions The suggestion object containing new suggestions
+   * Defines what happens when enter is pressed
+   * @param inputStr The input string after it has been trimmed
    */
-  static setSuggestions(suggestions: SuggestionObj) {
-    if (TerminalInputHandler.instance != null) {
-      TerminalInputHandler.instance.suggestions = suggestions;
-    }
-  }
+  protected abstract onEnterFunc(inputStr: string): void;
 
   /***********************
    *   PRIVATE METHODS   *
    ***********************/
-
-  /**
-   * Creates a new instance of the TerminalInputHandler
-   * @param scene The scene that this is being used in
-   * @param onEnterFunc Defines what happens when the input string is input
-   * @param suggestions Defines the suggestions for input
-   * @param config The configuration of the terminal
-   */
-  private constructor(scene: Phaser.Scene, onEnterFunc: (inputStr: string, scene: Phaser.Scene) => void, suggestions?: SuggestionObj, config?: TerminalInputConfig) {
-    this.scene = scene;
-    this.suggestions = suggestions;
-    this.showSugg = false;
-
-    this.config = TerminalInputHandler.getDefaultTerminalConfig();
-    if (config != null) {
-      if ("fontSize" in config) {
-        this.config.fontSize = config.fontSize;
-      }
-      if ("primaryFontColor" in config) {
-        this.config.primaryFontColor = config.primaryFontColor;
-      }
-      if ("secondaryFontColor" in config) {
-        this.config.secondaryFontColor = config.secondaryFontColor;
-      }
-    }
-
-    // Create the input
-    this.currInput = "";
-    this.lastInput = "";
-    this.commandLine = new BBCodeText(scene, 0, 0, COMMAND_LINE_PROMPT, { fontFamily: "Monospace", fontSize: `${ this.config.fontSize }px`, color: this.config.primaryFontColor });
-    scene.add.existing(this.commandLine);
-    TerminalInputHandler.COMMAND_LINE_HEIGHT = this.commandLine.height;
-    this.commandLine.setPosition(COMMAND_LINE_OFFSET, scene.cameras.main.height - (COMMAND_LINE_OFFSET + TerminalInputHandler.COMMAND_LINE_HEIGHT));
-
-    // Create the cursor
-    this.blinkCursor = true;
-    this.cursor = scene.add.text(0, 0, "  _", { font: `${ this.config.fontSize }px Monospace`, fill: this.config.primaryFontColor });
-    this.cursor.setPosition(COMMAND_LINE_OFFSET, scene.cameras.main.height - (COMMAND_LINE_OFFSET + TerminalInputHandler.COMMAND_LINE_HEIGHT));
-    this.cursorPos = 0;
-
-    // Set variables
-    this.keyDebounceReject = false;
-    this.freezeInput = false;
-
-    // Set what happens on key input
-    this.onEnterFunc = onEnterFunc;
-    scene.input.keyboard.on("keydown", (event: KeyboardEvent) => this.onKeyInput(event), this);
-
-    // Start the blink
-    this.cursorBlinkEvent = scene.time.addEvent({
-      delay: CURSOR_BLINK_TIME,
-      callback: this.blinkCursorCallback,
-      callbackScope: this,
-      loop: true
-    });
-
-    // // Populate the keystroke sounds
-    // this.keyStrokeSounds = [];
-    // for (let i = 1; i <= 3; i++) {
-    //   let sound = SoundHandler.getSound(`keystroke${ i }`);
-    //   if (sound != null) {
-    //     this.keyStrokeSounds.push(sound);
-    //   }
-    // }
-  }
 
   /**
    * Blinks the cursor if it can
@@ -246,7 +230,7 @@ export class TerminalInputHandler {
    * This should happen if the user's input has reached the end of the screen
    */
   private checkForFreezeInput() {
-    const width = this.scene.cameras.main.width;
+    const width = this.cameras.main.width;
     const offset = 40; // Determines how far from the side of the screen should be counted until the user input has reached the end of the screen
 
     this.commandLine.text = this.commandLine.text.replace("|", "").replace("_", ""); // Need to get rid of cursor in order to check length
@@ -263,7 +247,7 @@ export class TerminalInputHandler {
     }
     else {
       this.keyDebounceReject = true;
-      this.scene.time.addEvent({
+      this.time.addEvent({
         delay: KEY_DEBOUNCE_WAIT_TIME,
         callback: () => {
           this.keyDebounceReject = false;
@@ -273,7 +257,7 @@ export class TerminalInputHandler {
     }
 
     let showSugg = false; // Only show the suggestion if we type a character or have an invalid input
-    const keyCat = TerminalInputHandler.getKeyCategory(keyEvent.keyCode);
+    const keyCat = TerminalInputScene.getKeyCategory(keyEvent.keyCode);
     if (keyCat != KeyCodeCateogry.INVALID) {
       switch (keyCat) {
         // If letter, digit, or space, append to the input string
@@ -365,7 +349,7 @@ export class TerminalInputHandler {
           this.fillSuggestion();
           let inputStr = this.currInput.trim();
           if (inputStr != "") {
-            this.onEnterFunc(inputStr, this.scene);
+            this.onEnterFunc(inputStr);
           }
           break;
         // If an invalid input, still show the suggestion

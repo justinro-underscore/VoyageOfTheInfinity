@@ -1,5 +1,5 @@
 import "phaser";
-import { TerminalInputHandler, COMMAND_LINE_OFFSET } from "../handler/terminalInputHandler";
+import { TerminalInputScene, SuggestionObj } from "./abstractscenes/terminalInputScene";
 import { InputHandler, InputResponseType } from "../handler/inputHandler";
 import { MapHandler } from "../handler/mapHandler";
 import { ShaderHandler } from "../handler/shaderHandler";
@@ -16,7 +16,9 @@ const MAX_NUM_TERMINAL_LINES = 90; // Equivalent to about 3 lengths of terminal 
 /**
  * Defines the scene where user can input commands through a terminal interface
  */
-export class TerminalScene extends Phaser.Scene {
+export class TerminalScene extends TerminalInputScene {
+  suggestions: SuggestionObj; // Suggestions for the terminal
+
   initData: {terminalData: string}; // Defines the data sent in from the scene that started this scene
 
   private static TERMINAL_HEIGHT: number; // Const that defines the height of the terminal screen
@@ -27,11 +29,13 @@ export class TerminalScene extends Phaser.Scene {
   lineShaderTint: number;
 
   constructor() {
-    super({
-      key: "TerminalScene"
-    });
+    super("TerminalScene");
   }
 
+  /**
+   * Sets the terminal screen to whatever it was before
+   * @param data The terminal data containing previous inputs
+   */
   init(data: any) {
     if (Object.keys(data).length > 0) {
       this.initData = <{terminalData: string}>data;
@@ -53,7 +57,7 @@ export class TerminalScene extends Phaser.Scene {
    * Set up all game elements that are shown to the user
    */
   create() {
-    TerminalScene.TERMINAL_HEIGHT = this.cameras.main.height - (TerminalInputHandler.COMMAND_LINE_HEIGHT + 2 * COMMAND_LINE_OFFSET);
+    TerminalScene.TERMINAL_HEIGHT = this.cameras.main.height - (this.COMMAND_LINE_HEIGHT + 2 * TerminalInputScene.COMMAND_LINE_OFFSET);
 
     /*************************
      * Set up the background *
@@ -104,8 +108,12 @@ export class TerminalScene extends Phaser.Scene {
     /*********************************
      * Set up the command line input *
      *********************************/
-    TerminalInputHandler.instantiateTerminalInput(this, TerminalScene.onEnter, InputHandler.getSuggestions(), { primaryFontColor: "#77ff55" });
+    this.suggestions = InputHandler.getSuggestions();
+    super.createTerminalInput({ primaryFontColor: "#77ff55" });
 
+    /*****************************************************
+     * Set the terminal screen to whatever it was before *
+     *****************************************************/
     if (this.initData != null) {
       this.updateTerminalScreen(this.initData.terminalData, true);
     }
@@ -124,12 +132,49 @@ export class TerminalScene extends Phaser.Scene {
     ShaderHandler.updateShaders(time);
   }
 
+  /*************************
+   *   PROTECTED METHODS   *
+   *************************/
+
+  /**
+   * Defines what happens when the user presses enter on the keyboard
+   * @param inputStr The string that is currently in the input of the command line
+   */
+  protected onEnterFunc(inputStr: string) {
+    // Submit input
+    let response = InputHandler.submitInput(inputStr);
+    if (response.type === InputResponseType.STRING || response.type === InputResponseType.ERROR) {
+      if (response.command === "go") { // If we have moved rooms, update the suggestions
+        this.suggestions = InputHandler.getSuggestions();
+      }
+
+      // Update the terminal screen
+      this.updateTerminalScreen(`\n\n> ${ inputStr }\n${ response.stringData }`);
+
+      this.resetInput();
+    }
+    else if (response.type === InputResponseType.SCENE_CHANGE) {
+      this.updateTerminalScreen(`\n\n> ${ inputStr }`);
+      this.scene.start(response.sceneChangeData, {terminalData: this.terminalScreen.text});
+    }
+
+    // Check if terminal screen overflows allotted text amount
+    let textArr = this.terminalScreen.text.split("\n");
+    if (textArr.length > MAX_NUM_TERMINAL_LINES) { // If there are too many lines, trim it
+      this.updateTerminalScreen(textArr.slice(textArr.length - MAX_NUM_TERMINAL_LINES).join("\n"), true);
+    }
+  }
+
+  /***********************
+   *   PRIVATE METHODS   *
+   ***********************/
+
   /**
    * Writes data to the terminal screen and updates it accordingly
    * @param data The strings to be added at the end of the terminal screen
    * @param overwrite If true, overwrite the terminal screen text with the data text
    */
-  updateTerminalScreen(data: string, overwrite=false) {
+  private updateTerminalScreen(data: string, overwrite=false) {
     if (overwrite) {
       this.terminalScreen.text = data;
     }
@@ -139,10 +184,6 @@ export class TerminalScene extends Phaser.Scene {
     this.scrollTerminalScreenTo(TerminalScene.TERMINAL_HEIGHT - this.terminalScreen.height); // Move the terminal screen to the bottom
     this.updateScrollBarSize(); // Update the scroll bar
   }
-
-  /***********************
-   *   PRIVATE METHODS   *
-   ***********************/
 
   /**
    * Moves the terminal screen to a specified location (used for scrolling)
@@ -209,37 +250,5 @@ export class TerminalScene extends Phaser.Scene {
     const m = (TerminalScene.TERMINAL_HEIGHT - this.scrollBar.displayHeight) / (TerminalScene.TERMINAL_HEIGHT - this.terminalScreen.height - 10);
     const b = -10 * m;
     return [m, b];
-  }
-
-  /**
-   * Defines what happens when the user presses enter on the keyboard
-   * @param inputStr The string that is currently in the input of the command line
-   * @param scene The scene instance that contains the terminal input
-   */
-  private static onEnter(inputStr: string, scene: Phaser.Scene) {
-    let terminalScene = <TerminalScene>scene;
-
-    // Submit input
-    let response = InputHandler.submitInput(inputStr);
-    if (response.type === InputResponseType.STRING || response.type === InputResponseType.ERROR) {
-      if (response.command === "go") { // If we have moved rooms, update the suggestions
-        TerminalInputHandler.setSuggestions(InputHandler.getSuggestions());
-      }
-
-      // Update the terminal screen
-      terminalScene.updateTerminalScreen(`\n\n> ${ inputStr }\n${ response.stringData }`);
-
-      TerminalInputHandler.resetInput();
-    }
-    else if (response.type === InputResponseType.SCENE_CHANGE) {
-      terminalScene.updateTerminalScreen(`\n\n> ${ inputStr }`);
-      terminalScene.scene.start(response.sceneChangeData, {terminalData: terminalScene.terminalScreen.text});
-    }
-
-    // Check if terminal screen overflows allotted text amount
-    let textArr = terminalScene.terminalScreen.text.split("\n");
-    if (textArr.length > MAX_NUM_TERMINAL_LINES) { // If there are too many lines, trim it
-      terminalScene.updateTerminalScreen(textArr.slice(textArr.length - MAX_NUM_TERMINAL_LINES).join("\n"), true);
-    }
   }
 }
