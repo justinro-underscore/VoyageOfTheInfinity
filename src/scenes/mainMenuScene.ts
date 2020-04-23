@@ -59,19 +59,19 @@ export class MainMenuScene extends TerminalInputScene {
     }));
     super.createTerminalInput({ fontSize: 24 });
 
-    // /**************
-    //  * Add shader *
-    //  **************/
-    // ShaderHandler.setRenderToShaders(this, "terminal");
+    /**************
+     * Add shader *
+     **************/
+    ShaderHandler.setRenderToShaders(this, "terminal");
   }
 
-  // /**
-  //  * Update the shaders
-  //  * @param time The amount of time that has passed
-  //  */
-  // update(time: number) {
-  //   ShaderHandler.updateShaders(time);
-  // }
+  /**
+   * Update the shaders
+   * @param time The amount of time that has passed
+   */
+  update(time: number) {
+    ShaderHandler.updateShaders(time);
+  }
 
   /*************************
    *   PROTECTED METHODS   *
