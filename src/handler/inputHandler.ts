@@ -35,6 +35,11 @@ interface CommandObjectHelp {
   desc: string;
 }
 
+interface CommandInfoObject {
+  hidden: boolean;
+  synonyms?: string[];
+}
+
 interface CommandObject {
   getPotentialArguments: () => Map<string, Array<string>>;
   responseType: InputResponseType;
@@ -226,20 +231,36 @@ export class InputHandler {
     return EventHandler.runUseEvent(useObj);
   }
 
-  private static VALID_COMMANDS = new Map<string, Array<string>>(Object.entries({
-    "examine": null,
-    "go": [
-      "walk"
-    ],
-    "take": null,
-    "drop": null,
-    "inventory": [
-      "inv"
-    ],
-    "use": null,
-    "map": null,
-    "help": null,
-    "swag": null
+  private static VALID_COMMANDS = new Map<string, CommandInfoObject>(Object.entries({
+    "examine": {
+      hidden: false,
+    },
+    "go": {
+      hidden: false,
+      synonyms: ["walk"]
+    },
+    "take": {
+      hidden: false,
+    },
+    "drop": {
+      hidden: false,
+    },
+    "inventory": {
+      hidden: false,
+      synonyms: ["inv"]
+    },
+    "use": {
+      hidden: false,
+    },
+    "map": {
+      hidden: false,
+    },
+    "help": {
+      hidden: false,
+    },
+    "swag": {
+      hidden: true,
+    }
   }));
 
   private static COMMAND_OBJS = new Map<string, CommandObject>(Object.entries({
@@ -538,7 +559,7 @@ export class InputHandler {
 
     "help": {
       getPotentialArguments: (): Map<string, Array<string>> => {
-        let cmdNames = Array.from(InputHandler.VALID_COMMANDS.entries()).flatMap(cmd => (cmd[1] != null ? cmd[1] : []).concat([cmd[0]]));
+        let cmdNames = Array.from(InputHandler.VALID_COMMANDS.entries()).filter(cmd => !cmd[1].hidden).flatMap(cmd => ((cmd[1].synonyms != null) ? cmd[1].synonyms : []).concat([cmd[0]]));
         let args = new Map<string, Array<string>>();
         cmdNames.forEach(name => {
           args.set(name, null);
@@ -578,7 +599,7 @@ export class InputHandler {
               res += `\t\t${ arg.argOpts }\n`;
             });
             res += `Description: ${ obj.desc }\n`;
-            let cmds = InputHandler.VALID_COMMANDS.get(cmd);
+            let cmds = InputHandler.VALID_COMMANDS.get(cmd).synonyms;
             if (cmds != null) {
               res += `\tAlso responds to: [${ cmds.reduce((cmd, str) => cmd + ", " + str) }]\n`;
             }
@@ -599,7 +620,7 @@ export class InputHandler {
       {
         args: [{
           argName: "command",
-          argOpts: `one of the following: [${ Array.from(InputHandler.VALID_COMMANDS.keys()).reduce((cmd, str) => cmd + ", " + str) }]`,
+          argOpts: `one of the following: [${ Array.from(InputHandler.VALID_COMMANDS.entries()).filter(cmd => !cmd[1].hidden).map(cmd => cmd[0]).reduce((cmd, str) => cmd + ", " + str) }]`,
           argExample: "examine"
         }],
         desc: "shows how to use the given command"
@@ -628,7 +649,7 @@ export class InputHandler {
     let masterKey = null;
     if (!InputHandler.VALID_COMMANDS.has(command)) {
       Array.from(InputHandler.VALID_COMMANDS.entries()).forEach(cmd => {
-        if (cmd[1] != null && cmd[1].includes(command)) {
+        if (cmd[1].synonyms != null && cmd[1].synonyms.includes(command)) {
           masterKey = cmd[0];
           return;
         }
@@ -713,13 +734,15 @@ export class InputHandler {
   private static setSuggestions() {
     InputHandler.inputSuggestions = new Map<string, Map<string, Array<string>>>();
     Array.from(InputHandler.VALID_COMMANDS.entries()).forEach(keyCommand => {
-      let suggObj = InputHandler.COMMAND_OBJS.get(keyCommand[0]).getPotentialArguments();
-      if (keyCommand[1] != null) {
-        keyCommand[1].forEach(command => {
-          InputHandler.inputSuggestions.set(command, suggObj);
-        });
+      if (!keyCommand[1].hidden) {
+        let suggObj = InputHandler.COMMAND_OBJS.get(keyCommand[0]).getPotentialArguments();
+        if (keyCommand[1].synonyms != null) {
+          keyCommand[1].synonyms.forEach(command => {
+            InputHandler.inputSuggestions.set(command, suggObj);
+          });
+        }
+        InputHandler.inputSuggestions.set(keyCommand[0], suggObj);
       }
-      InputHandler.inputSuggestions.set(keyCommand[0], suggObj);
     });
   }
 }
