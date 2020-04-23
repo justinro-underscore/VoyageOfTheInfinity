@@ -80,6 +80,7 @@ export class TerminalScene extends TerminalInputScene {
     this.scrollBar = this.add.image(this.cameras.main.width - SCROLL_BAR_WIDTH, 0, "scrollBar").setInteractive();
     this.scrollBar.setOrigin(0, 0);
     this.scrollBar.setTint(0x77ff55); // Should be the color of the text
+    this.scrollBar.setDisplaySize(SCROLL_BAR_WIDTH, 0);
 
     // Set up draggable functionality
     this.scrollBar.on("pointerover", () => this.scrollBar.setTint(0xfdfdcd));
@@ -106,15 +107,6 @@ export class TerminalScene extends TerminalInputScene {
      * Set the terminal height based on command line height *
      ********************************************************/
     TerminalScene.TERMINAL_HEIGHT = this.cameras.main.height - (this.COMMAND_LINE_HEIGHT + 2 * TerminalInputScene.COMMAND_LINE_OFFSET);
-
-    // Start scroll bar full size of the terminal screen
-    this.scrollBar.setDisplaySize(SCROLL_BAR_WIDTH, TerminalScene.TERMINAL_HEIGHT);
-
-    // Create a mask for terminal screen (so that it does not reach the bottom of the screen which is reserved for user input)
-    let graphics = this.make.graphics({});
-    graphics.fillRect(0, 0, this.cameras.main.width, TerminalScene.TERMINAL_HEIGHT);
-    let mask = new Phaser.Display.Masks.GeometryMask(this, graphics);
-    this.terminalScreen.setMask(mask);
 
     /*****************************************************
      * Set the terminal screen to whatever it was before *
@@ -198,6 +190,8 @@ export class TerminalScene extends TerminalInputScene {
     if (this.terminalScreen.height > TerminalScene.TERMINAL_HEIGHT) {
       this.terminalScreen.y = newY;
       this.terminalScreen.y = Phaser.Math.Clamp(this.terminalScreen.y, TerminalScene.TERMINAL_HEIGHT - this.terminalScreen.height, 10);
+      // Masking gets screwed up with the shaders, so we add a crop instead
+      this.terminalScreen.setCrop(0, -this.terminalScreen.y, this.cameras.main.width, TerminalScene.TERMINAL_HEIGHT - (this.terminalScreen.y > 0 ? this.terminalScreen.y : 0));
     }
   }
 
