@@ -1,6 +1,7 @@
 import "phaser"
 import BBCodeText from "phaser3-rex-plugins/plugins/bbcodetext.js";
 import { InputHandler } from "./inputHandler";
+// import { AudioHandler } from "./audioHandler";
 
 // Defines what category each key input goes into
 export enum KeyCodeCateogry {
@@ -71,6 +72,8 @@ export class TerminalInputHandler {
 
   private suggestions: SuggestionObj; // Defines the suggestions for inputs
   private showSugg: boolean; // If true, show the suggestion
+
+  // private keyStrokeSounds: Array<Phaser.Sound.BaseSound>; // Holds all keystroke sounds
 
   /**
    * Instantiates the current instance of TerminalInputHandler
@@ -210,6 +213,15 @@ export class TerminalInputHandler {
       callbackScope: this,
       loop: true
     });
+
+    // // Populate the keystroke sounds
+    // this.keyStrokeSounds = [];
+    // for (let i = 1; i <= 3; i++) {
+    //   let sound = SoundHandler.getSound(`keystroke${ i }`);
+    //   if (sound != null) {
+    //     this.keyStrokeSounds.push(sound);
+    //   }
+    // }
   }
 
   /**
@@ -361,6 +373,12 @@ export class TerminalInputHandler {
           showSugg = true;
           break;
       }
+      // if (this.keyStrokeSounds[0].isPlaying || this.keyStrokeSounds[1].isPlaying) {
+      //   this.keyStrokeSounds[0].play();
+      // }
+      // else {
+      //   this.keyStrokeSounds[1].play();
+      // }
       this.showSugg = showSugg;
       this.updateCommandLine();
       this.setCursorVisible(); // After every key input, set the cursor to visible

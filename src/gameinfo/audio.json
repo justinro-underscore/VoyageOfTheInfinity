@@ -1,0 +1,10 @@
+{
+  "music": {
+    "mainTheme": "Because_For_Everything_There_Is_Someone.wav"
+  },
+  "sounds": {
+    "keystroke1": ["keystroke.ogg", "keystroke.wav"],
+    "keystroke2": "keystroke2.ogg",
+    "keystroke3": ["keystroke3.ogg", "keystroke3.wav"]
+  }
+}

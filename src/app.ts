@@ -16,8 +16,8 @@ const config: Phaser.Types.Core.GameConfig = {
       debug: false
     }
   },
-  dom: {
-    createContainer: true
+  audio: {
+    disableWebAudio: true
   },
   backgroundColor: "#111111"
 };

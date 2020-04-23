@@ -3,6 +3,7 @@ import { TerminalInputHandler, SuggestionObj } from "../handler/terminalInputHan
 import { MapHandler } from "../handler/mapHandler";
 import { EventHandler } from "../handler/eventHandler";
 import { ShaderHandler } from "../handler/shaderHandler";
+import { AudioHandler } from "../handler/audioHandler";
 
 /**
  * Defines the initial scene that users see when they start the game
@@ -18,13 +19,21 @@ export class MainMenuScene extends Phaser.Scene {
   }
 
   /**
+   * Load all audio
+   */
+  preload() {
+    AudioHandler.loadAudio(this);
+  }
+
+  /**
    * Set up all game assets shown to user and adds functionality
    */
   create() {
-    /******************
-     * Set up shaders *
-     ******************/
+    /****************************
+     * Set up shaders and audio *
+     ****************************/
     ShaderHandler.instantiateShaders(this.game);
+    AudioHandler.instantiateAudio(this.game);
 
     /************
      * Add text *
