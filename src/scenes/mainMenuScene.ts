@@ -4,6 +4,7 @@ import { MapHandler } from "../handler/mapHandler";
 import { EventHandler } from "../handler/eventHandler";
 import { ShaderHandler } from "../handler/shaderHandler";
 import { AudioHandler } from "../handler/audioHandler";
+import { TextCutsceneHandler } from "../handler/textCutsceneHandler";
 
 /**
  * Defines the initial scene that users see when they start the game
@@ -30,11 +31,12 @@ export class MainMenuScene extends TerminalInputScene {
    * Set up all game assets shown to user and adds functionality
    */
   create() {
-    /****************************
-     * Set up shaders and audio *
-     ****************************/
+    /***************************************
+     * Set up shaders, audio and cutscenes *
+     ***************************************/
     ShaderHandler.instantiateShaders(this.game);
     AudioHandler.instantiateAudio(this.game);
+    TextCutsceneHandler.processCutscenes();
 
     /*************************
      * Set up the background *
@@ -84,6 +86,7 @@ export class MainMenuScene extends TerminalInputScene {
       EventHandler.instantiateEventMap("testing");
       // Start the game
       this.scene.start("TerminalScene");
+      // this.scene.start("CutsceneScene", {cutsceneKey: "testing", toScene: "TerminalScene"});
     }
   }
 }

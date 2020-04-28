@@ -1,0 +1,13 @@
+{
+  "config": {
+    "color": "#ff0000",
+    "textSpeed": 50
+  },
+  "lines": [
+    "Hello HAL[p=100]",
+    "",
+    ". [p=400]. [p=1000]Hello Stev[p=200][b=4][c=#0000ff]Dave[p=1000]",
+    "",
+    "[c=#ffffff]Press space to continue :\\[p=5] test"
+  ]
+}
