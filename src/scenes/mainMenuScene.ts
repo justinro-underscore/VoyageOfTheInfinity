@@ -82,8 +82,8 @@ export class MainMenuScene extends TerminalInputScene {
   protected onEnterFunc(inputStr: string) {
     if (inputStr === "start") {
       // Set up the game
-      MapHandler.instantiateInstance("testing");
-      EventHandler.instantiateEventMap("testing");
+      MapHandler.instantiateInstance("voyage");
+      EventHandler.instantiateEventMap("voyage");
       // Start the game
       this.scene.start("TerminalScene");
       // this.scene.start("CutsceneScene", {cutsceneKey: "testing", toScene: "TerminalScene"});
