@@ -82,7 +82,7 @@ export class MainMenuScene extends TerminalInputScene {
   protected onEnterFunc(inputStr: string) {
     if (inputStr === "start") {
       // Set up the game
-      let startingMap = "testing";
+      let startingMap = "voyage";
       MapHandler.instantiateInstance(startingMap);
       EventHandler.instantiateEventMap(startingMap);
       // Start the game

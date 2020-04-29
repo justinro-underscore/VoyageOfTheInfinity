@@ -27,7 +27,7 @@
         "y": 11
       },
       "exits": {
-        "north": "rm_fitness_dark",
+        "north": "rm_fitness",
         "east": "rm_lodging",
         "south": "rm_drone",
         "west": "rm_a",
@@ -38,31 +38,15 @@
           "id": "obj_pile_rubble",
           "name": "Pile of Rubble",
           "altNames": ["Rubble"],
-          "desc": "The precarious pile of rubble blocks the way to the west",
+          "desc": "The precarious pile of rubble blocks the way to the west. It looks as if a strong force could move it",
           "pickupable": false
         }
       ]
     },
     {
-      "id": "rm_fitness_dark",
-      "name": "Dark Room",
-      "desc": "The room is pitch black, not much can be done here",
-      "mapCoords": {
-        "x": 3,
-        "y": 10
-      },
-      "exits": {
-        "north": "",
-        "east": "",
-        "south": "rm_chambers",
-        "west": ""
-      },
-      "objects": []
-    },
-    {
       "id": "rm_fitness",
       "name": "Fitness Center",
-      "desc": "This room is used to keep crew members in peak physical condition during long expeditions.\nThere is a shower in the corner, a row of lockers, and various fitness equipment scattered around the area",
+      "desc": "This room is used to keep crew members in peak physical condition during long expeditions. The room is dark aside from the light seeping in from the cryopods, which illuminates a row of lockers on the opposite wall",
       "mapCoords": {
         "x": 3,
         "y": 10
@@ -77,7 +61,7 @@
         {
           "id": "obj_fitness_lockers",
           "name": "Lockers",
-          "desc": "It is a long wall of sealed lockers",
+          "desc": "It is a long wall of sealed lockers. One locker seems to be slightly ajar",
           "pickupable": false
         },
         {
@@ -91,7 +75,7 @@
     {
       "id": "rm_lodging",
       "name": "Lodging",
-      "desc": "This room is where crew members can relax, catch up on rest, or enjoy leisure time. The room is dark aside from the light seeping in from the cryopods, which illuminates a row of lockers on the opposite wall.\nThere is an exit to the west, and doors leading north, east, and south",
+      "desc": "This room is where crew members can relax, catch up on rest, or enjoy leisure time.\nThere are exits to the north and west, and doors leading east and south. The door to the south is locked",
       "mapCoords": {
         "x": 4,
         "y": 11
@@ -105,9 +89,10 @@
       },
       "objects": [
         {
-          "id": "obj_lodging_lockers",
-          "name": "Lockers",
-          "desc": "It is a long wall of sealed lockers. One seems to be slightly ajar",
+          "id": "obj_lodging_locked_door",
+          "name": "Locked Door",
+          "altNames": ["South Door", "Door"],
+          "desc": "The door leading south is locked. There is a keycard lock next to it. A sign on the door reads \"Power Room - Engineers Only\"",
           "pickupable": false
         }
       ]
