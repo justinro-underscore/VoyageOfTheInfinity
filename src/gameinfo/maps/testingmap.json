@@ -250,7 +250,7 @@
       "exits": {
         "north": "rm_start",
         "east": "rm_use_test_2",
-        "south": "",
+        "south": "rm_move_event",
         "west": ""
       },
       "objects": [
@@ -386,6 +386,72 @@
           "pickupable": false
         }
       ]
+    },
+    {
+      "id": "rm_move_event",
+      "name": "Move Event Testing Room",
+      "desc": "Try moving around to test the events",
+      "mapCoords": {
+        "x": 1,
+        "y": 4
+      },
+      "exits": {
+        "north": "rm_use_test_1",
+        "east": "rm_move_event_e",
+        "south": "rm_move_event_s",
+        "west": "rm_move_event_w",
+        "locked": ["south"],
+        "jammed": ["west"]
+      },
+      "objects": []
+    },
+    {
+      "id": "rm_move_event_w",
+      "name": "Move Event Testing Room West",
+      "desc": "Go east to return to the move event testing room",
+      "mapCoords": {
+        "x": 0,
+        "y": 4
+      },
+      "exits": {
+        "north": "",
+        "east": "rm_move_event",
+        "south": "",
+        "west": ""
+      },
+      "objects": []
+    },
+    {
+      "id": "rm_move_event_e",
+      "name": "Move Event Testing Room East",
+      "desc": "Go west to return to the move event testing room",
+      "mapCoords": {
+        "x": 2,
+        "y": 4
+      },
+      "exits": {
+        "north": "",
+        "east": "",
+        "south": "",
+        "west": "rm_move_event"
+      },
+      "objects": []
+    },
+    {
+      "id": "rm_move_event_s",
+      "name": "Move Event Testing Room South",
+      "desc": "Go north to return to the move event testing room",
+      "mapCoords": {
+        "x": 1,
+        "y": 5
+      },
+      "exits": {
+        "north": "rm_move_event",
+        "east": "",
+        "south": "",
+        "west": ""
+      },
+      "objects": []
     }
   ]
 }

@@ -344,7 +344,21 @@ export class InputHandler {
           case "w":
             dir = 3;
             break;
+          default:
+            return "Invalid direction"
         }
+        let moveEventRes = EventHandler.runMoveEvent(MapHandler.getCurrRoomId(), dir); // Check if there is a move event
+        let res = ""; // Defines what is returned to the screen
+
+        // First, add move event result to the returned result
+        if (moveEventRes != null && moveEventRes.result != "") {
+          res += moveEventRes.result;
+          if (!moveEventRes.overrideResult) { // If there will be more, add spacing
+            res += "\n\n";
+          }
+        }
+
+        // Second, move the player
         if (MapHandler.movePlayer(dir)) {
           let visited = MapHandler.getCurrRoomVisited()
           if (!visited) {
@@ -352,9 +366,16 @@ export class InputHandler {
           }
           InputHandler.setSuggestions();
 
-          return MapHandler.getCurrRoomInfo(!visited);
+          // Third, if the input is not to be overidden by the move event, add current room info
+          if (moveEventRes === null || !moveEventRes.overrideResult) {
+            res += MapHandler.getCurrRoomInfo(!visited);
+          }
         }
-        return "Cannot go that direction!";
+        // Third, if input is not to be overidden by the move event, tell the user they cannot move
+        else if (moveEventRes === null || !moveEventRes.overrideResult) {
+          res += "Cannot go in that direction!";
+        }
+        return res;
       },
       help: [{
         args: [{

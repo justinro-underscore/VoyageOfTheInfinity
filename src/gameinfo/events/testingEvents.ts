@@ -160,5 +160,57 @@ export const TestingEventMap: EventObject = {
         }
       ]
     }
+  ],
+  moveEvents: [
+    {
+      room: "rm_move_event",
+      dir: 0,
+      event: () => {
+        return {
+          overrideResult: true,
+          result: "You pass through the door no problem"
+        }
+      }
+    },
+    {
+      room: "rm_move_event",
+      dir: 1,
+      event: () => {
+        return {
+          overrideResult: false,
+          result: "You pass through the door no problem and show desc"
+        }
+      }
+    },
+    {
+      room: "rm_move_event",
+      dir: 2,
+      event: () => {
+        return {
+          overrideResult: true,
+          result: "Locked! And that's it"
+        }
+      }
+    },
+    {
+      room: "rm_move_event",
+      dir: 3,
+      event: () => {
+        return {
+          overrideResult: false,
+          result: "Can't move! And it should say that below"
+        }
+      }
+    },
+    {
+      room: "rm_move_event_e",
+      dir: 3,
+      event: () => {
+        return {
+          overrideResult: false,
+          result: ""
+        }
+      }
+    }
   ]
 };

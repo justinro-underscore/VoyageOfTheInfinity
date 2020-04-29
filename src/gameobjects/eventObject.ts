@@ -14,4 +14,17 @@ export interface EventObject {
       event: () => string; // Defines what happens when the object is triggered (return null if you want to run the normal functionality of the command)
     }[];
   }[];
+  moveEvents?: { // Events that occur when trying to move from a room NOTE: Occurs before the move takes place!
+    room: string; // The room that the event is triggered in
+    dir: number; // The direction that the move is taking place: {0: North, 1: East, 2: South, 3: West}
+    event: () => MoveEventResultObject; // Defines what happens when the direction is taken (return null if nothing is to happen)
+  }[];
+}
+
+/**
+ * Defines the return object of a move event
+ */
+export interface MoveEventResultObject {
+  overrideResult: boolean; // If true, only show the result of this object. Otherwise, show result + normal move result
+  result: string; // The result shown to the user (can be "" if normal functionality is desired)
 }

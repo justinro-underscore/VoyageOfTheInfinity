@@ -1,4 +1,4 @@
-import { EventObject } from "../gameobjects/eventObject";
+import { EventObject, MoveEventResultObject } from "../gameobjects/eventObject";
 import { GameObject } from "../gameobjects/gameObject";
 import { TestingEventMap } from "../gameinfo/events/testingEvents";
 import { VoyageEventMap } from "../gameinfo/events/voyageEvents";
@@ -11,6 +11,7 @@ export class EventHandler {
   private static multipleObjsEventMap: Map<string, () => string>; // Links use objects and with objects (format: "${ use_obj } ${ with_obj }") with their event
   private static singleObjEventMap: Map<string, () => string>; // Links use objects that can be used on their own with their event
   private static commandEventMap: Map<string, Map<string, () => string>>; // Links commands and their objects to events
+  private static moveEventMap: Map<string, Map<number, () => MoveEventResultObject>>; // Links a room and its movement commands in directions to events
   /*
    * Can have multiple event maps for different scenarios. Links keys with their event maps
    */
@@ -31,6 +32,7 @@ export class EventHandler {
       EventHandler.multipleObjsEventMap = new Map<string, () => string>();
       EventHandler.singleObjEventMap = new Map<string, () => string>();
       EventHandler.commandEventMap = new Map<string, Map<string, () => string>>();
+      EventHandler.moveEventMap = new Map<string, Map<number, () => MoveEventResultObject>>();
 
       let eventObj = this.availableEventMaps.get(eventMapKey);
       // Add use events
@@ -57,6 +59,20 @@ export class EventHandler {
               eventMap.set(eventData.useObj, eventData.event);
             }
           });
+        });
+      }
+      // Add movement events
+      if (eventObj.moveEvents != null) {
+        eventObj.moveEvents.forEach(moveEvent => {
+          if (!EventHandler.moveEventMap.has(moveEvent.room)) {
+            EventHandler.moveEventMap.set(moveEvent.room, new Map<number, () => MoveEventResultObject>());
+          }
+          if (EventHandler.moveEventMap.get(moveEvent.room).has(moveEvent.dir)) {
+            console.error(`Move event for room {${ moveEvent.room }} and direction {${ moveEvent.dir }} defined more than once!`);
+          }
+          else {
+            EventHandler.moveEventMap.get(moveEvent.room).set(moveEvent.dir, moveEvent.event);
+          }
         });
       }
     }
@@ -110,6 +126,23 @@ export class EventHandler {
       let eventMap = EventHandler.commandEventMap.get(command);
       if (eventMap.has(useObject.id)) {
         return eventMap.get(useObject.id)();
+      }
+      return null;
+    }
+    return null;
+  }
+
+  /**
+   * Attemps to run an event when a player moves in a certain direction in a given room
+   * @param roomId The room the player is moving from
+   * @param direction The direction the player is moving
+   * @returns The outcome of the event, or null if the standard functionality of movement should be executed
+   */
+  static runMoveEvent(roomId: string, direction: number): MoveEventResultObject {
+    if (EventHandler.moveEventMap.has(roomId)) {
+      let eventMap = EventHandler.moveEventMap.get(roomId);
+      if (eventMap.has(direction)) {
+        return eventMap.get(direction)();
       }
       return null;
     }

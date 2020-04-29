@@ -18,6 +18,10 @@ export class MapHandler {
     this.instance = new MapHandler(mapKey);
   }
 
+  static getCurrRoomId(): string {
+    return this.instance.gameMap.playerPos;
+  }
+
   static getCurrRoomInfo(fullRoomDesc: boolean): string {
     return this.instance.gameMap.getRoomInfo(fullRoomDesc);
   }
