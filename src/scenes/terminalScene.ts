@@ -141,9 +141,7 @@ export class TerminalScene extends TerminalInputScene {
     // Submit input
     let response = InputHandler.submitInput(inputStr);
     if (response.type === InputResponseType.STRING || response.type === InputResponseType.ERROR) {
-      if (response.command === "go") { // If we have moved rooms, update the suggestions
-        this.suggestions = InputHandler.getSuggestions();
-      }
+      this.suggestions = InputHandler.getSuggestions(); // Always update the suggestions, in case the room or objects have changed
 
       // Update the terminal screen
       this.updateTerminalScreen(`\n\n> ${ inputStr }\n${ response.stringData }`);

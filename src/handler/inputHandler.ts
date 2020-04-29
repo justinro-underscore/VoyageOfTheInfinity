@@ -152,6 +152,7 @@ export class InputHandler {
   private static examineObject(obj: GameObject): string {
     InputHandler.overrideInput = null;
     let commandEventOutcome = EventHandler.runCommandEvent("examine", obj);
+    InputHandler.setSuggestions(); // Update the suggestions because an event may or may not have occured
     if (commandEventOutcome != null) {
       return commandEventOutcome;
     }
@@ -162,6 +163,7 @@ export class InputHandler {
     InputHandler.overrideInput = null;
     let commandEventOutcome = EventHandler.runCommandEvent("take", obj);
     if (commandEventOutcome != null) {
+      InputHandler.setSuggestions(); // Update the suggestions because an event has occured
       return commandEventOutcome;
     }
     if (obj.pickupable) {
@@ -169,6 +171,7 @@ export class InputHandler {
       if (!MapHandler.removeObject(obj)) {
         console.error(`Removed an object from the map that did not exist on the map: {${ obj.id }}`);
       }
+      InputHandler.setSuggestions(); // Update the suggestions because the player has taken the object
       return "Taken";
     }
     else {
@@ -180,12 +183,14 @@ export class InputHandler {
     InputHandler.overrideInput = null;
     let commandEventOutcome = EventHandler.runCommandEvent("drop", obj);
     if (commandEventOutcome != null) {
+      InputHandler.setSuggestions(); // Update the suggestions because an event has occured
       return commandEventOutcome;
     }
     if (!InventoryHandler.removeObject(obj)) {
       console.error(`Dropped an object that was not in the inventory: {${ obj.id }}`);
     }
     MapHandler.addObject(obj);
+    InputHandler.setSuggestions(); // Update the suggestions because the player has dropped an object
     return "Dropped";
   }
 
@@ -219,7 +224,9 @@ export class InputHandler {
     let useObj = <GameObject>InputHandler.overrideInput.data.useObj;
     InputHandler.overrideInput = null;
     if (useObj.id != withObj.id) {
-      return EventHandler.runUseEvent(useObj, withObj);
+      let res = EventHandler.runUseEvent(useObj, withObj);
+      InputHandler.setSuggestions(); // Update the suggestions because an event has occured
+      return res;
     }
     else {
       return "Cannot use an object with itself!";
@@ -228,7 +235,9 @@ export class InputHandler {
 
   private static useSingleObject(useObj: GameObject): string {
     InputHandler.overrideInput = null;
-    return EventHandler.runUseEvent(useObj);
+    let res = EventHandler.runUseEvent(useObj);
+    InputHandler.setSuggestions(); // Update the suggestions because an event has occured
+    return res;
   }
 
   private static VALID_COMMANDS = new Map<string, CommandInfoObject>(Object.entries({
@@ -364,7 +373,7 @@ export class InputHandler {
           if (!visited) {
             MapHandler.setCurrRoomVisitedStatus(true);
           }
-          InputHandler.setSuggestions();
+          InputHandler.setSuggestions(); // Update the suggestions because the player has moved
 
           // Third, if the input is not to be overidden by the move event, add current room info
           if (moveEventRes === null || !moveEventRes.overrideResult) {
