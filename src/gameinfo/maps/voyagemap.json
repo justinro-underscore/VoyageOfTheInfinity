@@ -155,7 +155,7 @@
           "id": "obj_power_scrap",
           "name": "Scrap of Paper",
           "altNames": ["Scrap", "Paper"],
-          "desc": "The paper has the following hastily written on it with pen:\n- + + -",
+          "desc": "A small scrap of paper found in the Power Room. The paper has the following hastily written on it with pen:\n- + + -",
           "pickupable": true
         },
         {
@@ -363,6 +363,9 @@
         }
       ]
     },
+
+
+
     {
       "id": "rm_a",
       "name": "Checkpoint A",

@@ -11,7 +11,9 @@ const eventData = {
   destroyedRubbleToA: false,
   unlockedPowerRoom: false,
   spawnedFitnessOpenLocker: false,
-  spawnedEngineerKeycard: false
+  spawnedEngineerKeycard: false,
+  turnedPowerPipe: false,
+  powerPipeStatus: [false, false, false, false]
 }
 
 // "desc": "This room is used to keep crew members in peak physical condition during long expeditions.\nThere is a shower in the corner, a row of lockers, and various fitness equipment scattered around the area",
@@ -19,6 +21,70 @@ const eventData = {
 const tooDark: MoveEventResultObject = {
   overrideResult: true,
   result: "It's too dark to move around the room"
+}
+
+/**
+ * Check if the power pipes are activated
+ */
+const checkPowerPipeStatus = () => {
+  let powerActivate = [false, true, true, false];
+  for (let i = 0; i < 4; i++) {
+    if (eventData.powerPipeStatus[i] != powerActivate[i]) {
+      return false;
+    }
+  }
+  return true;
+}
+
+const powerPipeUse = (powerPipeIndex: number) => {
+  if (!checkPowerPipeStatus()) {
+    let pipeIndexChar = "";
+    switch (powerPipeIndex) {
+      case 0:
+        pipeIndexChar = "a";
+        break;
+      case 1:
+        pipeIndexChar = "b";
+        break;
+      case 2:
+        pipeIndexChar = "c";
+        break;
+      case 3:
+        pipeIndexChar = "d";
+        break;
+      default:
+        console.error(`PowerPipeUse function invoked with invalid pipe index {${ powerPipeIndex }}`);
+        return;
+    }
+    let pipe = MapHandler.getObjectFromID(`obj_power_pipe_${ pipeIndexChar }`);
+
+    let res = "";
+    if (!eventData.turnedPowerPipe) {
+      res += "The wrench fits perfectly on the square knob of the pipe!\n";
+      eventData.turnedPowerPipe = true;
+    }
+    eventData.powerPipeStatus[powerPipeIndex] = !eventData.powerPipeStatus[powerPipeIndex];
+
+    res += "With some effort, the knob creaks to the side, ";
+    if (eventData.powerPipeStatus[powerPipeIndex]) {
+      res += "releasing the flow of the pipe"
+      pipe.desc += ". The sound of flowing material can be heard in the pipe";
+    }
+    else {
+      res += "stopping the flow of the pipe"
+      pipe.desc = pipe.desc.replace(". The sound of flowing material can be heard in the pipe", "");
+    }
+
+    if (checkPowerPipeStatus()) {
+      res += "\n\nWith a clunk, there's a loud noise and the ambient light in the room seems to brighten";
+
+      // TODO Set everything to be powered
+    }
+    return res;
+  }
+  else {
+    return "The power is already on"
+  }
 }
 
 export const VoyageEventMap: EventObject = {
@@ -44,6 +110,26 @@ export const VoyageEventMap: EventObject = {
           return "The door is already unlocked";
         }
       }
+    },
+    {
+      useObj: "obj_wrench",
+      withObj: "obj_power_pipe_a",
+      event: () => powerPipeUse(0)
+    },
+    {
+      useObj: "obj_wrench",
+      withObj: "obj_power_pipe_b",
+      event: () => powerPipeUse(1)
+    },
+    {
+      useObj: "obj_wrench",
+      withObj: "obj_power_pipe_c",
+      event: () => powerPipeUse(2)
+    },
+    {
+      useObj: "obj_wrench",
+      withObj: "obj_power_pipe_d",
+      event: () => powerPipeUse(3)
     }
   ],
   commandEvents: [
@@ -90,6 +176,24 @@ export const VoyageEventMap: EventObject = {
           useObj: "obj_power_room_keycard",
           event: () => {
             MapHandler.getObjectFromID("obj_fitness_open_locker").desc = "The open locker is empty";
+            return null;
+          }
+        },
+        {
+          useObj: "obj_wrench",
+          event: () => {
+            let room = MapHandler.getRoom("rm_power");
+            room.desc = room.desc.replace("a wrench laying on the floor", "the room around");
+            room.desc = room.desc.replace("a wrench on the floor next to a scrap of paper", "a small scrap of paper on the floor");
+            return null;
+          }
+        },
+        {
+          useObj: "obj_power_scrap",
+          event: () => {
+            let room = MapHandler.getRoom("rm_power");
+            room.desc = room.desc.replace("a small scrap of paper on the floor", "the room around");
+            room.desc = room.desc.replace("a wrench on the floor next to a scrap of paper", "a wrench laying on the floor");
             return null;
           }
         }
