@@ -269,6 +269,9 @@ export class InputHandler {
     },
     "swag": {
       hidden: true,
+    },
+    "debug": {
+      hidden: true,
     }
   }));
 
@@ -671,6 +674,39 @@ export class InputHandler {
       help: [{
         desc: "swag",
         example: "swag"
+      }]
+    },
+
+    "debug": {
+      getPotentialArguments: (): Map<string, Array<string>> => {
+        return null;
+      },
+      responseType: InputResponseType.STRING,
+      validate: (args: Array<string>): boolean => {
+        return true;
+      },
+      execute: (args: Array<string>): string => {
+        let res = "Debug not set up";
+        let commands = [
+          "go north",
+          "go north",
+          "examine lockers",
+          "examine open locker",
+          "take keycard",
+          "go south",
+          "go east",
+          "use keycard with door",
+          "go south",
+          "take wrench"
+        ];
+        res = "Moved player to power room and grabbed wrench";
+        commands.forEach(cmd => {
+          InputHandler.submitInput(cmd).stringData;
+        });
+        return res;
+      },
+      help: [{
+        desc: "runs a string of commands to update a player's state"
       }]
     },
   }));
