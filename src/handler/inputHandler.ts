@@ -697,13 +697,16 @@ export class InputHandler {
           "go east",
           "use keycard with door",
           "go south",
-          "take wrench"
+          "take wrench",
+          "use wrench with pipe b",
+          "use wrench with pipe c",
+          "go north"
         ];
-        res = "Moved player to power room and grabbed wrench";
+        res = "Turned on power and moved player to lodging\n\n";
         commands.forEach(cmd => {
           InputHandler.submitInput(cmd).stringData;
         });
-        return res;
+        return res + MapHandler.getCurrRoomInfo(true);
       },
       help: [{
         desc: "runs a string of commands to update a player's state"

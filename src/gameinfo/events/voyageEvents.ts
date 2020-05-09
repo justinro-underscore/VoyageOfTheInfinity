@@ -2,7 +2,6 @@ import { EventObject, MoveEventResultObject } from "../../gameobjects/eventObjec
 import { MapHandler } from "../../handler/mapHandler";
 import { RoomExitStatus } from "../../gameobjects/room";
 import { GameObject } from "../../gameobjects/gameObject";
-import { InventoryHandler } from "../../handler/inventoryHandler";
 
 /**
  * Used to define any data that should be kept track of
@@ -13,7 +12,8 @@ const eventData = {
   spawnedFitnessOpenLocker: false,
   spawnedEngineerKeycard: false,
   turnedPowerPipe: false,
-  powerPipeStatus: [false, false, false, false]
+  powerPipeStatus: [false, false, false, false],
+  waterFilledRoomBio: true
 }
 
 // "desc": "This room is used to keep crew members in peak physical condition during long expeditions.\nThere is a shower in the corner, a row of lockers, and various fitness equipment scattered around the area",
@@ -78,7 +78,16 @@ const powerPipeUse = (powerPipeIndex: number) => {
     if (checkPowerPipeStatus()) {
       res += "\n\nWith a clunk, there's a loud noise and the ambient light in the room seems to brighten";
 
-      // TODO Set everything to be powered
+      let room = MapHandler.getRoom("rm_lodging");
+      room.desc = "This room is where crew members can relax, catch up on rest, or enjoy leisure time. Light shines around the room, lighting up exits to the north and west, and doors leading east and south";
+      room.setVisited(false);
+
+      room.exits[0][0] = "rm_cafe";
+      room.exits[1][0] = "rm_laundry";
+
+      MapHandler.getRoom("rm_chambers").desc = "This room holds passengers during cryosleep. The room is brightly lit, and features eight pods situated in a circle around a central pillar.\nA large doorway leads to the west, but it is blocked by a pile of rubble. There are exits to the north, east, and south";
+
+      MapHandler.getRoom("rm_fitness").desc = "This room is used to keep crew members in peak physical condition during long expeditions. In the room are a variety of exercise equipment, along with a row of lockers on the opposite wall and a shower in the corner. A door leads to the south";
     }
     return res;
   }
@@ -130,6 +139,24 @@ export const VoyageEventMap: EventObject = {
       useObj: "obj_wrench",
       withObj: "obj_power_pipe_d",
       event: () => powerPipeUse(3)
+    },
+    {
+      useObj: "obj_water_valve",
+      event: () => {
+        let bioFilled = eventData.waterFilledRoomBio;
+        MapHandler.getRoom("rm_water").setExitStatus("east", bioFilled ? RoomExitStatus.UNLOCKED : RoomExitStatus.JAMMED);
+        MapHandler.getRoom("rm_cafe").setExitStatus("east", bioFilled ? RoomExitStatus.JAMMED : RoomExitStatus.UNLOCKED);
+        MapHandler.getRoom("rm_bio").setExitStatus("south", bioFilled ? RoomExitStatus.JAMMED : RoomExitStatus.UNLOCKED);
+        MapHandler.getRoom("rm_garden").setExitStatus("north", bioFilled ? RoomExitStatus.UNLOCKED : RoomExitStatus.JAMMED);
+
+        eventData.waterFilledRoomBio = !bioFilled;
+        if (bioFilled) {
+          return "There's a loud whooshing sound as the door to your east opens";
+        }
+        else {
+          return "There's a loud whooshing sound as the door to your east slams shut";
+        }
+      }
     }
   ],
   commandEvents: [

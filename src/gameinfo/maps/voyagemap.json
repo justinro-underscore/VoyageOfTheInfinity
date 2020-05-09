@@ -106,11 +106,10 @@
         "y": 10
       },
       "exits": {
-        "north": "rm_water",
-        "east": "rm_garden",
+        "north": "",
+        "east": "",
         "south": "rm_lodging",
-        "west": "",
-        "jammed": ["north", "east"]
+        "west": ""
       },
       "objects": []
     },
@@ -199,8 +198,9 @@
       "exits": {
         "north": "",
         "east": "rm_bio",
-        "south": "rm_cafe_dark",
-        "west": ""
+        "south": "rm_cafe",
+        "west": "",
+        "jammed": ["east"]
       },
       "objects": [
         {
@@ -287,7 +287,8 @@
         "north": "rm_bio",
         "east": "",
         "south": "",
-        "west": "rm_cafe_dark"
+        "west": "rm_cafe",
+        "jammed": ["north"]
       },
       "objects": [
         {
