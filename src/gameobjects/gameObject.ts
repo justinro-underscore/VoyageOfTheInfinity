@@ -42,6 +42,14 @@ export class GameObject {
   equals(objName: string): boolean {
     return this.name.toLocaleLowerCase() === objName || this.altNames.includes(objName);
   }
+
+  /**
+   * Gets all names that the game object responds to
+   * @returns A list of all possible names for the object
+   */
+  getNames(): Array<string> {
+    return [this.name.toLocaleLowerCase()].concat(this.altNames);
+  }
 }
 
 /**

@@ -278,8 +278,8 @@ export class InputHandler {
   private static COMMAND_OBJS = new Map<string, CommandObject>(Object.entries({
     "examine": {
       getPotentialArguments: (): Map<string, Array<string>> => {
-        let objNames = MapHandler.getCurrRoomObjects().map(obj => obj.name.toLocaleLowerCase());
-        objNames = objNames.concat(InventoryHandler.objectsInInventory.map(obj => obj.name.toLocaleLowerCase()));
+        let objNames = MapHandler.getCurrRoomObjects().flatMap(obj => obj.getNames());
+        objNames = objNames.concat(InventoryHandler.objectsInInventory.flatMap(obj => obj.getNames()));
         let args = new Map<string, Array<string>>();
         objNames.forEach(name => {
           args.set(name, null);
@@ -402,7 +402,7 @@ export class InputHandler {
     "take": {
       getPotentialArguments: (): Map<string, Array<string>> => {
         let args = new Map<string, Array<string>>();
-        MapHandler.getCurrRoomObjects().filter(obj => obj.pickupable).map(obj => obj.name.toLocaleLowerCase()).forEach(name => {
+        MapHandler.getCurrRoomObjects().filter(obj => obj.pickupable).flatMap(obj => obj.getNames()).forEach(name => {
           args.set(name, null);
         });
         return args;
@@ -440,7 +440,7 @@ export class InputHandler {
     "drop": {
       getPotentialArguments: (): Map<string, Array<string>> => {
         let args = new Map<string, Array<string>>();
-        InventoryHandler.objectsInInventory.map(obj => obj.name.toLocaleLowerCase()).forEach(name => {
+        InventoryHandler.objectsInInventory.flatMap(obj => obj.getNames()).forEach(name => {
           args.set(name, null);
         });
         return args;
@@ -503,8 +503,8 @@ export class InputHandler {
     "use": {
       getPotentialArguments: (): Map<string, Array<string>> => {
         // TODO Check to see if objects can be used
-        let objNames = MapHandler.getCurrRoomObjects().map(obj => obj.name.toLocaleLowerCase());
-        objNames = objNames.concat(InventoryHandler.objectsInInventory.map(obj => obj.name.toLocaleLowerCase()));
+        let objNames = MapHandler.getCurrRoomObjects().flatMap(obj => obj.getNames());
+        objNames = objNames.concat(InventoryHandler.objectsInInventory.flatMap(obj => obj.getNames()));
         let args = new Map<string, Array<string>>();
         objNames.forEach(name => {
           args.set(name, objNames);
