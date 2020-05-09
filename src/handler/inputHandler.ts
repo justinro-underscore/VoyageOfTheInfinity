@@ -43,7 +43,6 @@ interface CommandInfoObject {
 interface CommandObject {
   getPotentialArguments: () => Map<string, Array<string>>;
   responseType: InputResponseType;
-  validate: (args: Array<string>) => boolean;
   execute: (args: Array<string>) => string;
   help: CommandObjectHelp[];
 }
@@ -287,9 +286,6 @@ export class InputHandler {
         return args;
       },
       responseType: InputResponseType.STRING,
-      validate: (args: Array<string>): boolean => {
-        return true;
-      },
       execute: (args: Array<string>): string => {
         let objName = args.join(" ");
         if (args.length === 0 || objName === "room") {
@@ -334,9 +330,6 @@ export class InputHandler {
         return args;
       },
       responseType: InputResponseType.STRING,
-      validate: (args: Array<string>): boolean => {
-        return true;
-      },
       execute: (args: Array<string>): string => {
         let dir = -1;
         switch (args[0]) {
@@ -408,9 +401,6 @@ export class InputHandler {
         return args;
       },
       responseType: InputResponseType.STRING,
-      validate: (args: Array<string>): boolean => {
-        return true;
-      },
       execute: (args: Array<string>): string => {
         let objName = args.join(" ");
         try {
@@ -446,9 +436,6 @@ export class InputHandler {
         return args;
       },
       responseType: InputResponseType.STRING,
-      validate: (args: Array<string>): boolean => {
-        return true;
-      },
       execute: (args: Array<string>): string => {
         let objName = args.join(" ");
         try {
@@ -480,9 +467,6 @@ export class InputHandler {
         return null;
       },
       responseType: InputResponseType.STRING,
-      validate: (args: Array<string>): boolean => {
-        return true;
-      },
       execute: (args: Array<string>): string => {
         if (InventoryHandler.size === 0) {
           return "Inventory is empty!";
@@ -512,9 +496,6 @@ export class InputHandler {
         return args;
       },
       responseType: InputResponseType.STRING,
-      validate: (args: Array<string>): boolean => {
-        return true;
-      },
       execute: (args: Array<string>): string => {
         let objName = args.join(" ");
         if (objName.includes(" with ")) { // Use multiple objects
@@ -579,9 +560,6 @@ export class InputHandler {
         return null;
       },
       responseType: InputResponseType.SCENE_CHANGE,
-      validate: (args: Array<string>): boolean => {
-        return true;
-      },
       execute: (args: Array<string>): string => {
         return "MapTerminalScene";
       },
@@ -600,9 +578,6 @@ export class InputHandler {
         return args;
       },
       responseType: InputResponseType.STRING,
-      validate: (args: Array<string>): boolean => {
-        return true;
-      },
       execute: (args: Array<string>): string => {
         let cmd = (args.length > 0 ? InputHandler.getMasterCommand(args[0]) : "help");
         if (cmd != null) {
@@ -665,9 +640,6 @@ export class InputHandler {
         return null;
       },
       responseType: InputResponseType.STRING,
-      validate: (args: Array<string>): boolean => {
-        return true;
-      },
       execute: (args: Array<string>): string => {
         return "Ha ha, swag bro";
       },
@@ -682,9 +654,6 @@ export class InputHandler {
         return null;
       },
       responseType: InputResponseType.STRING,
-      validate: (args: Array<string>): boolean => {
-        return true;
-      },
       execute: (args: Array<string>): string => {
         let res = "Debug not set up";
         let commands = [
@@ -746,16 +715,10 @@ export class InputHandler {
 
   private static handleCommand(command: string, args: Array<string>): InputResponse {
     const commandObj = InputHandler.getCommandObj(command);
-    let response = new InputResponse(InputHandler.getMasterCommand(command), InputResponseType.ERROR, "Command not recognized!");
     if (commandObj != null) {
-      if (commandObj.validate(args)) {
-        response = new InputResponse(InputHandler.getMasterCommand(command), commandObj.responseType, commandObj.execute(args));
-      }
-      else {
-        response = new InputResponse(InputHandler.getMasterCommand(command), InputResponseType.ERROR, `Error, invalid use of the command ${ command }`);
-      }
+      return new InputResponse(InputHandler.getMasterCommand(command), commandObj.responseType, commandObj.execute(args));
     }
-    return response;
+    return new InputResponse(InputHandler.getMasterCommand(command), InputResponseType.ERROR, "Command not recognized!");
   }
 
   private static multipleObjectsDetectedPrompt(multObj: MultipleObjects): string {
