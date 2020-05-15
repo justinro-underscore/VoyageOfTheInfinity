@@ -12,6 +12,17 @@
     </script>
     <script src="./dist/app.js"></script>
     <style>
+      @font-face {
+        font-family: "Clacon";
+        src: url("assets/fonts/clacon.ttf") format("truetype");
+      }
+
+      .fontLoader {
+        position: absolute;
+        left: -1000px;
+        visibility: hidden;
+      }
+
       body {
         background-color: #111111;
       }
@@ -21,10 +32,11 @@
         width: 1021px;
         height: 734px;
         text-align: center;
-        background-image: url("assets/img/loading-indicator-invert.gif"), url("assets/img/computer-terminal-bezel.png");
+        background-image: url("assets/img/computer-terminal-bezel.png");
+        /* background-image: url("assets/img/loading-indicator-invert.gif"), url("assets/img/computer-terminal-bezel.png");
         background-size: 100px, 100%;
         background-position: center;
-        background-repeat: no-repeat;
+        background-repeat: no-repeat; */
         display: flex;
       }
 
@@ -36,6 +48,7 @@
     </style>
   </head>
   <body>
+    <div class="fontLoader" style="font-family: Squares;">-</div>
     <div id="gameContainer">
       <div id="game"></div>
     </div>

@@ -65,6 +65,11 @@ export class MainMenuScene extends TerminalInputScene {
      * Add shader *
      **************/
     ShaderHandler.setRenderToShaders(this, "terminal");
+
+    /************************
+     * Add background music *
+     ************************/
+    AudioHandler.playMusic("mainTheme");
   }
 
   /**

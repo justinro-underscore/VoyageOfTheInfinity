@@ -1,7 +1,7 @@
 import "phaser"
 import BBCodeText from "phaser3-rex-plugins/plugins/bbcodetext.js";
 import { InputHandler } from "../../handler/inputHandler";
-// import { AudioHandler } from "./audioHandler";
+import { AudioHandler } from "../../handler/audioHandler";
 
 // Defines what category each key input goes into
 export enum KeyCodeCateogry {
@@ -63,8 +63,6 @@ export abstract class TerminalInputScene extends Phaser.Scene {
 
   showSugg: boolean; // If true, show the suggestion
 
-  // private keyStrokeSounds: Array<Phaser.Sound.BaseSound>; // Holds all keystroke sounds
-
   abstract suggestions: SuggestionObj; // Defines the suggestions for inputs
 
   /**
@@ -125,15 +123,6 @@ export abstract class TerminalInputScene extends Phaser.Scene {
       callbackScope: this,
       loop: true
     });
-
-    // // Populate the keystroke sounds
-    // this.keyStrokeSounds = [];
-    // for (let i = 1; i <= 3; i++) {
-    //   let sound = SoundHandler.getSound(`keystroke${ i }`);
-    //   if (sound != null) {
-    //     this.keyStrokeSounds.push(sound);
-    //   }
-    // }
   }
 
   /**
@@ -349,6 +338,7 @@ export abstract class TerminalInputScene extends Phaser.Scene {
           this.fillSuggestion();
           let inputStr = this.currInput.trim();
           if (inputStr != "") {
+            AudioHandler.playSound("keystroke1"); // TODO vary the enter sounds
             this.onEnterFunc(inputStr);
           }
           break;
@@ -357,12 +347,6 @@ export abstract class TerminalInputScene extends Phaser.Scene {
           showSugg = true;
           break;
       }
-      // if (this.keyStrokeSounds[0].isPlaying || this.keyStrokeSounds[1].isPlaying) {
-      //   this.keyStrokeSounds[0].play();
-      // }
-      // else {
-      //   this.keyStrokeSounds[1].play();
-      // }
       this.showSugg = showSugg;
       this.updateCommandLine();
       this.setCursorVisible(); // After every key input, set the cursor to visible

@@ -2,11 +2,19 @@ import "phaser";
 import gameAudioFile from "../gameinfo/audio.json";
 
 /**
+ * Defines how an optional music file configuration
+ */
+interface MusicFileConfigInterface {
+  fileName: string; // File name of the music
+  loop: boolean; // If true, loop the music. Otherwise, stop playing when music ends
+}
+
+/**
  * Defines how an audio file should be set up
  */
 interface AudioFileInterface {
   music: {
-    [musicFile: string]: string; // List of music file keys with their repective file name
+    [musicFile: string]: string | MusicFileConfigInterface; // List of music file keys with their repective file name or config
   };
   sounds: {
     [soundFile: string]: string | string[]; // List of sound file keys with their respective file name(s)
@@ -29,7 +37,12 @@ export class AudioHandler {
   static loadAudio(scene: Phaser.Scene, audioFile: AudioFileInterface=gameAudioFile) {
     // Load all music
     Object.entries(audioFile.music).forEach(music => {
-      scene.load.audio(music[0], `assets/audio/music/${ music[1] }`);
+      if (typeof(music[1]) === "string") {
+        scene.load.audio(music[0], `assets/audio/music/${ music[1] }`);
+      }
+      else {
+        scene.load.audio(music[0], `assets/audio/music/${ music[1].fileName }`, { loop: music[1].loop });
+      }
     });
     // Load all sound effects
     Object.entries(audioFile.sounds).forEach(sound => {
@@ -48,13 +61,15 @@ export class AudioHandler {
    * @param audioFile The audio file to pull from (defaults to the game audio file)
    */
   static instantiateAudio(game: Phaser.Game, audioFile: AudioFileInterface=gameAudioFile) {
+    game.sound.pauseOnBlur = false;
+
     AudioHandler.music = new Map<string, Phaser.Sound.BaseSound>();
     Object.keys(audioFile.music).forEach(music => {
-      AudioHandler.music.set(music, game.sound.add(music, game.cache.audio.get(music)));
+      AudioHandler.music.set(music, game.sound.add(music, { loop: true }));
     });
     AudioHandler.sounds = new Map<string, Phaser.Sound.BaseSound>();
     Object.keys(audioFile.sounds).forEach(sound => {
-      AudioHandler.sounds.set(sound, game.sound.add(sound, game.cache.audio.get(sound)));
+      AudioHandler.sounds.set(sound, game.sound.add(sound));
     });
   }
 

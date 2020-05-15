@@ -1,6 +1,10 @@
 {
   "music": {
-    "mainTheme": "Because_For_Everything_There_Is_Someone.wav"
+    "mainTheme": {
+      "fileName": "Space Discoveries (looped).wav",
+      "loop": true
+    },
+    "mainThemeNoLoop": "keystroke.wav"
   },
   "sounds": {
     "keystroke1": ["keystroke.ogg", "keystroke.wav"],

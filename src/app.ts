@@ -1,4 +1,5 @@
 import "phaser";
+import { StartGameScene } from "./scenes/startGameScene";
 import { MainMenuScene } from "./scenes/mainMenuScene";
 import { CutsceneScene } from "./scenes/cutsceneScene";
 import { TerminalScene } from "./scenes/terminalScene";
@@ -10,7 +11,7 @@ const config: Phaser.Types.Core.GameConfig = {
   width: 800,
   height: 600,
   parent: "game",
-  scene: [MainMenuScene, DebugMapScene, CutsceneScene, TerminalScene, MapTerminalScene],
+  scene: [StartGameScene, MainMenuScene, DebugMapScene, CutsceneScene, TerminalScene, MapTerminalScene],
   physics: {
     default: "arcade",
     arcade: {
@@ -20,7 +21,7 @@ const config: Phaser.Types.Core.GameConfig = {
   audio: {
     disableWebAudio: true
   },
-  backgroundColor: "#111111"
+  "transparent": true
 };
 
 export class TextAdventureGame extends Phaser.Game {
