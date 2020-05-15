@@ -12,12 +12,32 @@
     </script>
     <script src="./dist/app.js"></script>
     <style>
-      #game {
+      body {
+        background-color: #111111;
+      }
+
+      #gameContainer {
+        margin: auto;
+        width: 1021px;
+        height: 734px;
         text-align: center;
+        background-image: url("assets/img/loading-indicator-invert.gif"), url("assets/img/computer-terminal-bezel.png");
+        background-size: 100px, 100%;
+        background-position: center;
+        background-repeat: no-repeat;
+        display: flex;
+      }
+
+      #game {
+        margin: auto;
+        width: 800px;
+        height: 600px;
       }
     </style>
   </head>
   <body>
-    <div id="game"></div>
+    <div id="gameContainer">
+      <div id="game"></div>
+    </div>
   </body>
 </html>
