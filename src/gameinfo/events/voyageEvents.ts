@@ -80,7 +80,6 @@ const powerPipeUse = (powerPipeIndex: number) => {
 
       let room = MapHandler.getRoom("rm_lodging");
       room.desc = "This room is where crew members can relax, catch up on rest, or enjoy leisure time. Light shines around the room, lighting up exits to the north and west, and doors leading east and south";
-      room.setVisited(false);
 
       room.exits[0][0] = "rm_cafe";
       room.exits[1][0] = "rm_laundry";
