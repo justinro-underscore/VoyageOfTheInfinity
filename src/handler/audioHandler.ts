@@ -25,8 +25,11 @@ interface AudioFileInterface {
  * Handles all sound creation and playing
  */
 export class AudioHandler {
-  private static music: Map<string, Phaser.Sound.BaseSound>;
-  private static sounds: Map<string, Phaser.Sound.BaseSound>;
+  private static _masterVolume: number; // The overall volume as an integer out of 10
+  private static _musicVolume: number; // The volume of the music as an integer out of 10
+  private static _soundVolume: number; // The volume of the sounds as an integer out of 10
+  private static music: Map<string, Phaser.Sound.HTML5AudioSound>; // List of music files that can be accessed by its key
+  private static sounds: Map<string, Phaser.Sound.HTML5AudioSound>; // List of sound files that can be accessed by its key
 
   /**
    * Loads all the audio and places it in the cache
@@ -63,13 +66,13 @@ export class AudioHandler {
   static instantiateAudio(game: Phaser.Game, audioFile: AudioFileInterface=gameAudioFile) {
     game.sound.pauseOnBlur = false;
 
-    AudioHandler.music = new Map<string, Phaser.Sound.BaseSound>();
+    AudioHandler.music = new Map<string, Phaser.Sound.HTML5AudioSound>();
     Object.keys(audioFile.music).forEach(music => {
-      AudioHandler.music.set(music, game.sound.add(music, { loop: true }));
+      AudioHandler.music.set(music, <Phaser.Sound.HTML5AudioSound>game.sound.add(music, { loop: true }));
     });
-    AudioHandler.sounds = new Map<string, Phaser.Sound.BaseSound>();
+    AudioHandler.sounds = new Map<string, Phaser.Sound.HTML5AudioSound>();
     Object.keys(audioFile.sounds).forEach(sound => {
-      AudioHandler.sounds.set(sound, game.sound.add(sound));
+      AudioHandler.sounds.set(sound, <Phaser.Sound.HTML5AudioSound>game.sound.add(sound));
     });
   }
 
@@ -78,11 +81,8 @@ export class AudioHandler {
    * @param musicKey The key of the music desired
    * @returns An instance of the desired music
    */
-  static getMusic(musicKey: string): Phaser.Sound.BaseSound {
-    if (AudioHandler.music.has(musicKey)) {
-      return AudioHandler.music.get(musicKey);
-    }
-    return null;
+  static getMusic(musicKey: string): Phaser.Sound.HTML5AudioSound {
+    return AudioHandler.getAudio(true, musicKey);
   }
 
   /**
@@ -91,11 +91,7 @@ export class AudioHandler {
    * @returns True if play was successful, false otherwise
    */
   static playMusic(musicKey: string): boolean {
-    if (AudioHandler.music.has(musicKey)) {
-      AudioHandler.music.get(musicKey).play();
-      return true;
-    }
-    return false;
+    return AudioHandler.playAudio(true, musicKey);
   }
 
   /**
@@ -103,11 +99,8 @@ export class AudioHandler {
    * @param soundKey The key of the sound effect desired
    * @returns An instance of the desired sound effect
    */
-  static getSound(soundKey: string): Phaser.Sound.BaseSound {
-    if (AudioHandler.sounds.has(soundKey)) {
-      return AudioHandler.sounds.get(soundKey);
-    }
-    return null;
+  static getSound(soundKey: string): Phaser.Sound.HTML5AudioSound {
+    return AudioHandler.getAudio(false, soundKey);
   }
 
   /**
@@ -116,10 +109,121 @@ export class AudioHandler {
    * @returns True if play was successful, false otherwise
    */
   static playSound(soundKey: string): boolean {
-    if (AudioHandler.sounds.has(soundKey)) {
-      AudioHandler.sounds.get(soundKey).play();
+    return AudioHandler.playAudio(false, soundKey);
+  }
+
+  static get masterVolume(): number {
+    return AudioHandler._masterVolume;
+  }
+
+  static get musicVolume(): number {
+    return AudioHandler._musicVolume;
+  }
+
+  static get soundVolume(): number {
+    return AudioHandler._soundVolume;
+  }
+
+  /**
+   * Sets the overall volume of the audio
+   * @param volIndex The value of the master volume out of 10
+   * @returns True if index is valid, false otherwise
+   */
+  static setMasterAudioVolume(volIndex: number): boolean {
+    let volume = volIndex / 10;
+    if (AudioHandler.volumeValid(volume)) {
+      AudioHandler._masterVolume = volIndex;
+      AudioHandler.setAudioVolume(true, volume * (AudioHandler._musicVolume / 10));
+      AudioHandler.setAudioVolume(false, volume * (AudioHandler._soundVolume / 10));
+      return true;
+    }
+    return false
+  }
+
+  /**
+   * Sets the volume of the music
+   * @param volIndex The value of the music volume out of 10
+   * @returns True if index is valid, false otherwise
+   */
+  static setMusicVolume(volIndex: number): boolean {
+    let volume = volIndex / 10;
+    if (AudioHandler.volumeValid(volume)) {
+      AudioHandler.setAudioVolume(true, volume);
+      AudioHandler._musicVolume = volIndex;
       return true;
     }
     return false;
+  }
+
+  /**
+   * Sets the volume of the sound effects
+   * @param volIndex The value of the sound volume out of 10
+   * @returns True if index is valid, false otherwise
+   */
+  static setSoundVolume(volIndex: number): boolean {
+    let volume = volIndex / 10;
+    if (AudioHandler.volumeValid(volume)) {
+      AudioHandler.setAudioVolume(false, volume);
+      AudioHandler._soundVolume = volIndex;
+      return true;
+    }
+    return false;
+  }
+
+  /***********************
+   *   PRIVATE METHODS   *
+   ***********************/
+
+  /**
+   * Gets an audio clip from a requested key
+   * @param music If true, get the music clip. Otherwise, get sound clip
+   * @param key The key to the audio clip
+   * @returns The audio clip, if it exists
+   */
+  private static getAudio(music: boolean, key: string): Phaser.Sound.HTML5AudioSound {
+    let handler = (music ? AudioHandler.music : AudioHandler.sounds);
+    if (handler.has(key)) {
+      return handler.get(key);
+    }
+    return null;
+  }
+
+  /**
+   * Plays an audio clip from a requested key
+   * @param music If true, play the music clip. Otherwise, play sound clip
+   * @param key The key to the audio clip
+   * @returns True if the audio clip exists, false otherwise
+   */
+  private static playAudio(music: boolean, key: string): boolean {
+    let handler = (music ? AudioHandler.music : AudioHandler.sounds);
+    if (handler.has(key)) {
+      handler.get(key).play();
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Sets the volume of the given audio type
+   * @param music If true, set music volume. Otherwise, set sound volume
+   * @param volume The volume of the audio type, from 0 to 1
+   */
+  private static setAudioVolume(music: boolean, volume: number) {
+    let handler = (music ? AudioHandler.music : AudioHandler.sounds);
+    for (let audio of handler.values()) {
+      audio.volume = volume;
+    }
+  }
+
+  /**
+   * Checks to see if the volume is valid (within a range of 0 to 1)
+   * @param volume The volume value to check
+   * @returns True if the volume is within the range 0 and 1
+   */
+  private static volumeValid(volume: number): boolean {
+    if (volume < 0.0 || volume > 1.0) {
+      return false;
+    }
+    return true;
   }
 }

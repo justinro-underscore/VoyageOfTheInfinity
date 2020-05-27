@@ -4,6 +4,22 @@ import { EventHandler } from "./eventHandler";
 import { SuggestionObj } from "../scenes/abstractscenes/terminalInputScene";
 import { GameObject } from "../gameobjects/gameObject";
 
+// Defines what category each key input goes into
+export enum KeyCodeCateogry {
+  LETTER,
+  DIGIT,
+  SPACE,
+  ESCAPE,
+  ENTER,
+  BACKSPACE,
+  KEY_UP,
+  KEY_LEFT,
+  KEY_RIGHT,
+  KEY_DOWN,
+  DELETE,
+  INVALID
+}
+
 class MultipleObjects extends Error {
   objectsFound: Array<GameObject>;
 
@@ -90,6 +106,43 @@ export class InputHandler {
   static previousInputs = new Array<string>();
   static currPrevInputPointer = -1;
   private static inputSuggestions: SuggestionObj = null;
+
+  /**
+   * Gets the category of the keyboard input (@see KeyCodeCateogry)
+   * @param key The keycode of the keyboard input
+   * @returns The category of the keyboard input
+   */
+  static getKeyCategory(key: number): KeyCodeCateogry {
+    if (key >= 65 && key <= 90) {
+      return KeyCodeCateogry.LETTER
+    }
+    if (key >= 48 && key <= 57) {
+      return KeyCodeCateogry.DIGIT;
+    }
+    switch (key) {
+      case 8:
+        return KeyCodeCateogry.BACKSPACE;
+      case 10:
+      case 13:
+        return KeyCodeCateogry.ENTER;
+      case 27:
+        return KeyCodeCateogry.ESCAPE;
+      case 32:
+        return KeyCodeCateogry.SPACE;
+      case 37:
+        return KeyCodeCateogry.KEY_LEFT;
+      case 38:
+        return KeyCodeCateogry.KEY_UP;
+      case 39:
+        return KeyCodeCateogry.KEY_RIGHT;
+      case 40:
+        return KeyCodeCateogry.KEY_DOWN;
+      case 46:
+        return KeyCodeCateogry.DELETE;
+      default:
+        return KeyCodeCateogry.INVALID;
+    }
+  }
 
   static submitInput(inputStr: string): InputResponse {
     InputHandler.currPrevInputPointer = -1;
@@ -271,6 +324,9 @@ export class InputHandler {
     },
     "debug": {
       hidden: true,
+    },
+    "settings": {
+      hidden: false,
     }
   }));
 
@@ -679,6 +735,19 @@ export class InputHandler {
       },
       help: [{
         desc: "runs a string of commands to update a player's state"
+      }]
+    },
+
+    "settings": {
+      getPotentialArguments: (): Map<string, Array<string>> => {
+        return null;
+      },
+      responseType: InputResponseType.SCENE_CHANGE,
+      execute: (args: Array<string>): string => {
+        return "SettingsScene";
+      },
+      help: [{
+        desc: "opens the settings menu to adjust settings"
       }]
     },
   }));

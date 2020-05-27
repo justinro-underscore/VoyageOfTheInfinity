@@ -10,6 +10,8 @@ const TERMINAL_TINT_WAIT_TIME_MIN = 5;
 export class ShaderHandler {
   static shaders: Map<string, Phaser.Renderer.WebGL.WebGLPipeline>; // Keeps track of all shaders
   private static activeShader: string;
+
+  static terminalScreenFlicker: boolean; // For Terminal pipeline - if true, flicker screen
   private static terminalShaderTint: number; // For Terminal pipeline - keeps track of how long until next tint
 
   /**
@@ -62,13 +64,16 @@ export class ShaderHandler {
     if (ShaderHandler.activeShader === "terminal") {
       ShaderHandler.shaders.get("terminal").setFloat1("time", time);
 
-      // Update terminal shader tint
-      if (ShaderHandler.terminalShaderTint <= 0) {
-        ShaderHandler.shaders.get("terminal").setFloat1("tint", (Math.random() - 0.5) / 50);
-        ShaderHandler.terminalShaderTint = Math.floor((2 * TERMINAL_TINT_WAIT_TIME_MIN * Math.random()) + TERMINAL_TINT_WAIT_TIME_MIN);
-      }
-      else {
-        ShaderHandler.terminalShaderTint--;
+      // If we want to flicker the terminal screen...
+      if (ShaderHandler.terminalScreenFlicker) {
+        // Update terminal shader tint
+        if (ShaderHandler.terminalShaderTint <= 0) {
+          ShaderHandler.shaders.get("terminal").setFloat1("tint", (Math.random() - 0.5) / 50);
+          ShaderHandler.terminalShaderTint = Math.floor((2 * TERMINAL_TINT_WAIT_TIME_MIN * Math.random()) + TERMINAL_TINT_WAIT_TIME_MIN);
+        }
+        else {
+          ShaderHandler.terminalShaderTint--;
+        }
       }
     }
   }

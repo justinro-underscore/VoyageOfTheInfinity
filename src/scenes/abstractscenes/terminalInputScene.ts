@@ -1,22 +1,7 @@
 import "phaser"
 import BBCodeText from "phaser3-rex-plugins/plugins/bbcodetext.js";
-import { InputHandler } from "../../handler/inputHandler";
+import { InputHandler, KeyCodeCateogry } from "../../handler/inputHandler";
 import { AudioHandler } from "../../handler/audioHandler";
-
-// Defines what category each key input goes into
-export enum KeyCodeCateogry {
-  LETTER,
-  DIGIT,
-  SPACE,
-  ENTER,
-  BACKSPACE,
-  KEY_UP,
-  KEY_LEFT,
-  KEY_RIGHT,
-  KEY_DOWN,
-  DELETE,
-  INVALID
-}
 
 // The amount of ticks between when the cursor blinks
 const CURSOR_BLINK_TIME = 800;
@@ -138,41 +123,6 @@ export abstract class TerminalInputScene extends Phaser.Scene {
     }
   }
 
-  /**
-   * Gets the category of the keyboard input (@see KeyCodeCateogry)
-   * @param key The keycode of the keyboard input
-   * @returns The category of the keyboard input
-   */
-  static getKeyCategory(key: number): KeyCodeCateogry {
-    if (key >= 65 && key <= 90) {
-      return KeyCodeCateogry.LETTER
-    }
-    if (key >= 48 && key <= 57) {
-      return KeyCodeCateogry.DIGIT;
-    }
-    switch (key) {
-      case 8:
-        return KeyCodeCateogry.BACKSPACE;
-      case 10:
-      case 13:
-        return KeyCodeCateogry.ENTER;
-      case 32:
-        return KeyCodeCateogry.SPACE;
-      case 37:
-        return KeyCodeCateogry.KEY_LEFT;
-      case 38:
-        return KeyCodeCateogry.KEY_UP;
-      case 39:
-        return KeyCodeCateogry.KEY_RIGHT;
-      case 40:
-        return KeyCodeCateogry.KEY_DOWN;
-      case 46:
-        return KeyCodeCateogry.DELETE;
-      default:
-        return KeyCodeCateogry.INVALID;
-    }
-  }
-
   /*************************
    *   PROTECTED METHODS   *
    *************************/
@@ -246,7 +196,7 @@ export abstract class TerminalInputScene extends Phaser.Scene {
     }
 
     let showSugg = false; // Only show the suggestion if we type a character or have an invalid input
-    const keyCat = TerminalInputScene.getKeyCategory(keyEvent.keyCode);
+    const keyCat = InputHandler.getKeyCategory(keyEvent.keyCode);
     if (keyCat != KeyCodeCateogry.INVALID) {
       switch (keyCat) {
         // If letter, digit, or space, append to the input string
